@@ -1,0 +1,11 @@
+const fs = require('fs');
+const scifi = JSON.parse(fs.readFileSync('scifi_hindi_source.json', 'utf8'));
+console.log('Read scifi');
+const list = JSON.parse(fs.readFileSync('workflows_list_v2.json', 'utf8'));
+console.log('Read list');
+const workflow = Array.isArray(scifi) ? scifi[0] : scifi;
+workflow.id = 'scifi_hindi_v1';
+workflow.name = 'Sci-Fi & Future Worlds – Hindi';
+list.push(workflow);
+fs.writeFileSync('workflows_list_v2.json', JSON.stringify(list));
+console.log('Done');

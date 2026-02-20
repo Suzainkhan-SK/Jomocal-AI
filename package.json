@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "vite preview --port 10000 --host"
+    "start": "node serve.js"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.18",

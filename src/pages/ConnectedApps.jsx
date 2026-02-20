@@ -29,10 +29,10 @@ const APP_CONFIG = {
   google: { name: 'Google Account', placeholder: null, credentialKey: null, oauthOnly: true },
   telegram: { name: 'Telegram', placeholder: 'Bot Token', credentialKey: 'token', hint: 'Get your token from @BotFather on Telegram.' },
   whatsapp: { name: 'WhatsApp', placeholder: 'API Key or Access Token', credentialKey: 'token' },
-  google_sheets: { name: 'Google Sheets', placeholder: 'Spreadsheet ID or OAuth token', credentialKey: 'token' },
+  google_sheets: { name: 'Google Sheets', placeholder: null, credentialKey: null, oauthOnly: true },
   instagram: { name: 'Instagram', placeholder: 'Access Token', credentialKey: 'token' },
-  gmail: { name: 'Gmail', placeholder: 'App Password or OAuth token', credentialKey: 'token' },
-  youtube: { name: 'YouTube', placeholder: 'API Key or OAuth token', credentialKey: 'token', hint: 'Use Google Account above for YouTube, Gmail & Sheets.' },
+  gmail: { name: 'Gmail', placeholder: null, credentialKey: null, oauthOnly: true },
+  youtube: { name: 'YouTube', placeholder: null, credentialKey: null, oauthOnly: true, hint: 'Use Google Account below for YouTube, Gmail & Sheets.' },
   twitter: { name: 'X (Twitter)', placeholder: 'API Key / Access Token', credentialKey: 'token' },
   tiktok: { name: 'TikTok', placeholder: 'Access Token', credentialKey: 'token' },
   linkedin: { name: 'LinkedIn', placeholder: 'Access Token', credentialKey: 'token' },
@@ -133,12 +133,8 @@ const ConnectedApps = () => {
   };
 
   const handleConnectClick = (appId) => {
-    if (appId === 'google') {
+    if (appId === 'google' || appId === 'gmail' || appId === 'google_sheets' || appId === 'youtube') {
       startGoogleOAuth();
-      return;
-    }
-    if (appId === 'youtube') {
-      startYoutubeOAuth();
       return;
     }
     setSelectedApp(appId);
@@ -193,12 +189,18 @@ const ConnectedApps = () => {
   const handleDisconnect = async (platform) => {
     setDisconnectingId(platform);
     try {
-      if (platform === 'google') {
-        const hasGoogle = getIntegration('google')?.isConnected;
-        if (hasGoogle) await api.post('/oauth/google/disconnect');
-        else await api.post('/oauth/google/youtube/disconnect');
-      } else if (platform === 'youtube') {
-        await api.post('/oauth/google/youtube/disconnect');
+      if (platform === 'google' || platform === 'gmail' || platform === 'google_sheets' || platform === 'youtube') {
+        const hasUnifiedGoogle = integrations.some(i => i.platform === 'google' && i.isConnected);
+        if (hasUnifiedGoogle) {
+          await api.post('/oauth/google/disconnect');
+        } else if (platform === 'youtube' || platform === 'google') {
+          // Check for legacy youtube if platform is youtube or google
+          const hasLegacy = integrations.some(i => i.platform === 'youtube' && i.isConnected);
+          if (hasLegacy) await api.post('/oauth/google/youtube/disconnect');
+          else await api.post('/integrations/disconnect', { platform });
+        } else {
+          await api.post('/integrations/disconnect', { platform });
+        }
       } else {
         await api.post('/integrations/disconnect', { platform });
       }
@@ -206,6 +208,9 @@ const ConnectedApps = () => {
       setIntegrations(res.data || []);
     } catch (err) {
       console.error('Error disconnecting:', err);
+      // Show actual error message to user if possible
+      const msg = err.response?.data?.msg || 'Failed to disconnect. Please try again.';
+      alert(msg);
       fetchIntegrations();
     } finally {
       setDisconnectingId(null);
@@ -215,26 +220,29 @@ const ConnectedApps = () => {
   return (
     <div className="animate-fade-in">
       {(showYoutubeConnectedToast || showGoogleConnectedToast) && (
-        <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <div className="mb-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-600 dark:text-emerald-400">
           <span className="font-medium">{showGoogleConnectedToast ? 'Google Account connected.' : 'YouTube Connected.'}</span>{' '}
           {showGoogleConnectedToast ? 'YouTube, Gmail & Sheets are now available for automations.' : 'Your channel is now available for automations.'}
         </div>
       )}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Connected Apps</h1>
-        <p className="text-slate-500 text-sm mt-1">Connect the apps you use. Each integration powers your automations.</p>
+        <h1 className="text-3xl font-bold text-main tracking-tight">Connected Apps</h1>
+        <p className="text-secondary text-sm mt-1">Connect the apps you use. Each integration powers your automations.</p>
       </div>
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-slate-100">
-          <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-3" />
-          <p className="text-slate-500 text-sm">Loading…</p>
+        <div className="flex flex-col items-center justify-center py-16 bg-surface rounded-xl border border-main transition-colors">
+          <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
+          <p className="text-secondary text-sm font-medium">Loading connected apps…</p>
         </div>
       ) : (
         <div className="space-y-8">
           {APP_CATEGORIES.map((cat) => (
             <section key={cat.id}>
-              <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">{cat.label}</h2>
+              <h2 className="text-xs font-bold text-secondary uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                {cat.label}
+              </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {cat.apps.map((appId) => {
                   const config = APP_CONFIG[appId];
@@ -250,24 +258,22 @@ const ConnectedApps = () => {
                     return (
                       <div
                         key={appId}
-                        className={`rounded-xl border p-5 flex flex-col items-center text-center transition-all ${
-                          connected ? 'border-emerald-200 bg-emerald-50/40' : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-sm'
-                        }`}
+                        className={`rounded-xl border p-5 flex flex-col items-center text-center transition-all duration-300 ${connected ? 'border-emerald-500/30 bg-emerald-500/5' : 'bg-surface border-main hover:border-primary/50 hover:shadow-xl'
+                          }`}
                       >
-                        <div className="w-14 h-14 mb-3 rounded-xl bg-white border border-slate-100 flex items-center justify-center overflow-hidden shrink-0">
-                          {icon ? <img src={icon} alt="" className="w-8 h-8 object-contain" /> : <span className="text-slate-400 font-bold text-lg">G</span>}
+                        <div className="w-14 h-14 mb-3 rounded-xl bg-body p-2.5 flex items-center justify-center overflow-hidden shrink-0 shadow-inner border border-main transition-colors">
+                          {icon ? <img src={icon} alt="" className="w-9 h-9 object-contain" /> : <span className="text-secondary font-bold text-lg">G</span>}
                         </div>
-                        <h3 className="font-semibold text-slate-900 text-[15px] mb-1">{config.name}</h3>
-                        <p className="text-xs text-slate-500 mb-2">Connected services</p>
+                        <h3 className="font-bold text-main text-[15px] mb-1">{config.name}</h3>
+                        <p className="text-[10px] font-bold text-secondary uppercase tracking-widest mb-2">Connected services</p>
                         <div className="flex flex-wrap justify-center gap-1.5 mb-4">
                           {GOOGLE_SERVICES.map((s) => {
                             const enabled = googleConnectedServices.includes(s.id);
                             return (
                               <span
                                 key={s.id}
-                                className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
-                                  enabled ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'
-                                }`}
+                                className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${enabled ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-body text-secondary border border-main'
+                                  }`}
                               >
                                 {s.label}
                               </span>
@@ -291,7 +297,7 @@ const ConnectedApps = () => {
                               type="button"
                               onClick={() => handleDisconnect(appId)}
                               disabled={disconnectingId === appId}
-                              className="flex-1 btn btn-secondary text-sm py-2 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                              className="flex-1 btn btn-secondary text-sm py-2 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/20"
                             >
                               {disconnectingId === appId ? <Loader2 size={14} className="animate-spin mx-auto" /> : <><Unplug size={14} /> Disconnect</>}
                             </button>
@@ -313,19 +319,18 @@ const ConnectedApps = () => {
                   return (
                     <div
                       key={appId}
-                      className={`rounded-xl border p-5 flex flex-col items-center text-center transition-all ${
-                        connected ? 'border-emerald-200 bg-emerald-50/40' : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-sm'
-                      }`}
+                      className={`rounded-xl border p-5 flex flex-col items-center text-center transition-all ${connected ? 'border-emerald-500/30 bg-emerald-500/5' : 'bg-surface border-main hover:border-primary/50 hover:shadow-xl'
+                        }`}
                     >
-                      <div className="w-14 h-14 mb-3 rounded-xl bg-white border border-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                      <div className="w-14 h-14 mb-3 rounded-xl bg-body p-2.5 flex items-center justify-center overflow-hidden shrink-0 shadow-inner border border-main transition-colors">
                         {icon ? (
-                          <img src={icon} alt="" className="w-8 h-8 object-contain" />
+                          <img src={icon} alt="" className="w-9 h-9 object-contain" />
                         ) : (
-                          <span className="text-slate-400 font-bold text-lg">{config.name[0]}</span>
+                          <span className="text-secondary font-bold text-lg">{config.name[0]}</span>
                         )}
                       </div>
-                      <h3 className="font-semibold text-slate-900 text-[15px] mb-1">{config.name}</h3>
-                      <p className={`text-xs mb-4 ${connected ? 'text-emerald-600 font-medium' : 'text-slate-400'}`}>
+                      <h3 className="font-bold text-main text-[15px] mb-1">{config.name}</h3>
+                      <p className={`text-[10px] font-bold uppercase tracking-widest mb-4 ${connected ? 'text-emerald-500' : 'text-secondary'}`}>
                         {connected && appId === 'youtube' && (integration?.youtube_channel_title || googleInt?.youtube_channel_title)
                           ? `Connected: ${integration?.youtube_channel_title || googleInt?.youtube_channel_title}`
                           : connected
@@ -346,7 +351,7 @@ const ConnectedApps = () => {
                             type="button"
                             onClick={() => handleDisconnect(appId)}
                             disabled={disconnectingId === appId}
-                            className="flex-1 btn btn-secondary text-sm py-2 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                            className="flex-1 btn btn-secondary text-sm py-2 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/20"
                           >
                             {disconnectingId === appId ? <Loader2 size={14} className="animate-spin mx-auto" /> : <><Unplug size={14} /> Disconnect</>}
                           </button>
@@ -374,21 +379,23 @@ const ConnectedApps = () => {
         const config = APP_CONFIG[selectedApp];
         const icon = APP_ICONS[selectedApp];
         return (
-          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-                    {icon ? <img src={icon} alt="" className="w-8 h-8 object-contain" /> : <span className="text-slate-500 font-bold text-xl">{config?.name[0]}</span>}
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-main animate-fade-in transition-colors">
+              <div className="p-8">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="w-14 h-14 rounded-xl bg-body p-2.5 flex items-center justify-center shrink-0 shadow-inner border border-main transition-colors">
+                    {icon ? <img src={icon} alt="" className="w-9 h-9 object-contain" /> : <span className="text-secondary font-bold text-xl">{config?.name[0]}</span>}
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-slate-900">Connect {config?.name}</h2>
-                    <p className="text-slate-500 text-sm">Enter your credentials to link your account.</p>
+                    <h2 className="text-xl font-bold text-main">Connect {config?.name}</h2>
+                    <p className="text-secondary text-sm">Enter your credentials to link your account.</p>
                   </div>
                 </div>
                 <form onSubmit={handleConnectSubmit} className="space-y-4">
                   <div>
-                    <label className="label text-sm">{config?.placeholder}</label>
+                    <label className="label text-[10px] uppercase tracking-widest font-bold">
+                      {config?.placeholder}
+                    </label>
                     <input
                       type="text"
                       className="input"
@@ -398,11 +405,11 @@ const ConnectedApps = () => {
                       required
                     />
                     {config?.hint && (
-                      <p className="text-xs text-slate-400 mt-2">{config.hint}</p>
+                      <p className="text-[10px] text-secondary font-medium mt-2">{config.hint}</p>
                     )}
                     {selectedApp === 'telegram' && (
-                      <p className="text-xs text-slate-400 mt-1">
-                        Get your token from <a href="https://t.me/BotFather" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">@BotFather</a> on Telegram.
+                      <p className="text-[10px] text-secondary font-medium mt-1">
+                        Get your token from <a href="https://t.me/BotFather" target="_blank" rel="noreferrer" className="text-primary hover:underline font-bold">@BotFather</a> on Telegram.
                       </p>
                     )}
                   </div>

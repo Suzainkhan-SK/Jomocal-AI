@@ -27,6 +27,27 @@ const automationSchema = new mongoose.Schema({
         type: Object,
         default: {}
     },
+    botPersonality: {
+        type: String,
+        default: "Professional and helpful"
+    },
+    botWelcomeMessage: {
+        type: String,
+        default: "Hello! How can I help you?"
+    },
+    knowledgeBaseText: {
+        type: String,
+        default: ""
+    },
+    emailAutomationStatus: {
+        type: String,
+        enum: ['active', 'inactive', 'paused'],
+        default: 'inactive'
+    },
+    emailAutomationWebhook: {
+        type: String,
+        default: ""
+    },
     createdAt: {
         type: Date,
         default: Date.now

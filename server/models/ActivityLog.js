@@ -13,7 +13,7 @@ const activityLogSchema = new mongoose.Schema({
     automationName: String, // Snapshot of name in case automation is deleted
     platform: {
         type: String,
-        enum: ['telegram', 'whatsapp', 'instagram', 'other'],
+        enum: ['telegram', 'whatsapp', 'instagram', 'email', 'gmail', 'other'],
         default: 'other'
     },
     action: {
@@ -27,6 +27,7 @@ const activityLogSchema = new mongoose.Schema({
     },
     details: String, // Error message or success details
     messageData: {
+        recipient: String,
         recipientUsername: String,
         recipientName: String,
         messageContent: String,

@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 
 const MessageHistory = () => {
     const [messages, setMessages] = useState([]);
-    
+
     // Helper function to safely get message content
     const getMessageContent = (message) => {
         if (message.messageData) {
@@ -26,7 +26,7 @@ const MessageHistory = () => {
         }
         return message.action;
     };
-    
+
     // Helper function to safely get bot response
     const getBotResponse = (message) => {
         if (message.messageData) {
@@ -47,7 +47,7 @@ const MessageHistory = () => {
         }
         return 'Response logged in backend';
     };
-    
+
     // Helper function to safely get recipient name
     const getRecipientName = (message) => {
         if (message.messageData) {
@@ -75,7 +75,7 @@ const MessageHistory = () => {
         }
         return 'User';
     };
-    
+
     // Helper function to safely get recipient username
     const getRecipientUsername = (message) => {
         if (message.messageData) {
@@ -109,7 +109,7 @@ const MessageHistory = () => {
 
     useEffect(() => {
         fetchMessageHistory();
-        
+
         // Refresh every 30 seconds
         const interval = setInterval(fetchMessageHistory, 30000);
         return () => clearInterval(interval);
@@ -119,7 +119,7 @@ const MessageHistory = () => {
         try {
             setError('');
             const res = await api.get('/logs');
-            
+
             // Get all Telegram messages and debug the structure
             console.log('Raw logs from API:', res.data);
             const telegramMessages = res.data
@@ -129,7 +129,7 @@ const MessageHistory = () => {
                     return log;
                 })
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
+
             setMessages(telegramMessages);
         } catch (err) {
             console.error('Error fetching message history:', err);
@@ -139,8 +139,8 @@ const MessageHistory = () => {
         }
     };
 
-    const filteredMessages = filter === 'all' 
-        ? messages 
+    const filteredMessages = filter === 'all'
+        ? messages
         : messages.filter(msg => msg.status === filter);
 
     const exportToCSV = () => {
@@ -166,15 +166,15 @@ const MessageHistory = () => {
 
     return (
         <div className="animate-fade-in">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 p-6 bg-surface border border-main rounded-2xl transition-colors">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Message History</h1>
-                    <p className="text-slate-500 mt-1">View all conversations between users and your automated assistant.</p>
+                    <h1 className="text-3xl font-bold text-main tracking-tight">Message History</h1>
+                    <p className="text-secondary mt-1">View all conversations between users and your automated assistant.</p>
                 </div>
                 <div className="flex gap-2">
-                    <button 
+                    <button
                         onClick={exportToCSV}
-                        className="btn btn-secondary text-sm bg-white hover:bg-slate-50"
+                        className="btn btn-secondary text-sm"
                     >
                         <Download size={16} /> Export CSV
                     </button>
@@ -182,34 +182,31 @@ const MessageHistory = () => {
             </div>
 
             {/* Filters */}
-            <div className="card p-4 mb-6 flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2 mb-8 bg-surface p-2 rounded-xl border border-main transition-colors">
                 <button
                     onClick={() => setFilter('all')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        filter === 'all' 
-                            ? 'bg-blue-600 text-white' 
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filter === 'all'
+                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                        : 'text-secondary hover:bg-body hover:text-main'
+                        }`}
                 >
-                    All Messages ({messages.length})
+                    All ({messages.length})
                 </button>
                 <button
                     onClick={() => setFilter('success')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        filter === 'success' 
-                            ? 'bg-green-600 text-white' 
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filter === 'success'
+                        ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
+                        : 'text-secondary hover:bg-body hover:text-main'
+                        }`}
                 >
-                    Successful ({messages.filter(m => m.status === 'success').length})
+                    Success ({messages.filter(m => m.status === 'success').length})
                 </button>
                 <button
                     onClick={() => setFilter('failed')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        filter === 'failed' 
-                            ? 'bg-red-600 text-white' 
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filter === 'failed'
+                        ? 'bg-red-600 text-white shadow-lg shadow-red-500/20'
+                        : 'text-secondary hover:bg-body hover:text-main'
+                        }`}
                 >
                     Failed ({messages.filter(m => m.status === 'failed').length})
                 </button>
@@ -217,44 +214,41 @@ const MessageHistory = () => {
 
             {/* Error Message */}
             {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-lg">
-                    <div className="text-red-700 text-sm font-medium">{error}</div>
+                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                    <div className="text-red-400 text-sm font-medium">{error}</div>
                 </div>
             )}
 
             {/* Message List */}
             <div className="space-y-4">
                 {loading ? (
-                    <div className="card p-12 text-center">
-                        <Loader2 className="w-10 h-10 text-blue-600 animate-spin mx-auto mb-4" />
-                        <p className="text-slate-500 font-medium">Loading message history...</p>
+                    <div className="card p-12 text-center transition-colors">
+                        <Loader2 className="w-10 h-10 text-primary animate-spin mx-auto mb-4" />
+                        <p className="text-secondary font-medium">Loading message history...</p>
                     </div>
                 ) : filteredMessages.length > 0 ? (
                     filteredMessages.map((message) => (
-                        <div key={message._id} className="card p-6 hover:shadow-md transition-shadow">
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <User size={20} className="text-blue-600" />
+                        <div key={message._id} className="card p-6 border-main/50 hover:border-primary/50 transition-all duration-300">
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
+                                        <User size={24} className="text-primary" />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-slate-900">
+                                        <h3 className="font-bold text-main text-lg">
                                             {getRecipientName(message)}
                                         </h3>
-                                        <p className="text-sm text-slate-500">
+                                        <p className="text-sm text-secondary">
                                             @{getRecipientUsername(message)}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <div className="text-sm text-slate-500">
-                                        {format(new Date(message.timestamp), 'MMM d, yyyy h:mm a')}
+                                <div className="sm:text-right">
+                                    <div className="text-[10px] text-secondary font-bold uppercase tracking-widest mb-1.5 flex items-center sm:justify-end gap-1.5">
+                                        <Clock size={12} />
+                                        {format(new Date(message.timestamp), 'MMM d, h:mm a')}
                                     </div>
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${
-                                        message.status === 'success'
-                                            ? 'bg-green-50 text-green-700 border border-green-100'
-                                            : 'bg-red-50 text-red-700 border border-red-100'
-                                    }`}>
+                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold ${message.status === 'success' ? 'badge-success' : 'badge-neutral'}`}>
                                         {message.status === 'success' ? 'Delivered' : 'Failed'}
                                     </span>
                                 </div>
@@ -262,24 +256,24 @@ const MessageHistory = () => {
 
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div>
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <MessageSquare size={16} className="text-slate-400" />
-                                        <span className="text-sm font-medium text-slate-700">User Message</span>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <MessageSquare size={16} className="text-primary" />
+                                        <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">User Message</span>
                                     </div>
-                                    <div className="bg-slate-50 p-4 rounded-lg">
-                                        <p className="text-slate-800">
+                                    <div className="bg-body p-4 rounded-2xl border border-main transition-colors">
+                                        <p className="text-main leading-relaxed text-sm">
                                             {getMessageContent(message)}
                                         </p>
                                     </div>
                                 </div>
-                                                                    
+
                                 <div>
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Bot size={16} className="text-slate-400" />
-                                        <span className="text-sm font-medium text-slate-700">Bot Response</span>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Bot size={16} className="text-purple-500" />
+                                        <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">Bot Response</span>
                                     </div>
-                                    <div className="bg-blue-50 p-4 rounded-lg">
-                                        <p className="text-slate-800">
+                                    <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl">
+                                        <p className="text-primary leading-relaxed text-sm font-medium">
                                             {getBotResponse(message)}
                                         </p>
                                     </div>
@@ -287,21 +281,21 @@ const MessageHistory = () => {
                             </div>
 
                             {message.details && (
-                                <div className="mt-4 pt-4 border-t border-slate-100">
-                                    <div className="text-sm text-slate-500">
-                                        <strong>Error Details:</strong> {message.details}
+                                <div className="mt-6 pt-4 border-t border-main">
+                                    <div className="text-sm text-red-400 bg-red-500/5 p-3 rounded-lg border border-red-500/10">
+                                        <strong className="text-red-500">Error Details:</strong> {message.details}
                                     </div>
                                 </div>
                             )}
                         </div>
                     ))
                 ) : (
-                    <div className="card p-12 text-center">
-                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 mx-auto mb-6">
-                            <MessageSquare size={32} />
+                    <div className="card p-16 text-center shadow-lg transition-colors">
+                        <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center text-primary/40 mx-auto mb-6 border border-primary/10">
+                            <MessageSquare size={40} />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-900 mb-2">No messages yet</h3>
-                        <p className="text-slate-500">
+                        <h3 className="text-2xl font-bold text-main mb-2">No messages yet</h3>
+                        <p className="text-secondary max-w-sm mx-auto">
                             Conversation history will appear here once users start interacting with your bot.
                         </p>
                     </div>

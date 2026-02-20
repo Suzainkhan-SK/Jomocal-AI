@@ -14,6 +14,7 @@ const SERVICE_SCOPES = {
   gmail: [
     'https://www.googleapis.com/auth/gmail.send',
     'https://www.googleapis.com/auth/gmail.readonly',
+    'https://www.googleapis.com/auth/gmail.modify',
   ],
   sheets: [
     'https://www.googleapis.com/auth/spreadsheets',

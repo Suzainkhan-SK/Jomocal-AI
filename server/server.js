@@ -15,14 +15,18 @@ app.use(cors());
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => {
         console.log('MongoDB Connected');
-        
+
         // Start the Telegram Polling Bridge for local development
         const telegramBridge = require('./services/telegramBridge');
         telegramBridge.start();
-        
+
         // Start cleanup service
         const cleanupService = require('./services/cleanupService');
         cleanupService.start();
+
+        // Start Gmail Poller
+        const gmailPoller = require('./services/GmailPoller');
+        gmailPoller.start();
     })
     .catch(err => console.log('MongoDB Connection Error:', err));
 

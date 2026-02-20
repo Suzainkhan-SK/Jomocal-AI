@@ -5,6 +5,9 @@ const Automation = require('../models/Automation');
 const Integration = require('../models/Integration');
 const axios = require('axios');
 const ActivityLog = require('../models/ActivityLog');
+const multer = require('multer');
+const { PDFParse } = require('pdf-parse');
+const upload = multer({ storage: multer.memoryStorage() });
 const { getValidYoutubeTokensForUser } = require('../services/youtubeTokens');
 const { hasGoogleServiceConnected } = require('../services/googleTokens');
 
@@ -30,22 +33,22 @@ router.get('/', auth, async (req, res) => {
         const requiredTypes = [
             {
                 type: 'auto_reply',
-                name: 'Auto-Reply to Customer Messages',
-                description: 'Instantly reply to new messages on WhatsApp & Instagram with a welcome note.',
+                name: 'AI Customer Support Bot',
+                description: 'Context-aware AI assistant trained on your business knowledge.',
                 icon: 'MessageSquare',
                 color: 'blue',
             },
             {
                 type: 'lead_save',
-                name: 'Save Leads Automatically',
-                description: 'Capture contact details from DMs and save them to a Google Sheet.',
+                name: 'Lead Qualification AI',
+                description: 'Automatically capture and qualify leads from your conversations.',
                 icon: 'Users',
                 color: 'green',
             },
             {
                 type: 'youtube_video_automation',
-                name: 'YouTube AI Videos Automation',
-                description: 'Generate and upload Islamic Shorts to your connected YouTube channel.',
+                name: 'YouTube AI Shorts',
+                description: 'Automated AI video creation and publishing for YouTube.',
                 icon: 'Youtube',
                 color: 'red',
             },
@@ -87,11 +90,28 @@ router.get('/status/:userId', async (req, res) => {
         });
 
         if (!automation) {
-            return res.json({ status: 'inactive' });
+            return res.json({
+                status: 'inactive',
+                botSettings: {
+                    personality: "Professional and helpful", // Provide a default for AI agent
+                    welcomeMessage: "",
+                    knowledgeBase: ""
+                }
+            });
         }
 
-        // Return current status (active, paused, or inactive)
-        res.json({ status: automation.status });
+        // Return current status and the specific structure n8n expects
+        // 'active' if either Telegram or Gmail is active
+        const isActive = automation.status === 'active' || automation.emailAutomationStatus === 'active';
+
+        res.json({
+            status: isActive ? 'active' : 'inactive',
+            botSettings: {
+                personality: automation.botPersonality || "Professional and helpful", // Provide a default for AI agent
+                welcomeMessage: automation.botWelcomeMessage || "",
+                knowledgeBase: automation.knowledgeBaseText || ""
+            }
+        });
     } catch (err) {
         console.error('Status check error:', err.message);
         res.status(500).json({ status: 'error', message: 'Server Error' });
@@ -127,13 +147,84 @@ router.get('/public/:userId/:type', async (req, res) => {
     }
 });
 
+// @route   POST api/automations/config
+// @desc    Update AI Bot configuration (with PDF support)
+// @access  Private
+router.post('/config', [auth, upload.single('pdfFile')], async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { personality, welcomeMessage, manualText } = req.body;
+
+        console.log(`[BOT-CONFIG] User ${userId} is updating bot settings...`);
+        console.log(`[BOT-CONFIG] Personality: ${personality}, Welcome: ${welcomeMessage}`);
+        console.log(`[BOT-CONFIG] File: ${req.file ? req.file.originalname : 'No PDF'}`);
+
+        let automation = await Automation.findOne({ userId, type: 'auto_reply' });
+
+        if (!automation) {
+            console.log(`[BOT-CONFIG] Seeding new AI Customer Support Bot for user ${userId}`);
+            automation = new Automation({
+                userId,
+                type: 'auto_reply',
+                name: 'AI Customer Support Bot',
+                description: 'Context-aware AI assistant trained on your business knowledge.',
+                status: 'inactive'
+            });
+        }
+
+        if (personality) automation.botPersonality = personality;
+        if (welcomeMessage) automation.botWelcomeMessage = welcomeMessage;
+
+        let newKnowledge = '';
+        if (req.file) {
+            try {
+                // Convert Node.js Buffer to Uint8Array for modern pdf-parse compatibility
+                const uint8Array = new Uint8Array(req.file.buffer);
+                const pdfParser = new PDFParse(uint8Array);
+                const result = await pdfParser.getText();
+                newKnowledge = result.text.trim();
+                console.log(`[BOT-CONFIG] Successfully extracted ${newKnowledge.length} chars from PDF`);
+            } catch (pdfErr) {
+                console.error('[BOT-CONFIG] PDF parsing error:', pdfErr);
+                return res.status(400).json({ msg: 'Failed to parse PDF file. Please ensure it is a valid document.' });
+            }
+        }
+
+        if (manualText) {
+            console.log(`[BOT-CONFIG] Adding manual text: ${manualText.length} chars`);
+            newKnowledge = newKnowledge ? `${newKnowledge}\n\n${manualText.trim()}` : manualText.trim();
+        }
+
+        if (newKnowledge) {
+            automation.knowledgeBaseText = automation.knowledgeBaseText
+                ? `${automation.knowledgeBaseText}\n\n--- Information Added on ${new Date().toLocaleString()} ---\n${newKnowledge}`
+                : newKnowledge;
+
+            // Sanitize: remove excessive newlines
+            automation.knowledgeBaseText = automation.knowledgeBaseText.replace(/\n{3,}/g, '\n\n');
+        }
+
+        automation.updatedAt = new Date();
+        await automation.save();
+        console.log(`[BOT-CONFIG] Automation saved successfully.`);
+
+        res.json({
+            msg: 'AI Brain Updated',
+            automation
+        });
+    } catch (err) {
+        console.error('[BOT-CONFIG] ERROR:', err.message);
+        res.status(500).json({ msg: 'Server error while saving configuration. Please try again.' });
+    }
+});
+
 // @route   PATCH api/automations/:id
 // @desc    Update automation (name, description, config) for current user only
 // @access  Private
 router.patch('/:id', auth, async (req, res) => {
     const userId = req.user.id;
     const { id } = req.params;
-    const allowed = ['name', 'description', 'config'];
+    const allowed = ['name', 'description', 'config', 'emailAutomationStatus', 'emailAutomationWebhook'];
     const updates = {};
     for (const key of allowed) {
         if (req.body[key] !== undefined) {
@@ -147,9 +238,12 @@ router.patch('/:id', auth, async (req, res) => {
     try {
         const automation = await Automation.findOne({ _id: id, userId });
         if (!automation) return res.status(404).json({ msg: 'Automation not found.' });
+
         if (updates.name !== undefined) automation.name = updates.name;
         if (updates.description !== undefined) automation.description = updates.description;
         if (updates.config !== undefined) automation.config = { ...automation.config, ...updates.config };
+        if (updates.emailAutomationStatus !== undefined) automation.emailAutomationStatus = updates.emailAutomationStatus;
+        if (updates.emailAutomationWebhook !== undefined) automation.emailAutomationWebhook = updates.emailAutomationWebhook;
         automation.updatedAt = new Date();
         await automation.save();
         res.json(automation);
@@ -279,7 +373,7 @@ router.post('/run/youtube', auth, async (req, res) => {
                 error: 'content_type_required',
             });
         }
-        if (contentType !== 'islamic_stories_hindi' && contentType !== 'scifi_future_worlds_hindi' && contentType !== 'scifi_future_worlds_english') {
+        if (contentType !== 'islamic_stories_hindi' && contentType !== 'scifi_future_worlds_hindi' && contentType !== 'scifi_future_worlds_english' && contentType !== 'mythical_creatures') {
             return res.status(400).json({
                 msg: 'This content type is coming soon.',
                 error: 'content_type_coming_soon',
@@ -293,6 +387,8 @@ router.post('/run/youtube', auth, async (req, res) => {
             youtubeWebhookUrl = process.env.N8N_SCIFI_HINDI_WEBHOOK_URL;
         } else if (contentType === 'scifi_future_worlds_english') {
             youtubeWebhookUrl = process.env.N8N_SCIFI_ENGLISH_WEBHOOK_URL;
+        } else if (contentType === 'mythical_creatures') {
+            youtubeWebhookUrl = process.env.N8N_MYTHICAL_CREATURES_WEBHOOK_URL;
         } else {
             youtubeWebhookUrl = process.env.N8N_YOUTUBE_WEBHOOK_URL || process.env.N8N_WEBHOOK_URL;
         }

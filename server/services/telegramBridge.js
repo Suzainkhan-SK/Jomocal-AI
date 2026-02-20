@@ -78,7 +78,8 @@ class TelegramBridge {
 
                         const updates = response.data.result;
                         for (const update of updates) {
-                            if (!update.message) continue; // Skip non-message updates
+                            if (!update.message) continue;
+                            if (update.message.from?.is_bot) continue; // Skip bot's own messages or other bots
 
                             console.log(`📩 Bridge: Received message from @${update.message?.from?.username || 'unknown'}`);
 
@@ -94,25 +95,17 @@ class TelegramBridge {
                                 // Don't fail if analytics tracking fails
                             }
 
-                            // Get bot settings for this user
-                            let botSettings = null;
-                            try {
-                                const settingsResponse = await axios.get(`http://localhost:5000/api/settings/telegram`, {
-                                    headers: { 'x-auth-token': integration.userId } // This won't work without proper token, will fix in next iteration
-                                });
-                                botSettings = settingsResponse.data;
-                            } catch (e) {
-                                // Use defaults if settings fetch fails
-                                botSettings = {
-                                    welcomeMessage: 'Hello {{name}}! 👋\n\nI am your automated assistant. How can I help you today?',
-                                    personality: 'friendly'
-                                };
-                            }
+                            // Get bot settings directly from the automation object we already found
+                            const botSettings = {
+                                personality: automation.botPersonality || 'Professional and helpful',
+                                welcomeMessage: automation.botWelcomeMessage || '',
+                                knowledgeBase: automation.knowledgeBaseText || ''
+                            };
 
                             // 5. Check for duplicates before processing
                             const messageId = update.message?.message_id;
                             const chatId = update.message?.chat?.id;
-                            
+
                             if (!messageId || !chatId) {
                                 console.log('⚠️ Bridge: Skipping message - missing ID or chat ID');
                                 this.offsets.set(token, update.update_id + 1);
@@ -121,10 +114,10 @@ class TelegramBridge {
 
                             // Create unique identifier for this message
                             const messageKey = `${userId}-${chatId}-${messageId}`;
-                            
-                            // Skip if already being processed
+
+                            // Skip if already being processed or processed very recently
                             if (this.processingMessages.has(messageKey)) {
-                                console.log(`🔄 Bridge: Message ${messageKey} already being processed, skipping`);
+                                console.log(`🔄 Bridge: Message ${messageKey} is ALREADY in flight, skipping redundant processing.`);
                                 this.offsets.set(token, update.update_id + 1);
                                 continue;
                             }
@@ -137,7 +130,7 @@ class TelegramBridge {
                                     userId: userId,
                                     platform: 'telegram'
                                 });
-                                
+
                                 if (existing) {
                                     console.log(`🔁 Bridge: Duplicate message detected (ID: ${messageId}), skipping`);
                                     this.offsets.set(token, update.update_id + 1);
@@ -222,7 +215,7 @@ class TelegramBridge {
                                     const ActivityLog = require('../models/ActivityLog');
                                     await ActivityLog.create({
                                         userId,
-                                        automationName: 'Telegram Auto-Reply',
+                                        automationName: 'AI Customer Support Bot',
                                         platform: 'telegram',
                                         action: 'Auto-reply failed',
                                         status: 'failed',

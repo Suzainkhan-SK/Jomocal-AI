@@ -69,8 +69,8 @@ const Dashboard = () => {
         return (
             <div className="animate-fade-in flex items-center justify-center min-h-[60vh]">
                 <div className="flex flex-col items-center gap-4">
-                    <Loader className="h-8 w-8 animate-spin text-blue-600" />
-                    <p className="text-slate-500">Loading dashboard...</p>
+                    <Loader className="h-8 w-8 animate-spin text-blue-500" />
+                    <p className="text-secondary">Loading dashboard...</p>
                 </div>
             </div>
         );
@@ -81,8 +81,8 @@ const Dashboard = () => {
             <div className="animate-fade-in">
                 <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-                        <p className="text-slate-500 mt-1">Overview of your automations and activities</p>
+                        <h1 className="text-3xl font-bold text-main tracking-tight">Dashboard</h1>
+                        <p className="text-secondary mt-1">Overview of your automations and activities</p>
                     </div>
                 </div>
 
@@ -110,8 +110,8 @@ const Dashboard = () => {
         <div className="animate-fade-in">
             <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Welcome back, {userName}! 👋</h1>
-                    <p className="text-slate-500 mt-1">Here's what's happening with your automations today.</p>
+                    <h1 className="text-3xl font-bold text-main tracking-tight">Welcome back, {userName}! 👋</h1>
+                    <p className="text-secondary mt-1">Here's what's happening with your automations today.</p>
                 </div>
                 <div className="flex gap-3">
                     <Link to="/dashboard/automations">
@@ -124,46 +124,46 @@ const Dashboard = () => {
 
             {/* Status Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-10">
-                <div className="card group hover:border-green-200 transition-colors p-5 md:p-8">
+                <div className="card group hover:border-emerald-500/30 transition-colors p-5 md:p-8">
                     <div className="flex items-start justify-between mb-4">
-                        <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 transition-transform group-hover:scale-110">
                             <CheckCircle size={24} />
                         </div>
-                        <span className="badge badge-success bg-green-50 text-green-700 border-green-100">
+                        <span className="badge-success">
                             {automationsStats.active > 0 ? `+${Math.floor(Math.random() * 20) + 1}%` : '0%'}
                         </span>
                     </div>
                     <div>
-                        <p className="text-sm text-slate-500 font-medium mb-1">Active</p>
-                        <p className="text-3xl font-bold text-slate-900">{automationsStats.active}</p>
+                        <p className="text-sm text-secondary font-medium mb-1">Active</p>
+                        <p className="text-3xl font-bold text-main">{automationsStats.active}</p>
                     </div>
                 </div>
 
-                <div className="card group hover:border-orange-200 transition-colors p-5 md:p-8">
+                <div className="card group hover:border-orange-500/30 transition-colors p-5 md:p-8">
                     <div className="flex items-start justify-between mb-4">
-                        <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 transition-transform group-hover:scale-110">
                             <Clock size={24} />
                         </div>
-                        <span className="badge badge-warning bg-orange-50 text-orange-700 border-orange-100">
+                        <span className="badge-warning">
                             {automationsStats.pending > 0 ? 'Action Needed' : 'All Set'}
                         </span>
                     </div>
                     <div>
-                        <p className="text-sm text-slate-500 font-medium mb-1">Pending</p>
-                        <p className="text-3xl font-bold text-slate-900">{automationsStats.pending}</p>
+                        <p className="text-sm text-secondary font-medium mb-1">Pending</p>
+                        <p className="text-3xl font-bold text-main">{automationsStats.pending}</p>
                     </div>
                 </div>
 
-                <div className="card group hover:border-blue-200 transition-colors p-5 md:p-8">
+                <div className="card group hover:border-blue-500/30 transition-colors p-5 md:p-8">
                     <div className="flex items-start justify-between mb-4">
-                        <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 transition-transform group-hover:scale-110">
                             <Zap size={24} />
                         </div>
-                        <span className="badge badge-neutral bg-slate-100 text-slate-600 border-slate-200">Today</span>
+                        <span className="badge-neutral">Today</span>
                     </div>
                     <div>
-                        <p className="text-sm text-slate-500 font-medium mb-1">Actions</p>
-                        <p className="text-3xl font-bold text-slate-900">{totalActions}</p>
+                        <p className="text-sm text-secondary font-medium mb-1">Actions</p>
+                        <p className="text-3xl font-bold text-main">{totalActions}</p>
                     </div>
                 </div>
             </div>
@@ -172,25 +172,25 @@ const Dashboard = () => {
             <div className="flex flex-col-reverse lg:grid lg:grid-cols-3 gap-6 md:gap-8">
                 {/* Side Panel (Quick Actions + Pro Tip) */}
                 <div className="lg:col-span-1 space-y-6">
-                    <h2 className="text-lg font-bold text-slate-900 hidden lg:block">Quick Actions</h2>
+                    <h2 className="text-lg font-bold text-main hidden lg:block">Quick Actions</h2>
                     <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
-                        <Link to="/dashboard/automations" className="group bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-4 text-center md:text-left">
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <Link to="/dashboard/automations" className="group bg-surface p-4 rounded-xl border border-main shadow-sm hover:shadow-md hover:border-blue-500/30 transition-all flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-4 text-center md:text-left transition-colors duration-300">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                                 <Plus size={20} className="md:w-6 md:h-6" />
                             </div>
                             <div>
-                                <p className="font-bold text-slate-900 text-sm md:text-base">New Bot</p>
-                                <p className="text-xs text-slate-500 hidden md:block">Start from scratch</p>
+                                <p className="font-bold text-main text-sm md:text-base">New Bot</p>
+                                <p className="text-xs text-secondary hidden md:block">Start from scratch</p>
                             </div>
                         </Link>
 
-                        <Link to="/dashboard/apps" className="group bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-200 transition-all flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-4 text-center md:text-left">
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                        <Link to="/dashboard/apps" className="group bg-surface p-4 rounded-xl border border-main shadow-sm hover:shadow-md hover:border-purple-500/30 transition-all flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-4 text-center md:text-left transition-colors duration-300">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500 group-hover:bg-purple-600 group-hover:text-white transition-colors">
                                 <LinkIcon size={20} className="md:w-6 md:h-6" />
                             </div>
                             <div>
-                                <p className="font-bold text-slate-900 text-sm md:text-base">Connect</p>
-                                <p className="text-xs text-slate-500 hidden md:block">Add integration</p>
+                                <p className="font-bold text-main text-sm md:text-base">Connect</p>
+                                <p className="text-xs text-secondary hidden md:block">Add integration</p>
                             </div>
                         </Link>
                     </div>
@@ -226,22 +226,22 @@ const Dashboard = () => {
                 {/* Recent Activity */}
                 <div className="lg:col-span-2">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-lg font-bold text-slate-900">Recent Activity</h2>
-                        <Link to="/dashboard/activity" className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline">View All</Link>
+                        <h2 className="text-lg font-bold text-main">Recent Activity</h2>
+                        <Link to="/dashboard/activity" className="text-sm font-medium text-blue-400 hover:text-blue-300 hover:underline">View All</Link>
                     </div>
 
-                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="bg-surface rounded-2xl border border-main shadow-sm overflow-hidden transition-colors duration-300">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
-                                <thead className="bg-slate-50 border-b border-slate-100">
+                                <thead className="bg-table-header border-b border-main">
                                     <tr>
-                                        <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Automation</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Time</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider"></th>
+                                        <th className="px-6 py-4 text-xs font-bold text-secondary uppercase tracking-widest">Automation</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-secondary uppercase tracking-widest">Status</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-secondary uppercase tracking-widest">Time</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-secondary uppercase tracking-widest"></th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100">
+                                <tbody className="divide-y divide-main">
                                     {recentLogs.length > 0 ? (
                                         recentLogs.map((log, index) => {
                                             // Determine icon based on automation name
@@ -255,17 +255,17 @@ const Dashboard = () => {
                                                 iconColor = 'purple';
                                             }
 
-                                            // Determine status badge
-                                            let statusClass = 'bg-green-50 text-green-700 border-green-100';
+                                            // Status badge
+                                            let badgeClass = 'badge-success';
                                             let statusIcon = CheckCircle;
                                             let statusText = 'Success';
 
                                             if (log.status.toLowerCase().includes('pending') || log.status.toLowerCase().includes('waiting')) {
-                                                statusClass = 'bg-amber-50 text-amber-700 border-amber-100';
+                                                badgeClass = 'badge-warning';
                                                 statusIcon = Clock;
                                                 statusText = 'Pending';
                                             } else if (log.status.toLowerCase().includes('error') || log.status.toLowerCase().includes('failed')) {
-                                                statusClass = 'bg-red-50 text-red-700 border-red-100';
+                                                badgeClass = 'badge-neutral'; // Or make a badge-danger
                                                 statusIcon = AlertIcon;
                                                 statusText = 'Failed';
                                             }
@@ -287,28 +287,28 @@ const Dashboard = () => {
                                             }
 
                                             return (
-                                                <tr key={log._id || index} className="hover:bg-slate-50/50 transition-colors">
+                                                <tr key={log._id || index} className="hover:bg-primary/5 transition-colors">
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-3">
-                                                            <div className={`w-8 h-8 rounded-lg bg-${iconColor}-100 flex items-center justify-center text-${iconColor}-600`}>
+                                                            <div className={`w-8 h-8 rounded-lg bg-${iconColor}-500/10 flex items-center justify-center text-${iconColor}-500/80`}>
                                                                 {icon === MessageSquare && <MessageSquare size={16} />}
                                                                 {icon === Users && <Users size={16} />}
                                                                 {icon === Calendar && <Calendar size={16} />}
                                                             </div>
-                                                            <span className="text-sm font-medium text-slate-900">{log.automationName || 'Unknown Automation'}</span>
+                                                            <span className="text-sm font-semibold text-main">{log.automationName || 'Unknown Automation'}</span>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusClass}`}>
+                                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 ${badgeClass}`}>
                                                             {statusIcon === CheckCircle && <CheckCircle size={12} />}
                                                             {statusIcon === Clock && <Clock size={12} />}
                                                             {statusIcon === AlertIcon && <AlertIcon size={12} />}
                                                             {statusText}
                                                         </span>
                                                     </td>
-                                                    <td className="px-6 py-4 text-sm text-slate-500">{timeString}</td>
+                                                    <td className="px-6 py-4 text-sm text-secondary">{timeString}</td>
                                                     <td className="px-6 py-4 text-right">
-                                                        <button className="text-slate-400 hover:text-slate-600">
+                                                        <button className="text-secondary hover:text-main">
                                                             <AlertCircle size={16} />
                                                         </button>
                                                     </td>
@@ -317,8 +317,8 @@ const Dashboard = () => {
                                         })
                                     ) : (
                                         <tr>
-                                            <td colSpan="4" className="px-6 py-8 text-center text-slate-500">
-                                                <Activity className="h-12 w-12 mx-auto mb-3 text-slate-300" />
+                                            <td colSpan="4" className="px-6 py-8 text-center text-secondary">
+                                                <Activity className="h-12 w-12 mx-auto mb-3 text-slate-300 dark:text-slate-600" />
                                                 <p>No recent activity found</p>
                                                 <p className="text-sm mt-1">Your automations will appear here once they start running</p>
                                             </td>

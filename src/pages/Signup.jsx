@@ -28,60 +28,61 @@ const Signup = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 md:p-6 relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center p-4 md:p-6 relative overflow-hidden bg-body transition-colors">
             {/* Background Blobs */}
-            <div className="absolute bottom-0 right-1/2 translate-x-1/2 w-[600px] h-[600px] md:w-[1000px] md:h-[1000px] bg-indigo-400/20 rounded-full blur-[80px] md:blur-[120px] -z-10 animate-pulse-slow"></div>
+            <div className="absolute bottom-0 right-1/2 translate-x-1/2 w-[600px] h-[600px] md:w-[1000px] md:h-[1000px] bg-indigo-600/10 rounded-full blur-[80px] md:blur-[120px] -z-10 animate-pulse-slow"></div>
 
-            <div className="w-full max-w-sm md:max-w-md bg-white/70 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-xl border border-white/20 p-6 md:p-10 animate-fade-in">
+            <div className="w-full max-w-sm md:max-w-md bg-surface backdrop-blur-2xl rounded-2xl md:rounded-3xl shadow-xl border border-main p-6 md:p-10 animate-fade-in relative z-10 transition-colors">
                 <div className="text-center mb-6 md:mb-10">
-                    <Link to="/" className="inline-flex items-center gap-2 font-bold text-xl md:text-2xl text-slate-900 mb-4 md:mb-6 hover:opacity-80 transition-opacity">
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-600 rounded-lg md:rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
-                            <Bot size={20} className="md:w-6 md:h-6" />
-                        </div>
-                        <span>AI Auto Studio</span>
+                    <Link to="/" className="inline-flex items-center mb-4 md:mb-6 hover:opacity-80 transition-opacity">
+                        <img
+                            src="/jomocal ai logo.png"
+                            alt="Jomocal AI"
+                            className="w-32 md:w-40 h-auto object-contain scale-125"
+                        />
                     </Link>
-                    <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2 tracking-tight">Create an account</h2>
-                    <p className="text-sm md:text-base text-slate-500">Start automating your business today</p>
+                    <h2 className="text-2xl md:text-3xl font-bold text-main mb-2 tracking-tight">Create an account</h2>
+                    <p className="text-sm md:text-base text-secondary">Start automating your business today</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {error && (
-                        <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-shake">
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-500 dark:text-red-400 px-4 py-3 rounded-xl text-sm font-medium animate-shake">
                             {error}
                         </div>
                     )}
                     <div>
-                        <label className="label">I am a...</label>
+                        <label className="label text-main">I am a...</label>
                         <div className="grid grid-cols-2 gap-4">
                             <button
                                 type="button"
-                                className={`p-4 rounded-xl border flex flex-col items-center gap-3 transition-all duration-300 ${role === 'msme' ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md shadow-blue-500/10' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50 text-slate-500'}`}
+                                className={`p-4 rounded-xl border flex flex-col items-center gap-3 transition-all duration-300 ${role === 'msme' ? 'border-blue-500 bg-blue-500/10 text-blue-500 shadow-md shadow-blue-500/20' : 'border-main hover:border-blue-500/30 hover:bg-body text-secondary'}`}
                                 onClick={() => setRole('msme')}
                                 disabled={loading}
                             >
-                                <Briefcase size={28} className={role === 'msme' ? 'text-blue-600' : 'text-slate-400'} />
+                                <Briefcase size={28} className={role === 'msme' ? 'text-blue-500' : 'text-secondary/50'} />
                                 <span className="font-bold">Business</span>
                             </button>
                             <button
                                 type="button"
-                                className={`p-4 rounded-xl border flex flex-col items-center gap-3 transition-all duration-300 ${role === 'creator' ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-md shadow-purple-500/10' : 'border-slate-200 hover:border-purple-300 hover:bg-slate-50 text-slate-500'}`}
+                                className={`p-4 rounded-xl border flex flex-col items-center gap-3 transition-all duration-300 ${role === 'creator' ? 'border-purple-500 bg-purple-500/10 text-purple-500 shadow-md shadow-purple-500/20' : 'border-main hover:border-purple-500/30 hover:bg-body text-secondary'}`}
                                 onClick={() => setRole('creator')}
                                 disabled={loading}
                             >
-                                <Camera size={28} className={role === 'creator' ? 'text-purple-600' : 'text-slate-400'} />
+                                <Camera size={28} className={role === 'creator' ? 'text-purple-500' : 'text-secondary/50'} />
                                 <span className="font-bold">Creator</span>
                             </button>
                         </div>
                     </div>
 
                     <div>
-                        <label className="label" htmlFor="name">Full Name</label>
+                        <label className="label text-main" htmlFor="name">Full Name</label>
                         <div className="relative group">
-                            <User className="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                            <User className="absolute left-4 top-3.5 text-secondary group-focus-within:text-blue-500 transition-colors" size={20} />
                             <input
                                 type="text"
                                 id="name"
-                                className="input pl-12 bg-white/50"
+                                className="input pl-12 bg-body border-main"
                                 placeholder="John Doe"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
@@ -92,13 +93,13 @@ const Signup = () => {
                     </div>
 
                     <div>
-                        <label className="label" htmlFor="email">Email Address</label>
+                        <label className="label text-main" htmlFor="email">Email Address</label>
                         <div className="relative group">
-                            <Mail className="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                            <Mail className="absolute left-4 top-3.5 text-secondary group-focus-within:text-blue-500 transition-colors" size={20} />
                             <input
                                 type="email"
                                 id="email"
-                                className="input pl-12 bg-white/50"
+                                className="input pl-12 bg-body border-main"
                                 placeholder="you@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -109,13 +110,13 @@ const Signup = () => {
                     </div>
 
                     <div>
-                        <label className="label" htmlFor="password">Password</label>
+                        <label className="label text-main" htmlFor="password">Password</label>
                         <div className="relative group">
-                            <Lock className="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                            <Lock className="absolute left-4 top-3.5 text-secondary group-focus-within:text-blue-500 transition-colors" size={20} />
                             <input
                                 type="password"
                                 id="password"
-                                className="input pl-12 bg-white/50"
+                                className="input pl-12 bg-body border-main"
                                 placeholder="Create a password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -134,8 +135,8 @@ const Signup = () => {
                     </button>
                 </form>
 
-                <div className="mt-8 text-center text-sm text-slate-500">
-                    Already have an account? <Link to="/login" className="text-blue-600 font-bold hover:underline">Log in</Link>
+                <div className="mt-8 text-center text-sm text-secondary">
+                    Already have an account? <Link to="/login" className="text-blue-500 font-bold hover:underline">Log in</Link>
                 </div>
             </div>
         </div>

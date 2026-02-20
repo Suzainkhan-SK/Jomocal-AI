@@ -13,10 +13,14 @@ import {
     X,
     BarChart3,
     MessageSquare,
-    Sparkles
+    Sparkles,
+    Sun,
+    Moon
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const DashboardLayout = () => {
+    const { theme, toggleTheme } = useTheme();
     const location = useLocation();
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -39,13 +43,16 @@ const DashboardLayout = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-bg-body flex">
+        <div className="min-h-screen bg-body flex text-main transition-colors duration-300">
             {/* Sidebar - Desktop */}
-            <aside className="hidden md:flex flex-col w-64 bg-white border-r border-border fixed h-full z-10">
-                <div className="p-6 border-b border-border">
-                    <Link to="/dashboard" className="flex items-center gap-2 font-bold text-xl text-primary">
-                        <Bot size={28} />
-                        <span>AI Auto Studio</span>
+            <aside className="hidden md:flex flex-col w-64 bg-sidebar border-r border-main fixed h-full z-10 transition-colors duration-300">
+                <div className="p-6 border-b border-main flex items-center justify-between">
+                    <Link to="/dashboard" className="flex items-center">
+                        <img
+                            src="/jomocal ai logo.png"
+                            alt="Jomocal AI"
+                            className="w-20 h-auto object-contain scale-[2.5] translate-x-10"
+                        />
                     </Link>
                 </div>
 
@@ -54,9 +61,9 @@ const DashboardLayout = () => {
                         <Link
                             key={item.path}
                             to={item.path}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === item.path
-                                ? 'bg-primary-light text-primary'
-                                : 'text-text-secondary hover:bg-gray-50 hover:text-text-main'
+                            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${location.pathname === item.path
+                                ? 'bg-blue-500/10 text-blue-500'
+                                : 'text-sidebar-secondary hover:bg-sidebar-hover hover:text-sidebar-primary'
                                 }`}
                         >
                             {item.icon}
@@ -65,10 +72,17 @@ const DashboardLayout = () => {
                     ))}
                 </nav>
 
-                <div className="p-4 border-t border-border">
+                <div className="p-4 border-t border-main space-y-2">
+                    <button
+                        onClick={toggleTheme}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-sidebar-secondary hover:bg-sidebar-hover hover:text-sidebar-primary transition-colors"
+                    >
+                        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                    </button>
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors"
                     >
                         <LogOut size={20} />
                         Sign Out
@@ -77,24 +91,34 @@ const DashboardLayout = () => {
             </aside>
 
             {/* Mobile Header */}
-            <div className="md:hidden fixed top-0 w-full bg-white border-b border-border z-20 px-4 py-3 flex items-center justify-between">
-                <Link to="/dashboard" className="flex items-center gap-2 font-bold text-lg text-primary">
-                    <Bot size={24} />
-                    <span>AI Auto Studio</span>
+            <div className="md:hidden fixed top-0 w-full bg-header backdrop-blur-md border-b border-main z-20 px-4 py-2 flex items-center justify-between transition-colors duration-300">
+                <Link to="/dashboard" className="flex items-center">
+                    <img
+                        src="/jomocal ai logo.png"
+                        alt="Jomocal AI"
+                        className="w-20 h-auto object-contain scale-160"
+                    />
                 </Link>
-                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-text-secondary">
-                    {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
+                <div className="flex items-center gap-2">
+                    <button onClick={toggleTheme} className="p-2 text-main hover:text-primary transition-colors">
+                        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
+                    <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-main hover:text-primary transition-colors">
+                        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+                </div>
             </div>
 
             {/* Mobile Sidebar Overlay */}
-            {/* Mobile Sidebar Overlay */}
             {isMobileMenuOpen && (
-                <div className="md:hidden fixed inset-0 bg-black/50 z-30 animate-fade-in" onClick={() => setIsMobileMenuOpen(false)}>
-                    <div className="bg-white w-72 h-full p-4 shadow-2xl animate-fade-in" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center gap-2 font-bold text-xl text-primary mb-8 px-2">
-                            <Bot size={24} />
-                            <span>AI Auto Studio</span>
+                <div className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30 animate-fade-in" onClick={() => setIsMobileMenuOpen(false)}>
+                    <div className="bg-sidebar w-72 h-full p-4 shadow-2xl animate-fade-in border-r border-main" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center mb-8 px-2">
+                            <img
+                                src="/jomocal ai logo.png"
+                                alt="Jomocal AI"
+                                className="w-20 h-auto object-contain scale-[2.5] translate-x-10"
+                            />
                         </div>
                         <nav className="space-y-1">
                             {navItems.map((item) => (
@@ -102,9 +126,9 @@ const DashboardLayout = () => {
                                     key={item.path}
                                     to={item.path}
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === item.path
-                                        ? 'bg-primary-light text-primary'
-                                        : 'text-text-secondary hover:bg-gray-50 hover:text-text-main'
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${location.pathname === item.path
+                                        ? 'bg-blue-500/10 text-blue-500'
+                                        : 'text-sidebar-secondary hover:bg-sidebar-hover hover:text-sidebar-primary'
                                         }`}
                                 >
                                     {item.icon}
@@ -113,7 +137,7 @@ const DashboardLayout = () => {
                             ))}
                             <button
                                 onClick={handleLogout}
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors mt-8"
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors mt-8"
                             >
                                 <LogOut size={20} />
                                 Sign Out

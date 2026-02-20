@@ -26,8 +26,8 @@ const Analytics = () => {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="flex items-center justify-center min-h-[60vh] bg-body transition-colors">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
         );
     }
@@ -64,20 +64,20 @@ const Analytics = () => {
     ];
 
     const colorClasses = {
-        blue: 'bg-blue-500/10 text-blue-600',
-        green: 'bg-emerald-500/10 text-emerald-600',
-        purple: 'bg-purple-500/10 text-purple-600',
-        orange: 'bg-orange-500/10 text-orange-600'
+        blue: 'bg-primary/10 text-primary',
+        green: 'bg-emerald-500/10 text-emerald-500',
+        purple: 'bg-indigo-500/10 text-indigo-500',
+        orange: 'bg-orange-500/10 text-orange-500'
     };
 
     return (
         <div className="container mx-auto px-4 py-8 animate-fade-in">
             {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-4xl font-display font-bold text-slate-900 mb-2">
+            <div className="mb-8 p-6 bg-surface border border-main rounded-2xl transition-colors">
+                <h1 className="text-3xl md:text-4xl font-display font-bold text-main mb-2">
                     Analytics Dashboard
                 </h1>
-                <p className="text-slate-600">
+                <p className="text-secondary">
                     Track your automation performance over the last 30 days
                 </p>
             </div>
@@ -87,30 +87,30 @@ const Analytics = () => {
                 {stats.map((stat, index) => (
                     <div
                         key={stat.name}
-                        className="card delay-100"
+                        className="card transition-all duration-300"
                         style={{ animationDelay: `${index * 100}ms` }}
                     >
                         <div className="flex items-center justify-between mb-4">
                             <div className={`p-3 rounded-xl ${colorClasses[stat.color]}`}>
-                                <stat.icon className="w-6 h-6" />
+                                <stat.icon className="w-5 h-5 md:w-6 md:h-6" />
                             </div>
-                            <span className="text-sm font-semibold text-emerald-600">
+                            <span className="text-xs font-bold text-emerald-500">
                                 {stat.change}
                             </span>
                         </div>
-                        <h3 className="text-3xl font-display font-bold text-slate-900 mb-1">
+                        <h3 className="text-2xl md:text-3xl font-display font-bold text-main mb-1">
                             {stat.value}
                         </h3>
-                        <p className="text-sm text-slate-600">{stat.name}</p>
+                        <p className="text-xs md:text-sm text-secondary font-medium uppercase tracking-widest">{stat.name}</p>
                     </div>
                 ))}
             </div>
 
             {/* Chart Section */}
-            <div className="card mb-8">
+            <div className="card mb-8 transition-colors">
                 <div className="flex items-center gap-3 mb-6">
-                    <BarChart3 className="w-6 h-6 text-blue-600" />
-                    <h2 className="text-2xl font-display font-bold text-slate-900">
+                    <BarChart3 className="w-6 h-6 text-primary" />
+                    <h2 className="text-2xl font-display font-bold text-main">
                         Activity Over Time
                     </h2>
                 </div>
@@ -118,22 +118,22 @@ const Analytics = () => {
                 {analytics?.chartData && analytics.chartData.length > 0 ? (
                     <div className="space-y-4">
                         {/* Simple bar chart visualization */}
-                        <div className="grid grid-cols-7 gap-2">
+                        <div className="grid grid-cols-7 gap-2 md:gap-4 lg:gap-6">
                             {analytics.chartData.slice(-7).map((day, index) => {
                                 const maxValue = Math.max(...analytics.chartData.map(d => d.messagesSent));
                                 const height = maxValue > 0 ? (day.messagesSent / maxValue) * 200 : 20;
 
                                 return (
                                     <div key={index} className="flex flex-col items-center gap-2">
-                                        <div className="w-full bg-slate-100 rounded-lg overflow-hidden flex items-end" style={{ height: '200px' }}>
+                                        <div className="w-full bg-body rounded-lg overflow-hidden flex items-end transition-colors" style={{ height: '200px' }}>
                                             <div
-                                                className="w-full bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-lg transition-all duration-500 hover:from-blue-700 hover:to-blue-500"
+                                                className="w-full bg-primary/80 rounded-t-sm md:rounded-t-lg transition-all duration-500 hover:bg-primary"
                                                 style={{ height: `${height}px` }}
                                             ></div>
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-xs font-semibold text-slate-900">{day.messagesSent}</p>
-                                            <p className="text-xs text-slate-500">
+                                            <p className="text-xs font-bold text-main">{day.messagesSent}</p>
+                                            <p className="text-[10px] text-secondary font-bold uppercase tracking-widest">
                                                 {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}
                                             </p>
                                         </div>
@@ -143,53 +143,53 @@ const Analytics = () => {
                         </div>
 
                         {/* Legend */}
-                        <div className="flex items-center gap-6 pt-4 border-t border-slate-100">
+                        <div className="flex items-center gap-6 pt-4 border-t border-main">
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-blue-600"></div>
-                                <span className="text-sm text-slate-600">Messages Sent</span>
+                                <div className="w-3 h-3 rounded-full bg-primary"></div>
+                                <span className="text-xs font-bold text-secondary uppercase tracking-widest">Messages Sent</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-emerald-600"></div>
-                                <span className="text-sm text-slate-600">Messages Received</span>
+                                <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+                                <span className="text-xs font-bold text-secondary uppercase tracking-widest">Messages Received</span>
                             </div>
                         </div>
                     </div>
                 ) : (
                     <div className="text-center py-12">
-                        <BarChart3 className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                        <p className="text-slate-500">No data available yet. Start automating to see your analytics!</p>
+                        <BarChart3 className="w-16 h-16 text-secondary/30 mx-auto mb-4" />
+                        <p className="text-secondary font-medium">No data available yet. Start automating to see your analytics!</p>
                     </div>
                 )}
             </div>
 
             {/* Quick Insights */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="card bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200">
-                    <h3 className="font-display font-bold text-slate-900 mb-2">
+                <div className="card transition-colors">
+                    <h3 className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">
                         Efficiency Rate
                     </h3>
-                    <p className="text-3xl font-bold text-blue-600 mb-1">
+                    <p className="text-3xl font-display font-bold text-primary mb-1">
                         {analytics?.totals?.messagesSent > 0
                             ? Math.round((analytics.totals.messagesSent / analytics.totals.messagesReceived) * 100)
                             : 0}%
                     </p>
-                    <p className="text-sm text-slate-600">Auto-reply success rate</p>
+                    <p className="text-xs text-secondary font-medium">Auto-reply success rate</p>
                 </div>
 
-                <div className="card bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200">
-                    <h3 className="font-display font-bold text-slate-900 mb-2">
+                <div className="card transition-colors">
+                    <h3 className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">
                         Avg. Response Time
                     </h3>
-                    <p className="text-3xl font-bold text-emerald-600 mb-1">&lt;1s</p>
-                    <p className="text-sm text-slate-600">Lightning fast automation</p>
+                    <p className="text-3xl font-display font-bold text-emerald-500 mb-1">&lt;1s</p>
+                    <p className="text-xs text-secondary font-medium">Lightning fast automation</p>
                 </div>
 
-                <div className="card bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200">
-                    <h3 className="font-display font-bold text-slate-900 mb-2">
+                <div className="card transition-colors">
+                    <h3 className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">
                         Active Automations
                     </h3>
-                    <p className="text-3xl font-bold text-purple-600 mb-1">1</p>
-                    <p className="text-sm text-slate-600">Running 24/7</p>
+                    <p className="text-3xl font-display font-bold text-indigo-500 mb-1">1</p>
+                    <p className="text-xs text-secondary font-medium">Running 24/7</p>
                 </div>
             </div>
         </div>

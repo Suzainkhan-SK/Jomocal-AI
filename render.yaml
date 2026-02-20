@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: jomocal-frontend
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: VITE_API_URL
+        value: https://jomocal-backend.onrender.com/api
+    plan: free

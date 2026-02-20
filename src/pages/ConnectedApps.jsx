@@ -157,6 +157,10 @@ const ConnectedApps = () => {
       setShowModal(false);
     } catch (err) {
       console.error('Error connecting app:', err);
+      const msg =
+        err.response?.data?.msg ||
+        'Failed to connect app. Please check your token and try again.';
+      alert(msg);
     } finally {
       setConnecting(false);
     }

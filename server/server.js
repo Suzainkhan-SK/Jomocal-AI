@@ -9,7 +9,14 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: [
+        process.env.FRONTEND_URL || 'https://jomocal-frontend.onrender.com',
+        'http://localhost:5173', // Vite default dev server
+        'http://localhost:3000'  // Alternative dev port
+    ],
+    credentials: true
+}));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)

@@ -8,4 +8,8 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  // Expose environment variables to the client
+  define: {
+    'process.env': {}
+  }
 })

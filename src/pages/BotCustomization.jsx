@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Settings, Save, Sparkles, MessageCircle } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const BotCustomization = () => {
     const [settings, setSettings] = useState({
@@ -33,10 +33,7 @@ const BotCustomization = () => {
     const handleSave = async () => {
         setSaving(true);
         try {
-            const token = localStorage.getItem('token');
-            await axios.put('http://localhost:5000/api/settings/telegram', settings, {
-                headers: { 'x-auth-token': token }
-            });
+            await api.put('/settings/telegram', settings);
             setSaved(true);
             setTimeout(() => setSaved(false), 3000);
         } catch (err) {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BarChart3, TrendingUp, Users, Clock, MessageSquare } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const Analytics = () => {
     const [analytics, setAnalytics] = useState(null);
@@ -12,10 +12,7 @@ const Analytics = () => {
 
     const fetchAnalytics = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/analytics/dashboard', {
-                headers: { 'x-auth-token': token }
-            });
+            const res = await api.get('/analytics/dashboard');
             setAnalytics(res.data);
             setLoading(false);
         } catch (err) {

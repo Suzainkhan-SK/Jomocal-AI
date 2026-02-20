@@ -16,7 +16,21 @@ app.use(express.static(join(__dirname, 'dist'), {
 }));
 
 // Handle SPA routing - serve index.html for all routes that don't match static files
-app.get('*', (req, res) => {
+// Use app.use middleware instead of app.get('*') for Express 5 compatibility
+app.use((req, res, next) => {
+    // Check if response was already sent by express.static
+    if (res.headersSent) {
+        return next();
+    }
+    
+    // Check if it's likely a static file request (has file extension)
+    const hasExtension = /\.[^/]+$/.test(req.path);
+    if (hasExtension && !req.path.endsWith('/')) {
+        // Let Express handle 404 for static files that don't exist
+        return res.status(404).send('File not found');
+    }
+    
+    // Serve index.html for all other routes (SPA routing)
     try {
         const indexPath = join(__dirname, 'dist', 'index.html');
         

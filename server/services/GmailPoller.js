@@ -97,9 +97,14 @@ class GmailPoller {
 
             const data = this.extractEmailData(msgDetail.data);
 
-            // 5. Trigger n8n
+            // 5. Trigger n8n (cloud or self-hosted) via configured webhook URL
             try {
-                const n8nUrl = process.env.N8N_EMAIL_WEBHOOK_URL || 'http://localhost:5678/webhook/email-master-listener';
+                const n8nUrl = process.env.N8N_EMAIL_WEBHOOK_URL;
+                if (!n8nUrl) {
+                    console.warn('[GMAIL-POLL] Skipping n8n call: N8N_EMAIL_WEBHOOK_URL is not configured.');
+                    continue;
+                }
+
                 const queryStr = `?userId=${userId}&token=${accessToken}`;
 
                 await axios.post(n8nUrl + queryStr, {
@@ -111,7 +116,12 @@ class GmailPoller {
 
                 console.log(`[GMAIL-POLL] [N8N-SUCCESS] User ${userId}: Forwarded email from ${data.from} to n8n.`);
             } catch (n8nErr) {
-                console.error(`[GMAIL-POLL] [N8N-ERROR] User ${userId}: Failed to trigger n8n:`, n8nErr.response?.status === 404 ? '404 (Check if workflow is ACTIVE in n8n)' : n8nErr.message);
+                console.error(
+                    `[GMAIL-POLL] [N8N-ERROR] User ${userId}: Failed to trigger n8n:`,
+                    n8nErr.response?.status === 404
+                        ? '404 (Check if workflow is ACTIVE in n8n)'
+                        : n8nErr.message
+                );
                 continue; // Don't mark as read if n8n failed
             }
 

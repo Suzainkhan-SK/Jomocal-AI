@@ -144,11 +144,20 @@ class TelegramBridge {
                             // Mark as processing
                             this.processingMessages.add(messageKey);
 
-                            // 6. Forward to local n8n with settings
+                            // 6. Forward to n8n (cloud or self-hosted) with settings.
+                            // Prefer explicit webhook URLs from env; fall back to a base URL for local dev.
+                            const baseUrl = process.env.N8N_WEBHOOK_BASE_URL || 'http://localhost:5678';
+                            const prodWebhook =
+                                process.env.N8N_TELEGRAM_WEBHOOK_URL ||
+                                `${baseUrl.replace(/\/+$/, '')}/webhook/telegram-master-listener`;
+                            const testWebhook =
+                                process.env.N8N_TELEGRAM_WEBHOOK_TEST_URL ||
+                                `${baseUrl.replace(/\/+$/, '')}/webhook-test/telegram-master-listener`;
+
                             const n8nUrls = [
-                                `http://localhost:5678/webhook/telegram-master-listener?token=${token}&userId=${userId}`,
-                                `http://localhost:5678/webhook-test/telegram-master-listener?token=${token}&userId=${userId}`
-                            ];
+                                `${prodWebhook}?token=${token}&userId=${userId}`,
+                                `${testWebhook}?token=${token}&userId=${userId}`,
+                            ].filter(Boolean);
 
                             // Enhance the update with bot settings and tracking info
                             const enrichedUpdate = {

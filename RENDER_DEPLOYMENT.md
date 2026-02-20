@@ -8,28 +8,41 @@ Your backend is already deployed at: `https://jomocal-backend.onrender.com`
 
 ## Frontend Deployment Steps
 
-### Step 1: Create a New Static Site on Render
+### ⚠️ Important: Use Web Service (Not Static Site)
+
+To fix the 404 error on page refresh, you need to deploy as a **Web Service** instead of a Static Site. This allows proper SPA routing.
+
+### Step 1: Delete Existing Static Site (If Any)
+
+If you already deployed as a Static Site:
+1. Go to your Render dashboard
+2. Find your frontend service
+3. Click on it → Settings → Delete Service
+
+### Step 2: Create a New Web Service
 
 1. Go to [Render Dashboard](https://dashboard.render.com)
 2. Click **"New +"** button
-3. Select **"Static Site"**
+3. Select **"Web Service"**
 
-### Step 2: Connect Your Repository
+### Step 3: Connect Your Repository
 
 1. Connect your GitHub repository: `https://github.com/Suzainkhan-SK/Jomocal-AI`
 2. Render will automatically detect it
 
-### Step 3: Configure Build Settings
+### Step 4: Configure Build Settings
 
 Fill in the following settings:
 
 - **Name**: `jomocal-frontend` (or any name you prefer)
+- **Region**: Choose closest to your users
 - **Branch**: `main`
 - **Root Directory**: Leave empty (or `.` if required)
+- **Runtime**: `Node`
 - **Build Command**: `npm install && npm run build`
-- **Publish Directory**: `dist`
+- **Start Command**: `npm start`
 
-### Step 4: Add Environment Variable
+### Step 5: Add Environment Variables
 
 Click on **"Environment"** tab and add:
 
@@ -38,27 +51,16 @@ Click on **"Environment"** tab and add:
 
 **Important**: Make sure there's no trailing slash in the URL.
 
-### Step 5: Deploy
+### Step 6: Deploy
 
-1. Click **"Create Static Site"**
+1. Click **"Create Web Service"**
 2. Render will start building your frontend
 3. Wait for the build to complete (usually 2-5 minutes)
 4. Your frontend will be available at: `https://jomocal-frontend.onrender.com` (or your custom domain)
 
-## Alternative: Using Web Service (If Static Site Doesn't Work)
+### How It Works
 
-If you encounter issues with static site deployment, you can deploy as a Web Service:
-
-### Configuration:
-- **Name**: `jomocal-frontend`
-- **Environment**: `Node`
-- **Build Command**: `npm install && npm run build`
-- **Start Command**: `npm start`
-- **Root Directory**: Leave empty
-
-### Environment Variables:
-- `VITE_API_URL`: `https://jomocal-backend.onrender.com/api`
-- `PORT`: `10000` (or let Render assign automatically)
+The `serve.js` file serves your built static files and handles SPA routing by serving `index.html` for all routes. This ensures that refreshing `/dashboard` or any other route works correctly.
 
 ## Post-Deployment Checklist
 
@@ -84,8 +86,10 @@ If you encounter issues with static site deployment, you can deploy as a Web Ser
 
 ### Issue: 404 errors on page refresh
 **Solution**: 
-- This is normal for SPAs - Render static sites handle this automatically
-- If using Web Service, you may need to configure routing
+- Make sure you're using **Web Service** (not Static Site)
+- Verify `serve.js` file exists in your repository
+- Check that `npm start` command runs `node serve.js`
+- Ensure the build completed successfully (check build logs)
 
 ## Backend CORS Configuration
 

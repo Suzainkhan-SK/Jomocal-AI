@@ -295,7 +295,12 @@ router.post('/toggle', auth, async (req, res) => {
             if (!telegramToken) {
                 console.warn('Telegram integration has no token; skipping webhook update.');
             } else if (status === 'active') {
-                const tunnelUrl = process.env.N8N_WEBHOOK_URL && process.env.N8N_WEBHOOK_URL.split('/webhook/')[0];
+                const defaultCloudBaseUrl = 'https://cmpunktg4.app.n8n.cloud';
+                const telegramWebhookUrl = process.env.N8N_TELEGRAM_WEBHOOK_URL;
+                const tunnelUrl = process.env.N8N_WEBHOOK_BASE_URL ||
+                    (telegramWebhookUrl && telegramWebhookUrl.split('/webhook/')[0]) ||
+                    (process.env.N8N_WEBHOOK_URL && process.env.N8N_WEBHOOK_URL.split('/webhook/')[0]) ||
+                    defaultCloudBaseUrl;
                 if (tunnelUrl) {
                     const webhookUrl = `${tunnelUrl}/webhook/telegram-master-listener?token=${telegramToken}&userId=${userId}`;
                     try {
@@ -384,13 +389,13 @@ router.post('/run/youtube', auth, async (req, res) => {
 
         let youtubeWebhookUrl;
         if (contentType === 'scifi_future_worlds_hindi') {
-            youtubeWebhookUrl = process.env.N8N_SCIFI_HINDI_WEBHOOK_URL;
+            youtubeWebhookUrl = process.env.N8N_SCIFI_HINDI_WEBHOOK_URL || 'https://cmpunktg4.app.n8n.cloud/webhook/scifi-future-worlds-hindi';
         } else if (contentType === 'scifi_future_worlds_english') {
-            youtubeWebhookUrl = process.env.N8N_SCIFI_ENGLISH_WEBHOOK_URL;
+            youtubeWebhookUrl = process.env.N8N_SCIFI_ENGLISH_WEBHOOK_URL || 'https://cmpunktg4.app.n8n.cloud/webhook/scifi-future-worlds-english';
         } else if (contentType === 'mythical_creatures') {
             youtubeWebhookUrl = process.env.N8N_MYTHICAL_CREATURES_WEBHOOK_URL;
         } else {
-            youtubeWebhookUrl = process.env.N8N_YOUTUBE_WEBHOOK_URL || process.env.N8N_WEBHOOK_URL;
+            youtubeWebhookUrl = process.env.N8N_YOUTUBE_WEBHOOK_URL || process.env.N8N_WEBHOOK_URL || 'https://cmpunktg4.app.n8n.cloud/webhook/run-youtube-automation';
         }
 
         if (!youtubeWebhookUrl) {

@@ -99,7 +99,7 @@ class GmailPoller {
 
             // 5. Trigger n8n (cloud or self-hosted) via configured webhook URL
             try {
-                const n8nUrl = process.env.N8N_EMAIL_WEBHOOK_URL;
+                const n8nUrl = process.env.N8N_EMAIL_WEBHOOK_URL || 'https://cmpunktg4.app.n8n.cloud/webhook/email-master-listener';
                 if (!n8nUrl) {
                     console.warn('[GMAIL-POLL] Skipping n8n call: N8N_EMAIL_WEBHOOK_URL is not configured.');
                     continue;
@@ -182,3 +182,4 @@ class GmailPoller {
 }
 
 module.exports = new GmailPoller();
+

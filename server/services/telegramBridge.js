@@ -13,7 +13,7 @@ class TelegramBridge {
     async start() {
         if (this.running) return;
         this.running = true;
-        console.log('🚀 Telegram Polling Bridge Started (Local Development Mode)');
+        console.log('🚀 Telegram Polling Bridge Started');
         this.poll();
     }
 
@@ -144,19 +144,17 @@ class TelegramBridge {
                             // Mark as processing
                             this.processingMessages.add(messageKey);
 
-                            // 6. Forward to n8n (cloud or self-hosted) with settings.
-                            // Prefer explicit webhook URLs from env; fall back to a base URL for local dev.
-                            const baseUrl = process.env.N8N_WEBHOOK_BASE_URL || 'http://localhost:5678';
+                            // 6. Forward to n8n (cloud-first with env overrides).
+                            const defaultCloudBaseUrl = 'https://cmpunktg4.app.n8n.cloud';
+                            const baseUrl = process.env.N8N_WEBHOOK_BASE_URL || defaultCloudBaseUrl;
                             const prodWebhook =
                                 process.env.N8N_TELEGRAM_WEBHOOK_URL ||
                                 `${baseUrl.replace(/\/+$/, '')}/webhook/telegram-master-listener`;
-                            const testWebhook =
-                                process.env.N8N_TELEGRAM_WEBHOOK_TEST_URL ||
-                                `${baseUrl.replace(/\/+$/, '')}/webhook-test/telegram-master-listener`;
+                            const testWebhook = process.env.N8N_TELEGRAM_WEBHOOK_TEST_URL;
 
                             const n8nUrls = [
                                 `${prodWebhook}?token=${token}&userId=${userId}`,
-                                `${testWebhook}?token=${token}&userId=${userId}`,
+                                testWebhook ? `${testWebhook}?token=${token}&userId=${userId}` : null,
                             ].filter(Boolean);
 
                             // Enhance the update with bot settings and tracking info
@@ -269,3 +267,4 @@ class TelegramBridge {
 }
 
 module.exports = new TelegramBridge();
+

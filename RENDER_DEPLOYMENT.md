@@ -124,7 +124,14 @@ VITE_API_URL=https://jomocal-backend.onrender.com/api
 MONGODB_URI=your_mongodb_uri
 JWT_SECRET=your_jwt_secret
 PORT=10000
-N8N_WEBHOOK_URL=your_n8n_webhook_url
+N8N_WEBHOOK_BASE_URL=https://cmpunktg4.app.n8n.cloud
+N8N_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/run-youtube-automation
+N8N_YOUTUBE_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/run-youtube-automation
+N8N_TELEGRAM_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/telegram-master-listener
+N8N_EMAIL_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/email-master-listener
+N8N_SCIFI_ENGLISH_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/scifi-future-worlds-english
+N8N_SCIFI_HINDI_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/scifi-future-worlds-hindi
+N8N_LEAD_QUALIFICATION_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/lead-qualification
 ... (other backend env vars)
 ```
 
@@ -134,3 +141,4 @@ N8N_WEBHOOK_URL=your_n8n_webhook_url
 - First request after spin-down may take 30-60 seconds
 - Consider upgrading to paid tier for always-on services
 - Static sites on Render are always-on even on free tier
+

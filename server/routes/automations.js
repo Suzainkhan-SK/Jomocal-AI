@@ -18,7 +18,7 @@ const leadHunterQueue = require('../services/leadHunterQueue');
 // to Redis or a dedicated service later without changing the public API.
 const youtubeTriggerBuckets = new Map(); // userId -> number[]
 const ONE_HOUR_MS = 60 * 60 * 1000;
-const DEFAULT_LEAD_HUNTER_WEBHOOK_URL = 'https://cmpunktg5.app.n8n.cloud/webhook/lead-hunter-start';
+const DEFAULT_LEAD_HUNTER_WEBHOOK_URL = 'https://cmpunktg5.app.n8n.cloud/webhook/stateless-hunter';
 
 function normalizeLeadRows(rows) {
     const list = Array.isArray(rows) ? rows : [];
@@ -56,6 +56,18 @@ function normalizeLeadRows(rows) {
                 : (Number.isInteger(lead?.sheetRowIndex) ? lead.sheetRowIndex : (index + 2)),
         }))
         .filter((lead) => lead.leadEmail);
+}
+
+function buildHunterWebhookCandidates() {
+    const configured = process.env.N8N_HUNTER_WEBHOOK_URL;
+    const baseUrl = process.env.N8N_WEBHOOK_BASE_URL || 'https://cmpunktg5.app.n8n.cloud';
+    const base = baseUrl.replace(/\/+$/, '');
+    return [
+        configured,
+        `${base}/webhook/stateless-hunter`,
+        `${base}/webhook/lead-hunter-start`,
+        DEFAULT_LEAD_HUNTER_WEBHOOK_URL,
+    ].filter(Boolean);
 }
 
 // Public helper: return a sanitized automation for a given user and type
@@ -425,7 +437,6 @@ router.post('/lead-hunter/start', auth, async (req, res) => {
             targetLocation: cleanTargetLocation,
         });
 
-        const hunterWebhookUrl = process.env.N8N_HUNTER_WEBHOOK_URL || DEFAULT_LEAD_HUNTER_WEBHOOK_URL;
         const webhookPayload = {
             userId: String(userId),
             targetNiche: cleanTargetNiche,
@@ -439,10 +450,30 @@ router.post('/lead-hunter/start', auth, async (req, res) => {
             googleAccessToken: sheetsAccessToken,
         };
 
-        const workflowResponse = await axios.post(hunterWebhookUrl, webhookPayload, {
-            headers: { 'Content-Type': 'application/json' },
-            timeout: Number(process.env.N8N_HUNTER_TIMEOUT_MS || 180000),
-        });
+        const webhookCandidates = buildHunterWebhookCandidates();
+        let workflowResponse = null;
+        let lastHunterError = null;
+
+        for (const hunterWebhookUrl of webhookCandidates) {
+            try {
+                workflowResponse = await axios.post(hunterWebhookUrl, webhookPayload, {
+                    headers: { 'Content-Type': 'application/json' },
+                    timeout: Number(process.env.N8N_HUNTER_TIMEOUT_MS || 300000),
+                });
+                break;
+            } catch (hunterErr) {
+                lastHunterError = hunterErr;
+                const status = hunterErr.response?.status;
+                // Retry next candidate if webhook path is wrong.
+                if (status === 404) continue;
+                // For non-404 errors, stop early and surface the upstream failure.
+                break;
+            }
+        }
+
+        if (!workflowResponse) {
+            throw lastHunterError || new Error('Hunter workflow did not respond.');
+        }
 
         const rawLeads =
             workflowResponse.data?.leads ||
@@ -511,7 +542,14 @@ router.post('/lead-hunter/start', auth, async (req, res) => {
         if (code === 'SERVICE_NOT_CONNECTED' || code === 'MISSING_REFRESH_TOKEN') {
             return res.status(400).json({ msg: 'Connect Google with Gmail and Sheets before launching Lead Hunter.' });
         }
-        return res.status(500).json({ msg: 'Failed to start Lead Hunter campaign.' });
+        const upstreamStatus = Number(err.response?.status || 0);
+        const upstreamMsg = typeof err.response?.data === 'string'
+            ? err.response.data
+            : (err.response?.data?.message || err.response?.data?.msg || err.message);
+        if (upstreamStatus >= 400 && upstreamStatus < 500) {
+            return res.status(400).json({ msg: `Lead Hunter rejected request: ${upstreamMsg}` });
+        }
+        return res.status(500).json({ msg: `Failed to start Lead Hunter campaign: ${upstreamMsg}` });
     }
 });
 

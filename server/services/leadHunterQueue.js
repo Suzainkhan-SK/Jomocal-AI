@@ -5,6 +5,17 @@ const { getValidGoogleAccessToken } = require('./googleTokens');
 const DEFAULT_SENDER_WEBHOOK_URL =
   'https://cmpunktg5.app.n8n.cloud/webhook/lead-hunter-sender';
 
+function buildSenderWebhookCandidates() {
+  const configured = process.env.N8N_SENDER_WEBHOOK_URL;
+  const baseUrl = process.env.N8N_WEBHOOK_BASE_URL || 'https://cmpunktg5.app.n8n.cloud';
+  const base = baseUrl.replace(/\/+$/, '');
+  return [
+    configured,
+    `${base}/webhook/lead-hunter-sender`,
+    DEFAULT_SENDER_WEBHOOK_URL,
+  ].filter(Boolean);
+}
+
 class LeadHunterQueue {
   constructor() {
     this.timer = null;
@@ -104,27 +115,40 @@ class LeadHunterQueue {
     try {
       const { accessToken } = await getValidGoogleAccessToken(job.userId, 'gmail');
 
-      const senderWebhookUrl = process.env.N8N_SENDER_WEBHOOK_URL || DEFAULT_SENDER_WEBHOOK_URL;
+      const senderPayload = {
+        userId: String(job.userId),
+        spreadsheetId: job.spreadsheetId,
+        leadEmail: job.leadEmail,
+        businessName: job.businessName,
+        icebreaker: job.icebreaker,
+        website: job.website,
+        phone: job.phone,
+        mode: job.mode,
+        rowIndex: job.rowIndex,
+        googleAccessToken: accessToken,
+      };
+      const senderCandidates = buildSenderWebhookCandidates();
+      let senderErr = null;
+      let delivered = false;
 
-      await axios.post(
-        senderWebhookUrl,
-        {
-          userId: String(job.userId),
-          spreadsheetId: job.spreadsheetId,
-          leadEmail: job.leadEmail,
-          businessName: job.businessName,
-          icebreaker: job.icebreaker,
-          website: job.website,
-          phone: job.phone,
-          mode: job.mode,
-          rowIndex: job.rowIndex,
-          googleAccessToken: accessToken,
-        },
-        {
-          headers: { 'Content-Type': 'application/json' },
-          timeout: 30000,
+      for (const senderWebhookUrl of senderCandidates) {
+        try {
+          await axios.post(senderWebhookUrl, senderPayload, {
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 30000,
+          });
+          delivered = true;
+          break;
+        } catch (err) {
+          senderErr = err;
+          if (err.response?.status === 404) continue;
+          break;
         }
-      );
+      }
+
+      if (!delivered) {
+        throw senderErr || new Error('Sender workflow did not respond.');
+      }
 
       await LeadHunterJob.updateOne(
         { _id: job._id },

@@ -1,14 +1,14 @@
-# Render.com Deployment Guide
+﻿# Render.com Deployment Guide
 
 This guide will help you deploy both the backend and frontend of your Automation Studio application to Render.com.
 
-## Backend Deployment (Already Completed ✅)
+## Backend Deployment (Already Completed âœ…)
 
 Your backend is already deployed at: `https://jomocal-backend.onrender.com`
 
 ## Frontend Deployment Steps
 
-### ⚠️ Important: Use Web Service (Not Static Site)
+### âš ï¸ Important: Use Web Service (Not Static Site)
 
 To fix the 404 error on page refresh, you need to deploy as a **Web Service** instead of a Static Site. This allows proper SPA routing.
 
@@ -17,7 +17,7 @@ To fix the 404 error on page refresh, you need to deploy as a **Web Service** in
 If you already deployed as a Static Site:
 1. Go to your Render dashboard
 2. Find your frontend service
-3. Click on it → Settings → Delete Service
+3. Click on it â†’ Settings â†’ Delete Service
 
 ### Step 2: Create a New Web Service
 
@@ -124,14 +124,20 @@ VITE_API_URL=https://jomocal-backend.onrender.com/api
 MONGODB_URI=your_mongodb_uri
 JWT_SECRET=your_jwt_secret
 PORT=10000
-N8N_WEBHOOK_BASE_URL=https://cmpunktg4.app.n8n.cloud
-N8N_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/run-youtube-automation
-N8N_YOUTUBE_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/run-youtube-automation
-N8N_TELEGRAM_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/telegram-master-listener
-N8N_EMAIL_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/email-master-listener
-N8N_SCIFI_ENGLISH_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/scifi-future-worlds-english
-N8N_SCIFI_HINDI_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/scifi-future-worlds-hindi
-N8N_LEAD_QUALIFICATION_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/lead-qualification
+N8N_WEBHOOK_BASE_URL=https://cmpunktg5.app.n8n.cloud
+N8N_WEBHOOK_URL=https://cmpunktg5.app.n8n.cloud/webhook/run-youtube-automation
+N8N_YOUTUBE_WEBHOOK_URL=https://cmpunktg5.app.n8n.cloud/webhook/run-youtube-automation
+N8N_TELEGRAM_WEBHOOK_URL=https://cmpunktg5.app.n8n.cloud/webhook/telegram-master-listener
+N8N_EMAIL_WEBHOOK_URL=https://cmpunktg5.app.n8n.cloud/webhook/email-master-listener
+N8N_SCIFI_ENGLISH_WEBHOOK_URL=https://cmpunktg5.app.n8n.cloud/webhook/scifi-future-worlds-english
+N8N_SCIFI_HINDI_WEBHOOK_URL=https://cmpunktg5.app.n8n.cloud/webhook/scifi-future-worlds-hindi
+N8N_LEAD_QUALIFICATION_WEBHOOK_URL=https://cmpunktg5.app.n8n.cloud/webhook/lead-qualification
+N8N_HUNTER_WEBHOOK_URL=https://cmpunktg5.app.n8n.cloud/webhook/stateless-hunter
+N8N_SENDER_WEBHOOK_URL=https://cmpunktg5.app.n8n.cloud/webhook/lead-hunter-sender
+LEAD_HUNTER_QUEUE_POLL_MS=15000
+LEAD_HUNTER_QUEUE_MAX_ATTEMPTS=3
+LEAD_HUNTER_QUEUE_RETRY_DELAY_MS=60000
+LEAD_HUNTER_QUEUE_LOCK_TTL_MS=900000
 ... (other backend env vars)
 ```
 
@@ -141,4 +147,5 @@ N8N_LEAD_QUALIFICATION_WEBHOOK_URL=https://cmpunktg4.app.n8n.cloud/webhook/lead-
 - First request after spin-down may take 30-60 seconds
 - Consider upgrading to paid tier for always-on services
 - Static sites on Render are always-on even on free tier
+
 

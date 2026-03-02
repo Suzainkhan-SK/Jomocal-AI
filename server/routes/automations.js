@@ -9,13 +9,54 @@ const multer = require('multer');
 const { PDFParse } = require('pdf-parse');
 const upload = multer({ storage: multer.memoryStorage() });
 const { getValidYoutubeTokensForUser } = require('../services/youtubeTokens');
-const { hasGoogleServiceConnected } = require('../services/googleTokens');
+const { getValidGoogleAccessToken, hasGoogleServiceConnected } = require('../services/googleTokens');
+const { createLeadHunterSheet } = require('../services/googleSheets');
+const leadHunterQueue = require('../services/leadHunterQueue');
 
 // In-memory soft rate limiting for YouTube triggers (per user, per hour).
 // This is intentionally simple for demo/MANTHAN readiness and can be moved
 // to Redis or a dedicated service later without changing the public API.
 const youtubeTriggerBuckets = new Map(); // userId -> number[]
 const ONE_HOUR_MS = 60 * 60 * 1000;
+const DEFAULT_LEAD_HUNTER_WEBHOOK_URL = 'https://cmpunktg5.app.n8n.cloud/webhook/lead-hunter-start';
+
+function normalizeLeadRows(rows) {
+    const list = Array.isArray(rows) ? rows : [];
+    return list
+        .map((lead, index) => ({
+            leadEmail: String(
+                lead?.leadEmail ||
+                lead?.email ||
+                lead?.Email ||
+                ''
+            ).trim(),
+            businessName: String(
+                lead?.businessName ||
+                lead?.['Business Name'] ||
+                lead?.title ||
+                ''
+            ).trim(),
+            icebreaker: String(
+                lead?.icebreaker ||
+                lead?.Icebreaker ||
+                ''
+            ).trim(),
+            website: String(
+                lead?.website ||
+                lead?.Website ||
+                ''
+            ).trim(),
+            phone: String(
+                lead?.phone ||
+                lead?.Phone ||
+                ''
+            ).trim(),
+            rowIndex: Number.isInteger(lead?.rowIndex)
+                ? lead.rowIndex
+                : (Number.isInteger(lead?.sheetRowIndex) ? lead.sheetRowIndex : (index + 2)),
+        }))
+        .filter((lead) => lead.leadEmail);
+}
 
 // Public helper: return a sanitized automation for a given user and type
 // Used by backend automations like n8n; does NOT expose credentials (none are stored here anyway).
@@ -295,7 +336,7 @@ router.post('/toggle', auth, async (req, res) => {
             if (!telegramToken) {
                 console.warn('Telegram integration has no token; skipping webhook update.');
             } else if (status === 'active') {
-                const defaultCloudBaseUrl = 'https://cmpunktg4.app.n8n.cloud';
+                const defaultCloudBaseUrl = 'https://cmpunktg5.app.n8n.cloud';
                 const telegramWebhookUrl = process.env.N8N_TELEGRAM_WEBHOOK_URL;
                 const tunnelUrl = process.env.N8N_WEBHOOK_BASE_URL ||
                     (telegramWebhookUrl && telegramWebhookUrl.split('/webhook/')[0]) ||
@@ -324,6 +365,123 @@ router.post('/toggle', auth, async (req, res) => {
     } catch (err) {
         console.error('Toggle Error:', err.message);
         res.status(500).send('Server Error');
+    }
+});
+
+// @route   POST api/automations/lead-hunter/start
+// @desc    Start stateless Lead Hunter campaign: scrape + AI now, drip send later via queue.
+// @access  Private
+router.post('/lead-hunter/start', auth, async (req, res) => {
+    const userId = req.user.id;
+    try {
+        const {
+            targetNiche,
+            targetLocation,
+            campaignSize,
+            offer,
+            benefit,
+            sendingSpeed,
+            mode,
+        } = req.body || {};
+
+        const cleanTargetNiche = String(targetNiche || '').trim();
+        const cleanTargetLocation = String(targetLocation || '').trim();
+        const cleanOffer = String(offer || '').trim();
+        const cleanBenefit = String(benefit || '').trim();
+        const cleanMode = String(mode || 'Review in Drafts').trim();
+        const campaignSizeNum = Math.max(1, Math.min(100, Number(campaignSize) || 25));
+        const sendingSpeedNum = Math.max(1, Math.min(50, Number(sendingSpeed) || 20));
+
+        if (!cleanTargetNiche || !cleanTargetLocation || !cleanOffer || !cleanBenefit) {
+            return res.status(400).json({ msg: 'Missing required lead hunter inputs.' });
+        }
+
+        // Ensure Google Sheets + Gmail permissions are connected before launching campaign.
+        await getValidGoogleAccessToken(userId, 'gmail');
+        const { accessToken: sheetsAccessToken } = await getValidGoogleAccessToken(userId, 'sheets');
+
+        const { spreadsheetId } = await createLeadHunterSheet({
+            accessToken: sheetsAccessToken,
+            targetNiche: cleanTargetNiche,
+            targetLocation: cleanTargetLocation,
+        });
+
+        const hunterWebhookUrl = process.env.N8N_HUNTER_WEBHOOK_URL || DEFAULT_LEAD_HUNTER_WEBHOOK_URL;
+        const webhookPayload = {
+            userId: String(userId),
+            targetNiche: cleanTargetNiche,
+            targetLocation: cleanTargetLocation,
+            campaignSize: campaignSizeNum,
+            offer: cleanOffer,
+            benefit: cleanBenefit,
+            mode: cleanMode === 'Auto-Pilot' ? 'Auto-Pilot' : 'Review in Drafts',
+            sendingSpeed: sendingSpeedNum,
+            spreadsheetId,
+            googleAccessToken: sheetsAccessToken,
+        };
+
+        const workflowResponse = await axios.post(hunterWebhookUrl, webhookPayload, {
+            headers: { 'Content-Type': 'application/json' },
+            timeout: Number(process.env.N8N_HUNTER_TIMEOUT_MS || 180000),
+        });
+
+        const rawLeads =
+            workflowResponse.data?.leads ||
+            workflowResponse.data?.data ||
+            workflowResponse.data?.items ||
+            workflowResponse.data;
+        const leads = normalizeLeadRows(rawLeads);
+
+        if (leads.length === 0) {
+            return res.status(200).json({
+                ok: true,
+                spreadsheetId,
+                queuedCount: 0,
+                message: 'No leads with valid emails were returned from hunter workflow.',
+            });
+        }
+
+        const enqueueResult = await leadHunterQueue.scheduleJobs({
+            userId,
+            spreadsheetId,
+            leads,
+            mode: cleanMode,
+            sendingSpeed: sendingSpeedNum,
+        });
+
+        // Persist latest campaign config on the existing lead automation.
+        await Automation.updateOne(
+            { userId, type: 'lead_save' },
+            {
+                $set: {
+                    updatedAt: new Date(),
+                    config: {
+                        targetNiche: cleanTargetNiche,
+                        targetLocation: cleanTargetLocation,
+                        campaignSize: campaignSizeNum,
+                        offer: cleanOffer,
+                        benefit: cleanBenefit,
+                        sendingSpeed: sendingSpeedNum,
+                        mode: cleanMode === 'Auto-Pilot' ? 'Auto-Pilot' : 'Review in Drafts',
+                    },
+                },
+            }
+        );
+
+        return res.json({
+            ok: true,
+            spreadsheetId,
+            queuedCount: enqueueResult.queued,
+            intervalMinutes: Number((enqueueResult.intervalMs / 60000).toFixed(2)),
+            message: `Campaign started. ${enqueueResult.queued} leads queued for drip sending.`,
+        });
+    } catch (err) {
+        console.error('Lead Hunter start error:', err.response?.data || err.message);
+        const code = err.code || err.response?.data?.error;
+        if (code === 'SERVICE_NOT_CONNECTED' || code === 'MISSING_REFRESH_TOKEN') {
+            return res.status(400).json({ msg: 'Connect Google with Gmail and Sheets before launching Lead Hunter.' });
+        }
+        return res.status(500).json({ msg: 'Failed to start Lead Hunter campaign.' });
     }
 });
 
@@ -389,13 +547,13 @@ router.post('/run/youtube', auth, async (req, res) => {
 
         let youtubeWebhookUrl;
         if (contentType === 'scifi_future_worlds_hindi') {
-            youtubeWebhookUrl = process.env.N8N_SCIFI_HINDI_WEBHOOK_URL || 'https://cmpunktg4.app.n8n.cloud/webhook/scifi-future-worlds-hindi';
+            youtubeWebhookUrl = process.env.N8N_SCIFI_HINDI_WEBHOOK_URL || 'https://cmpunktg5.app.n8n.cloud/webhook/scifi-future-worlds-hindi';
         } else if (contentType === 'scifi_future_worlds_english') {
-            youtubeWebhookUrl = process.env.N8N_SCIFI_ENGLISH_WEBHOOK_URL || 'https://cmpunktg4.app.n8n.cloud/webhook/scifi-future-worlds-english';
+            youtubeWebhookUrl = process.env.N8N_SCIFI_ENGLISH_WEBHOOK_URL || 'https://cmpunktg5.app.n8n.cloud/webhook/scifi-future-worlds-english';
         } else if (contentType === 'mythical_creatures') {
             youtubeWebhookUrl = process.env.N8N_MYTHICAL_CREATURES_WEBHOOK_URL;
         } else {
-            youtubeWebhookUrl = process.env.N8N_YOUTUBE_WEBHOOK_URL || process.env.N8N_WEBHOOK_URL || 'https://cmpunktg4.app.n8n.cloud/webhook/run-youtube-automation';
+            youtubeWebhookUrl = process.env.N8N_YOUTUBE_WEBHOOK_URL || process.env.N8N_WEBHOOK_URL || 'https://cmpunktg5.app.n8n.cloud/webhook/run-youtube-automation';
         }
 
         if (!youtubeWebhookUrl) {

@@ -1,0 +1,413 @@
+{
+  "name": "stateless_hunter_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "stateless-hunter",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "n1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body || $json;\nreturn {\n  json: {\n    ...body,\n    apifyKeys: [process.env.APIFY_KEY_1 || 'replace_me', process.env.APIFY_KEY_2 || 'replace_me_2'],\n    currentKeyIndex: 0\n  }\n};"
+      },
+      "id": "n2",
+      "name": "Apify Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        430,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = { ...$json };\nif (data.currentKeyIndex >= data.apifyKeys.length) {\n  throw new Error('All Apify keys exhausted');\n}\ndata.activeKey = data.apifyKeys[data.currentKeyIndex];\nreturn { json: data };"
+      },
+      "id": "n3",
+      "name": "Select Active Key",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items?token={{$json.activeKey}}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"includeWebResults\":false,\"language\":\"en\",\"locationQuery\":\"{{$json.targetLocation}}\",\"maxCrawledPlacesPerSearch\":{{$json.campaignSize || 25}},\"searchStringsArray\":[\"{{$json.targetNiche}}\"],\"skipClosedPlaces\":true}",
+        "options": {}
+      },
+      "id": "n4",
+      "name": "Fetch Businesses (Apify)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "n5",
+      "name": "Split Businesses",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1130,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{$json.website}}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "n6",
+      "name": "Has Website",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$json.website}}",
+        "options": {}
+      },
+      "id": "n7",
+      "name": "Fetch Website HTML",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1550,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a B2B copywriter. Find a contact email and write a 2-sentence icebreaker. Return only JSON with keys email and icebreaker. Offer: {{$json.offer}}. Benefit: {{$json.benefit}}. Website data: {{$json.data}}"
+      },
+      "id": "n8",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1760,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = JSON.stringify($json);\nconst emailMatch = source.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/i);\nlet parsed = {};\ntry {\n  const start = source.indexOf('{');\n  const end = source.lastIndexOf('}');\n  if (start >= 0 && end > start) {\n    parsed = JSON.parse(source.slice(start, end + 1));\n  }\n} catch (e) {}\nreturn {\n  json: {\n    email: (parsed.email || (emailMatch ? emailMatch[0] : '') || '').trim(),\n    icebreaker: (parsed.icebreaker || '').trim(),\n    businessName: $('Has Website').item.json.title || '',\n    website: $('Has Website').item.json.website || '',\n    phone: $('Has Website').item.json.phone || ''\n  }\n};"
+      },
+      "id": "n9",
+      "name": "Data Cleaner",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1970,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{$json.email}}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "n10",
+      "name": "Has Email",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2180,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{$json.spreadsheetId}}/values/Leads!A:H:append?valueInputOption=USER_ENTERED",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$json.googleAccessToken}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"values\":[[\"{{$json.businessName}}\",\"{{$json.email}}\",\"{{$json.icebreaker}}\",\"{{$json.website}}\",\"{{$json.phone}}\",\"Pending\",\"{{$json.mode}}\",\"\"]]}",
+        "options": {}
+      },
+      "id": "n11",
+      "name": "Append Lead to Sheet (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2390,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const updates = $json.updates || {};\nconst updatedRange = updates.updatedRange || '';\nconst m = updatedRange.match(/!(?:[A-Z]+)(\\d+):/);\nconst rowIndex = m ? Number(m[1]) : null;\nreturn {\n  json: {\n    leadEmail: $('Has Email').item.json.email,\n    businessName: $('Has Email').item.json.businessName,\n    icebreaker: $('Has Email').item.json.icebreaker,\n    website: $('Has Email').item.json.website,\n    phone: $('Has Email').item.json.phone,\n    rowIndex,\n    mode: $('Webhook').item.json.body.mode || $('Webhook').item.json.mode,\n    spreadsheetId: $('Webhook').item.json.body.spreadsheetId || $('Webhook').item.json.spreadsheetId\n  }\n};"
+      },
+      "id": "n12",
+      "name": "Shape Lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2600,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { leads: $input.all().map(i => i.json).filter(x => x.leadEmail) } }];"
+      },
+      "id": "n13",
+      "name": "Collect Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2810,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}",
+        "options": {}
+      },
+      "id": "n14",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        3020,
+        220
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Apify Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apify Config": {
+      "main": [
+        [
+          {
+            "node": "Select Active Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Active Key": {
+      "main": [
+        [
+          {
+            "node": "Fetch Businesses (Apify)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Businesses (Apify)": {
+      "main": [
+        [
+          {
+            "node": "Split Businesses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Businesses": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Has Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Website": {
+      "main": [
+        [
+          {
+            "node": "Fetch Website HTML",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split Businesses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Website HTML": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Data Cleaner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Cleaner": {
+      "main": [
+        [
+          {
+            "node": "Has Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Email": {
+      "main": [
+        [
+          {
+            "node": "Append Lead to Sheet (API)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split Businesses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Lead to Sheet (API)": {
+      "main": [
+        [
+          {
+            "node": "Shape Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shape Lead": {
+      "main": [
+        [
+          {
+            "node": "Collect Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Leads": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

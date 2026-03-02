@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { DEFAULT_AUTOMATION_META, YOUTUBE_CONTENT_TYPES } from '../data/automationCatalog';
 import api from '../utils/api';
+import LeadHunterSetup from './LeadHunterSetup';
 
 const COLOR_CLASSES = {
     blue: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -88,6 +89,7 @@ function AutomationCard({
 
 
     const isYoutubeAutomation = userAutomation?.type?.startsWith('youtube_');
+    const isLeadHunterAutomation = userAutomation?.type === 'lead_save' || item?.type === 'lead_qualification';
 
     useEffect(() => {
         setTone(userAutomation?.config?.tone ?? '');
@@ -124,6 +126,9 @@ function AutomationCard({
     const showRetryButton = isYoutubeAutomation && lastRunStatus === 'failed';
 
     const handleSaveConfig = useCallback(async () => {
+        if (isLeadHunterAutomation) {
+            return;
+        }
         if (isYoutubeAutomation && !contentType) {
             setConfigError('Please select a content type.');
             return;
@@ -185,11 +190,15 @@ function AutomationCard({
             setConfigSaving(false);
             setConfigOpen(false);
         });
-    }, [item, userAutomation?._id, userAutomation?.type, tone, customNotes, contentType, voiceStyle, videoLength, botPersonality, botWelcomeMessage, pdfFile, manualText, isYoutubeAutomation, onSaveConfig]);
+    }, [item, userAutomation?._id, userAutomation?.type, tone, customNotes, contentType, voiceStyle, videoLength, botPersonality, botWelcomeMessage, pdfFile, manualText, isYoutubeAutomation, isLeadHunterAutomation, onSaveConfig]);
 
     // Click outside listener removed as we are moving to modal
 
     const renderConfigPanel = () => {
+        if (isLeadHunterAutomation) {
+            return <LeadHunterSetup userAutomation={userAutomation} />;
+        }
+
         if (isYoutubeAutomation) {
             return (
                 <div className="space-y-3">
@@ -657,13 +666,15 @@ function AutomationCard({
                         </div>
                         <div className="p-4 sm:p-5 overflow-y-auto">
                             {renderConfigPanel()}
-                            <button
-                                onClick={handleSaveConfig}
-                                disabled={configSaving}
-                                className="btn btn-primary w-full mt-5 text-sm py-2.5"
-                            >
-                                {configSaving ? 'Saving…' : 'Save Settings'}
-                            </button>
+                            {!isLeadHunterAutomation && (
+                                <button
+                                    onClick={handleSaveConfig}
+                                    disabled={configSaving}
+                                    className="btn btn-primary w-full mt-5 text-sm py-2.5"
+                                >
+                                    {configSaving ? 'Saving…' : 'Save Settings'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

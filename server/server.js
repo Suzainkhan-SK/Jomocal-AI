@@ -34,6 +34,10 @@ mongoose.connect(process.env.MONGODB_URI)
         // Start Gmail Poller
         const gmailPoller = require('./services/GmailPoller');
         gmailPoller.start();
+
+        // Start Lead Hunter delayed queue worker
+        const leadHunterQueue = require('./services/leadHunterQueue');
+        leadHunterQueue.start();
     })
     .catch(err => console.log('MongoDB Connection Error:', err));
 

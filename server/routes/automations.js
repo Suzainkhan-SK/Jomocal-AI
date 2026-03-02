@@ -87,6 +87,13 @@ router.get('/', auth, async (req, res) => {
                 color: 'green',
             },
             {
+                type: 'lead_hunter',
+                name: 'Lead Hunter',
+                description: 'Find and drip-send personalized B2B leads with AI.',
+                icon: 'Zap',
+                color: 'amber',
+            },
+            {
                 type: 'youtube_video_automation',
                 name: 'YouTube AI Shorts',
                 description: 'Automated AI video creation and publishing for YouTube.',
@@ -374,7 +381,7 @@ router.post('/toggle', auth, async (req, res) => {
 router.post('/lead-hunter/start', auth, async (req, res) => {
     const userId = req.user.id;
     try {
-        const {
+        let {
             targetNiche,
             targetLocation,
             campaignSize,
@@ -383,6 +390,18 @@ router.post('/lead-hunter/start', auth, async (req, res) => {
             sendingSpeed,
             mode,
         } = req.body || {};
+
+        if (!targetNiche || !targetLocation || !offer || !benefit) {
+            const leadHunterAutomation = await Automation.findOne({ userId, type: 'lead_hunter' });
+            const cfg = leadHunterAutomation?.config || {};
+            targetNiche = targetNiche || cfg.targetNiche;
+            targetLocation = targetLocation || cfg.targetLocation;
+            campaignSize = campaignSize || cfg.campaignSize;
+            offer = offer || cfg.offer;
+            benefit = benefit || cfg.benefit;
+            sendingSpeed = sendingSpeed || cfg.sendingSpeed;
+            mode = mode || cfg.mode;
+        }
 
         const cleanTargetNiche = String(targetNiche || '').trim();
         const cleanTargetLocation = String(targetLocation || '').trim();
@@ -449,10 +468,20 @@ router.post('/lead-hunter/start', auth, async (req, res) => {
             sendingSpeed: sendingSpeedNum,
         });
 
-        // Persist latest campaign config on the existing lead automation.
+        // Persist latest campaign config on lead_hunter automation.
         await Automation.updateOne(
-            { userId, type: 'lead_save' },
+            { userId, type: 'lead_hunter' },
             {
+                $setOnInsert: {
+                    userId,
+                    type: 'lead_hunter',
+                    name: 'Lead Hunter',
+                    description: 'Find and drip-send personalized B2B leads with AI.',
+                    icon: 'Zap',
+                    color: 'amber',
+                    status: 'inactive',
+                    createdAt: new Date(),
+                },
                 $set: {
                     updatedAt: new Date(),
                     config: {
@@ -465,7 +494,8 @@ router.post('/lead-hunter/start', auth, async (req, res) => {
                         mode: cleanMode === 'Auto-Pilot' ? 'Auto-Pilot' : 'Review in Drafts',
                     },
                 },
-            }
+            },
+            { upsert: true }
         );
 
         return res.json({

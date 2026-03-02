@@ -19,7 +19,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const body = $json.body || $json;\nreturn {\n  json: {\n    ...body,\n    apifyKeys: [process.env.APIFY_KEY_1 || 'replace_me', process.env.APIFY_KEY_2 || 'replace_me_2'],\n    currentKeyIndex: 0\n  }\n};"
+        "jsCode": "const body = $json.body || $json;\nreturn {\n  json: {\n    ...body,\n    apifyKeys: [\n      'ZsWYmW9PgNgebAAZ2zBjL9zhiafg5S1YyJTx',\n      'ty1HZvtz5afa2LGXNighyXP4YTTx923d8L49'\n    ],\n    currentKeyIndex: 0\n  }\n};"
       },
       "id": "n2",
       "name": "Apify Config",
@@ -46,7 +46,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items?token={{$json.activeKey}}",
+        "url": "=https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items?token=apify_api_{{$json.activeKey}}",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\"includeWebResults\":false,\"language\":\"en\",\"locationQuery\":\"{{$json.targetLocation}}\",\"maxCrawledPlacesPerSearch\":{{$json.campaignSize || 25}},\"searchStringsArray\":[\"{{$json.targetNiche}}\"],\"skipClosedPlaces\":true}",

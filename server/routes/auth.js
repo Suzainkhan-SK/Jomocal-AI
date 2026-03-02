@@ -49,6 +49,15 @@ router.post('/signup', async (req, res) => {
                 icon: 'Users',
                 color: 'green',
                 status: 'inactive'
+            },
+            {
+                userId: user.id,
+                name: 'Lead Hunter',
+                description: 'Find and drip-send personalized B2B leads with AI.',
+                type: 'lead_hunter',
+                icon: 'Zap',
+                color: 'amber',
+                status: 'inactive'
             }
         ];
         const Automation = require('../models/Automation');

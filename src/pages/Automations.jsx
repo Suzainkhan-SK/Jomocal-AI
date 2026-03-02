@@ -17,6 +17,7 @@ const USER_AUTOMATION_MAPPING = [
   { type: 'auto_reply', industryId: 'msme', catalogId: 'customer-inquiry-management' },
   { type: 'auto_reply', industryId: 'businesses', catalogId: 'ai-enterprise-support' },
   { type: 'lead_save', industryId: 'msme', catalogId: 'lead-qualification' },
+  { type: 'lead_hunter', industryId: 'msme', catalogId: 'lead-hunter' },
   { type: 'youtube_video_automation', industryId: 'creators', catalogId: 'youtube-video-automation' },
 ];
 
@@ -96,6 +97,8 @@ const Automations = () => {
       const needed =
         type === 'auto_reply'
           ? 'telegram'
+          : type === 'lead_hunter'
+            ? 'google'
           : type?.startsWith('youtube_')
             ? 'youtube'
             : 'google_sheets';
@@ -110,6 +113,13 @@ const Automations = () => {
             const services = i.connected_services;
             return !Array.isArray(services) || services.length === 0 || services.includes('youtube');
           })
+          : needed === 'google'
+            ? integrations.some((i) => {
+              if (i.platform !== 'google' || !i.isConnected) return false;
+              const services = i.connected_services || [];
+              if (!Array.isArray(services) || services.length === 0) return true;
+              return services.includes('gmail') && services.includes('sheets');
+            })
           : !!integrations.find((i) => i.platform === needed && i.isConnected);
 
       if (!hasNeededIntegration) {
@@ -120,10 +130,17 @@ const Automations = () => {
     }
     setToggleLoadingId(id);
     try {
+      if (newStatus === 'active' && type === 'lead_hunter') {
+        const launchRes = await api.post('/automations/lead-hunter/start');
+        setRunSuccessMessage(launchRes.data?.message || 'Lead Hunter campaign started from activation.');
+      }
       await api.post('/automations/toggle', { automationId: id, status: newStatus });
       setAutomations((prev) => prev.map((a) => (a._id === id ? { ...a, status: newStatus } : a)));
     } catch (err) {
       console.error('Error toggling status:', err);
+      if (type === 'lead_hunter') {
+        setRunError(err.response?.data?.msg || 'Lead Hunter failed to start on activation.');
+      }
     } finally {
       setToggleLoadingId(null);
     }
@@ -178,6 +195,13 @@ const Automations = () => {
           ...(payload.contentType !== undefined && { contentType: payload.contentType }),
           ...(payload.voiceStyle !== undefined && { voiceStyle: payload.voiceStyle }),
           ...(payload.videoLength !== undefined && { videoLength: payload.videoLength }),
+          ...(payload.targetNiche !== undefined && { targetNiche: payload.targetNiche }),
+          ...(payload.targetLocation !== undefined && { targetLocation: payload.targetLocation }),
+          ...(payload.campaignSize !== undefined && { campaignSize: payload.campaignSize }),
+          ...(payload.offer !== undefined && { offer: payload.offer }),
+          ...(payload.benefit !== undefined && { benefit: payload.benefit }),
+          ...(payload.sendingSpeed !== undefined && { sendingSpeed: payload.sendingSpeed }),
+          ...(payload.mode !== undefined && { mode: payload.mode }),
         };
         const res = await api.patch(`/automations/${id}`, { config });
         setAutomations((prev) =>
@@ -202,17 +226,25 @@ const Automations = () => {
 
   const handleRunNow = useCallback(
     async (userAutomation) => {
-      if (!userAutomation || !userAutomation.type?.startsWith('youtube_')) return;
-      if (!youtubeConnected) return;
+      if (!userAutomation) return;
+      const isYoutubeAutomation = userAutomation.type?.startsWith('youtube_');
+      const isLeadHunterAutomation = userAutomation.type === 'lead_hunter';
+      if (isYoutubeAutomation && !youtubeConnected) return;
       setRunLoadingId(userAutomation._id);
       setRunSuccessMessage(null);
       setRunError(null);
       try {
-        await api.post('/automations/run/youtube');
-        setRunSuccessMessage('Video generation started! Your video will be uploaded within 30–60 minutes.');
-        fetchLastYoutubeRun();
+        if (isYoutubeAutomation) {
+          await api.post('/automations/run/youtube');
+          setRunSuccessMessage('Video generation started! Your video will be uploaded within 30–60 minutes.');
+          fetchLastYoutubeRun();
+        } else if (isLeadHunterAutomation) {
+          const res = await api.post('/automations/lead-hunter/start');
+          setRunSuccessMessage(res.data?.message || 'Lead Hunter campaign started.');
+          fetchData();
+        }
       } catch (err) {
-        console.error('Error running YouTube automation:', err);
+        console.error('Error running automation:', err);
         setRunError(err.response?.data?.msg || 'Failed to start. Please try again.');
       } finally {
         setRunLoadingId(null);
@@ -298,6 +330,8 @@ const Automations = () => {
             <p className="text-sm text-secondary mt-2 leading-relaxed">
               {pendingAuto.type === 'auto_reply'
                 ? 'Connect Telegram to activate this automation.'
+                : pendingAuto.type === 'lead_hunter'
+                  ? 'Connect Google account with Gmail + Sheets scopes to activate this automation.'
                 : pendingAuto.type === 'email_automation'
                   ? 'Connect Gmail to activate this automation.'
                   : pendingAuto.type?.startsWith('youtube_')

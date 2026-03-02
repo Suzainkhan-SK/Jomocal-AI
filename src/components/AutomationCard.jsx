@@ -86,10 +86,11 @@ function AutomationCard({
     const [configError, setConfigError] = useState('');
     const [configSuccess, setConfigSuccess] = useState('');
     const [activePlatform, setActivePlatform] = useState('telegram'); // 'telegram' or 'gmail'
+    const [leadHunterConfig, setLeadHunterConfig] = useState(userAutomation?.config || {});
 
 
     const isYoutubeAutomation = userAutomation?.type?.startsWith('youtube_');
-    const isLeadHunterAutomation = userAutomation?.type === 'lead_save' || item?.type === 'lead_qualification';
+    const isLeadHunterAutomation = userAutomation?.type === 'lead_hunter' || item?.type === 'lead_hunter';
 
     useEffect(() => {
         setTone(userAutomation?.config?.tone ?? '');
@@ -99,6 +100,7 @@ function AutomationCard({
         setVideoLength(userAutomation?.config?.videoLength ?? '');
         setBotPersonality(userAutomation?.botPersonality ?? 'Professional and helpful');
         setBotWelcomeMessage(userAutomation?.botWelcomeMessage ?? 'Hello! How can I help you?');
+        setLeadHunterConfig(userAutomation?.config || {});
     }, [
         userAutomation?._id,
         userAutomation?.config?.tone,
@@ -106,6 +108,7 @@ function AutomationCard({
         userAutomation?.config?.contentType,
         userAutomation?.config?.voiceStyle,
         userAutomation?.config?.videoLength,
+        userAutomation?.config,
         userAutomation?.botPersonality,
         userAutomation?.botWelcomeMessage,
     ]);
@@ -114,6 +117,7 @@ function AutomationCard({
     const isPaused = userAutomation?.status === 'paused';
     const isInactive = userAutomation && userAutomation.status !== 'active' && userAutomation.status !== 'paused';
     const canToggle = !!userAutomation;
+    const isTelegramAutomation = userAutomation?.type === 'auto_reply';
     const colorClass = COLOR_CLASSES[item.color] || COLOR_CLASSES.blue;
 
     const pricing = item.pricing ?? DEFAULT_AUTOMATION_META.pricing;
@@ -127,6 +131,16 @@ function AutomationCard({
 
     const handleSaveConfig = useCallback(async () => {
         if (isLeadHunterAutomation) {
+            const payload = {
+                automationId: item.id,
+                userAutomationId: userAutomation?._id,
+                ...leadHunterConfig,
+            };
+            setConfigSaving(true);
+            Promise.resolve(onSaveConfig?.(item, payload)).finally(() => {
+                setConfigSaving(false);
+                setConfigOpen(false);
+            });
             return;
         }
         if (isYoutubeAutomation && !contentType) {
@@ -190,13 +204,13 @@ function AutomationCard({
             setConfigSaving(false);
             setConfigOpen(false);
         });
-    }, [item, userAutomation?._id, userAutomation?.type, tone, customNotes, contentType, voiceStyle, videoLength, botPersonality, botWelcomeMessage, pdfFile, manualText, isYoutubeAutomation, isLeadHunterAutomation, onSaveConfig]);
+    }, [item, userAutomation?._id, userAutomation?.type, tone, customNotes, contentType, voiceStyle, videoLength, botPersonality, botWelcomeMessage, pdfFile, manualText, isYoutubeAutomation, isLeadHunterAutomation, leadHunterConfig, onSaveConfig]);
 
     // Click outside listener removed as we are moving to modal
 
     const renderConfigPanel = () => {
         if (isLeadHunterAutomation) {
-            return <LeadHunterSetup userAutomation={userAutomation} />;
+            return <LeadHunterSetup userAutomation={userAutomation} onConfigChange={setLeadHunterConfig} />;
         }
 
         if (isYoutubeAutomation) {
@@ -457,7 +471,9 @@ function AutomationCard({
                         className={`shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full ${isActive ? 'bg-emerald-500/10 text-emerald-400' : isPaused ? 'bg-amber-500/10 text-amber-400' : 'bg-body text-secondary border border-main'
                             }`}
                     >
-                        {isActive ? 'Telegram Bot Active' : isPaused ? 'Telegram Bot Paused' : isInactive ? 'Telegram Bot Inactive' : 'Available'}
+                        {isTelegramAutomation
+                            ? (isActive ? 'Telegram Bot Active' : isPaused ? 'Telegram Bot Paused' : isInactive ? 'Telegram Bot Inactive' : 'Available')
+                            : (isActive ? 'Automation Active' : isPaused ? 'Automation Paused' : isInactive ? 'Automation Inactive' : 'Available')}
                     </span>
 
                     {userAutomation?.type === 'auto_reply' && (
@@ -486,7 +502,7 @@ function AutomationCard({
                     </div>
                 )}
 
-                {isYoutubeAutomation && runSuccessMessage && (
+                {(isYoutubeAutomation || isLeadHunterAutomation) && runSuccessMessage && (
                     <div className="flex items-start gap-2 p-3 rounded-lg bg-emerald-50 border border-emerald-100">
                         <Clock size={16} className="shrink-0 text-emerald-600 mt-0.5" />
                         <div className="flex-1 min-w-0">
@@ -502,7 +518,7 @@ function AutomationCard({
                     </div>
                 )}
 
-                {isYoutubeAutomation && runError && (
+                {(isYoutubeAutomation || isLeadHunterAutomation) && runError && (
                     <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-100">
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-red-800">{runError}</p>
@@ -532,7 +548,7 @@ function AutomationCard({
                     >
                         <Info size={16} /> Details
                     </button>
-                    {isYoutubeAutomation && userAutomation && (
+                    {(isYoutubeAutomation || isLeadHunterAutomation) && userAutomation && (
                         <>
                             {showRetryButton && (
                                 <button
@@ -547,8 +563,16 @@ function AutomationCard({
                             <button
                                 type="button"
                                 onClick={() => onRun?.(userAutomation)}
-                                disabled={runLoading || !canRunYoutube}
-                                title={!contentType ? 'Select a content type in Configure' : (contentType !== 'islamic_stories_hindi' && contentType !== 'scifi_future_worlds_hindi' && contentType !== 'scifi_future_worlds_english' && contentType !== 'mythical_creatures') ? 'This content type is coming soon' : !youtubeConnected ? 'Connect YouTube first' : ''}
+                                disabled={
+                                    runLoading ||
+                                    (isYoutubeAutomation && !canRunYoutube) ||
+                                    (isLeadHunterAutomation && !userAutomation?.config?.targetNiche)
+                                }
+                                title={
+                                    isYoutubeAutomation
+                                        ? (!contentType ? 'Select a content type in Configure' : (contentType !== 'islamic_stories_hindi' && contentType !== 'scifi_future_worlds_hindi' && contentType !== 'scifi_future_worlds_english' && contentType !== 'mythical_creatures') ? 'This content type is coming soon' : !youtubeConnected ? 'Connect YouTube first' : '')
+                                        : (!userAutomation?.config?.targetNiche ? 'Save Lead Hunter configuration first' : '')
+                                }
                                 className="btn btn-primary text-sm py-2 px-4"
                             >
                                 {runLoading ? 'Running…' : (<><Play size={16} /> Run now</>)}
@@ -666,15 +690,13 @@ function AutomationCard({
                         </div>
                         <div className="p-4 sm:p-5 overflow-y-auto">
                             {renderConfigPanel()}
-                            {!isLeadHunterAutomation && (
-                                <button
-                                    onClick={handleSaveConfig}
-                                    disabled={configSaving}
-                                    className="btn btn-primary w-full mt-5 text-sm py-2.5"
-                                >
-                                    {configSaving ? 'Saving…' : 'Save Settings'}
-                                </button>
-                            )}
+                            <button
+                                onClick={handleSaveConfig}
+                                disabled={configSaving}
+                                className="btn btn-primary w-full mt-5 text-sm py-2.5"
+                            >
+                                {configSaving ? 'Saving…' : 'Save Settings'}
+                            </button>
                         </div>
                     </div>
                 </div>

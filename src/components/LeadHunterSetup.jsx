@@ -1,9 +1,8 @@
-import React, { useMemo, useState } from 'react';
-import api from '../utils/api';
+import React, { useEffect, useMemo, useState } from 'react';
 
 const CAMPAIGN_SIZES = [25, 50, 100];
 
-function LeadHunterSetup({ userAutomation }) {
+function LeadHunterSetup({ userAutomation, onConfigChange }) {
   const cfg = userAutomation?.config || {};
   const [targetNiche, setTargetNiche] = useState(cfg.targetNiche || '');
   const [targetLocation, setTargetLocation] = useState(cfg.targetLocation || '');
@@ -12,27 +11,24 @@ function LeadHunterSetup({ userAutomation }) {
   const [benefit, setBenefit] = useState(cfg.benefit || '');
   const [sendingSpeed, setSendingSpeed] = useState(Number(cfg.sendingSpeed) || 20);
   const [mode, setMode] = useState(cfg.mode === 'Auto-Pilot' ? 'Auto-Pilot' : 'Review in Drafts');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
+  useEffect(() => {
+    setTargetNiche(cfg.targetNiche || '');
+    setTargetLocation(cfg.targetLocation || '');
+    setCampaignSize(Number(cfg.campaignSize) || 25);
+    setOffer(cfg.offer || '');
+    setBenefit(cfg.benefit || '');
+    setSendingSpeed(Number(cfg.sendingSpeed) || 20);
+    setMode(cfg.mode === 'Auto-Pilot' ? 'Auto-Pilot' : 'Review in Drafts');
+  }, [userAutomation?._id, cfg.targetNiche, cfg.targetLocation, cfg.campaignSize, cfg.offer, cfg.benefit, cfg.sendingSpeed, cfg.mode]);
   const intervalMins = useMemo(() => {
     const safeSpeed = Math.max(1, Math.min(50, Number(sendingSpeed) || 1));
     return (1440 / safeSpeed).toFixed(2);
   }, [sendingSpeed]);
 
-  const handleLaunch = async () => {
-    setError('');
-    setSuccess('');
-
-    if (!targetNiche.trim() || !targetLocation.trim() || !offer.trim() || !benefit.trim()) {
-      setError('Please fill Niche, Location, Core Offer, and Big Benefit.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await api.post('/automations/lead-hunter/start', {
+  useEffect(() => {
+    if (!onConfigChange) return;
+    onConfigChange({
         targetNiche: targetNiche.trim(),
         targetLocation: targetLocation.trim(),
         campaignSize: Number(campaignSize),
@@ -40,18 +36,8 @@ function LeadHunterSetup({ userAutomation }) {
         benefit: benefit.trim(),
         sendingSpeed: Number(sendingSpeed),
         mode,
-      });
-
-      const data = res.data || {};
-      setSuccess(
-        `Campaign launched. Queued ${data.queuedCount || 0} lead emails. Sheet: ${data.spreadsheetId || 'created'}`
-      );
-    } catch (err) {
-      setError(err.response?.data?.msg || 'Failed to launch campaign.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    });
+  }, [targetNiche, targetLocation, campaignSize, offer, benefit, sendingSpeed, mode, onConfigChange]);
 
   return (
     <div className="space-y-4">
@@ -158,17 +144,9 @@ function LeadHunterSetup({ userAutomation }) {
         </div>
       </div>
 
-      {error && <p className="text-xs text-red-600">{error}</p>}
-      {success && <p className="text-xs text-emerald-600 font-medium">{success}</p>}
-
-      <button
-        type="button"
-        onClick={handleLaunch}
-        disabled={loading}
-        className="btn btn-primary w-full text-sm py-2.5"
-      >
-        {loading ? 'Launching Lead Hunter...' : 'Launch Lead Hunter'}
-      </button>
+      <p className="text-[11px] text-secondary">
+        Save this configuration first. Run execution from the automation card using <strong>Run now</strong> or by activating the automation.
+      </p>
     </div>
   );
 }

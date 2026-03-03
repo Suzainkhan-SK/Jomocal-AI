@@ -390,7 +390,7 @@ router.post('/toggle', auth, async (req, res) => {
 // @route   POST api/automations/lead-hunter/start
 // @desc    Start stateless Lead Hunter campaign: scrape + AI now, drip send later via queue.
 // @access  Private
-router.post('/lead-hunter/start', auth, async (req, res) => {
+router.post('/lead-hunter/start', [auth, upload.single('businessPdf')], async (req, res) => {
     const userId = req.user.id;
     try {
         let {
@@ -399,6 +399,7 @@ router.post('/lead-hunter/start', auth, async (req, res) => {
             campaignSize,
             offer,
             benefit,
+            businessContext,
             sendingSpeed,
             mode,
         } = req.body || {};
@@ -411,6 +412,7 @@ router.post('/lead-hunter/start', auth, async (req, res) => {
             campaignSize = campaignSize || cfg.campaignSize;
             offer = offer || cfg.offer;
             benefit = benefit || cfg.benefit;
+            businessContext = businessContext || cfg.businessContext;
             sendingSpeed = sendingSpeed || cfg.sendingSpeed;
             mode = mode || cfg.mode;
         }
@@ -419,6 +421,7 @@ router.post('/lead-hunter/start', auth, async (req, res) => {
         const cleanTargetLocation = String(targetLocation || '').trim();
         const cleanOffer = String(offer || '').trim();
         const cleanBenefit = String(benefit || '').trim();
+        let cleanBusinessContext = String(businessContext || '').trim();
         const cleanMode = String(mode || 'Review in Drafts').trim();
         const campaignSizeNum = Math.max(1, Math.min(100, Number(campaignSize) || 25));
         const sendingSpeedNum = Math.max(1, Math.min(50, Number(sendingSpeed) || 20));
@@ -437,6 +440,22 @@ router.post('/lead-hunter/start', auth, async (req, res) => {
             targetLocation: cleanTargetLocation,
         });
 
+        if (req.file) {
+            try {
+                const parser = new PDFParse(new Uint8Array(req.file.buffer));
+                const pdfResult = await parser.getText();
+                const extracted = String(pdfResult?.text || '').trim();
+                if (extracted) {
+                    cleanBusinessContext = cleanBusinessContext
+                        ? `${cleanBusinessContext}\n\n--- EXTRACTED PDF DATA ---\n${extracted}`
+                        : extracted;
+                }
+            } catch (pdfErr) {
+                console.error('Lead Hunter PDF parsing error:', pdfErr.message);
+                return res.status(400).json({ msg: 'Failed to parse business PDF. Upload a valid PDF document.' });
+            }
+        }
+
         const webhookPayload = {
             userId: String(userId),
             targetNiche: cleanTargetNiche,
@@ -444,6 +463,7 @@ router.post('/lead-hunter/start', auth, async (req, res) => {
             campaignSize: campaignSizeNum,
             offer: cleanOffer,
             benefit: cleanBenefit,
+            businessContext: cleanBusinessContext,
             mode: cleanMode === 'Auto-Pilot' ? 'Auto-Pilot' : 'Review in Drafts',
             sendingSpeed: sendingSpeedNum,
             spreadsheetId,
@@ -521,6 +541,7 @@ router.post('/lead-hunter/start', auth, async (req, res) => {
                         campaignSize: campaignSizeNum,
                         offer: cleanOffer,
                         benefit: cleanBenefit,
+                        businessContext: cleanBusinessContext,
                         sendingSpeed: sendingSpeedNum,
                         mode: cleanMode === 'Auto-Pilot' ? 'Auto-Pilot' : 'Review in Drafts',
                     },

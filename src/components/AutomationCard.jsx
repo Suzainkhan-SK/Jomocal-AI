@@ -562,7 +562,7 @@ function AutomationCard({
                             )}
                             <button
                                 type="button"
-                                onClick={() => onRun?.(userAutomation)}
+                                onClick={() => onRun?.(userAutomation, isLeadHunterAutomation ? leadHunterConfig : undefined)}
                                 disabled={
                                     runLoading ||
                                     (isYoutubeAutomation && !canRunYoutube) ||

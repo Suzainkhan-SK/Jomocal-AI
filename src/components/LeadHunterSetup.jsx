@@ -9,6 +9,8 @@ function LeadHunterSetup({ userAutomation, onConfigChange }) {
   const [campaignSize, setCampaignSize] = useState(Number(cfg.campaignSize) || 25);
   const [offer, setOffer] = useState(cfg.offer || '');
   const [benefit, setBenefit] = useState(cfg.benefit || '');
+  const [businessContext, setBusinessContext] = useState(cfg.businessContext || '');
+  const [businessPdfFile, setBusinessPdfFile] = useState(null);
   const [sendingSpeed, setSendingSpeed] = useState(Number(cfg.sendingSpeed) || 20);
   const [mode, setMode] = useState(cfg.mode === 'Auto-Pilot' ? 'Auto-Pilot' : 'Review in Drafts');
 
@@ -18,9 +20,11 @@ function LeadHunterSetup({ userAutomation, onConfigChange }) {
     setCampaignSize(Number(cfg.campaignSize) || 25);
     setOffer(cfg.offer || '');
     setBenefit(cfg.benefit || '');
+    setBusinessContext(cfg.businessContext || '');
+    setBusinessPdfFile(null);
     setSendingSpeed(Number(cfg.sendingSpeed) || 20);
     setMode(cfg.mode === 'Auto-Pilot' ? 'Auto-Pilot' : 'Review in Drafts');
-  }, [userAutomation?._id, cfg.targetNiche, cfg.targetLocation, cfg.campaignSize, cfg.offer, cfg.benefit, cfg.sendingSpeed, cfg.mode]);
+  }, [userAutomation?._id, cfg.targetNiche, cfg.targetLocation, cfg.campaignSize, cfg.offer, cfg.benefit, cfg.businessContext, cfg.sendingSpeed, cfg.mode]);
   const intervalMins = useMemo(() => {
     const safeSpeed = Math.max(1, Math.min(50, Number(sendingSpeed) || 1));
     return (1440 / safeSpeed).toFixed(2);
@@ -34,10 +38,12 @@ function LeadHunterSetup({ userAutomation, onConfigChange }) {
         campaignSize: Number(campaignSize),
         offer: offer.trim(),
         benefit: benefit.trim(),
+        businessContext: businessContext.trim(),
+        businessPdfFile,
         sendingSpeed: Number(sendingSpeed),
         mode,
     });
-  }, [targetNiche, targetLocation, campaignSize, offer, benefit, sendingSpeed, mode, onConfigChange]);
+  }, [targetNiche, targetLocation, campaignSize, offer, benefit, businessContext, businessPdfFile, sendingSpeed, mode, onConfigChange]);
 
   return (
     <div className="space-y-4">
@@ -99,6 +105,31 @@ function LeadHunterSetup({ userAutomation, onConfigChange }) {
             className="input text-sm py-2 w-full"
             placeholder="e.g. 40% faster response and more booked calls"
           />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-main mb-1">Business Context (Optional)</label>
+          <textarea
+            value={businessContext}
+            onChange={(e) => setBusinessContext(e.target.value)}
+            className="input text-sm py-2 w-full resize-y min-h-[92px]"
+            placeholder="Add business profile, offer details, ideal customer profile, tone, and positioning notes..."
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-main mb-1">
+            Upload Business Profile/Brochure (Optional PDF)
+          </label>
+          <input
+            type="file"
+            accept=".pdf,application/pdf"
+            onChange={(e) => setBusinessPdfFile(e.target.files?.[0] || null)}
+            className="block w-full text-[11px] text-secondary file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-blue-500/10 file:text-blue-500 hover:file:bg-blue-500/20"
+          />
+          {businessPdfFile && (
+            <p className="text-[11px] text-secondary mt-1">
+              Selected: {businessPdfFile.name}
+            </p>
+          )}
         </div>
       </div>
 

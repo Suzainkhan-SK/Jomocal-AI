@@ -200,6 +200,7 @@ const Automations = () => {
           ...(payload.campaignSize !== undefined && { campaignSize: payload.campaignSize }),
           ...(payload.offer !== undefined && { offer: payload.offer }),
           ...(payload.benefit !== undefined && { benefit: payload.benefit }),
+          ...(payload.businessContext !== undefined && { businessContext: payload.businessContext }),
           ...(payload.sendingSpeed !== undefined && { sendingSpeed: payload.sendingSpeed }),
           ...(payload.mode !== undefined && { mode: payload.mode }),
         };
@@ -225,7 +226,7 @@ const Automations = () => {
   );
 
   const handleRunNow = useCallback(
-    async (userAutomation) => {
+    async (userAutomation, leadHunterConfig) => {
       if (!userAutomation) return;
       const isYoutubeAutomation = userAutomation.type?.startsWith('youtube_');
       const isLeadHunterAutomation = userAutomation.type === 'lead_hunter';
@@ -239,7 +240,34 @@ const Automations = () => {
           setRunSuccessMessage('Video generation started! Your video will be uploaded within 30–60 minutes.');
           fetchLastYoutubeRun();
         } else if (isLeadHunterAutomation) {
-          const res = await api.post('/automations/lead-hunter/start');
+          const mergedConfig = {
+            ...(userAutomation.config || {}),
+            ...(leadHunterConfig || {}),
+          };
+          const formData = new FormData();
+          const fields = [
+            'targetNiche',
+            'targetLocation',
+            'campaignSize',
+            'offer',
+            'benefit',
+            'businessContext',
+            'sendingSpeed',
+            'mode',
+          ];
+          fields.forEach((field) => {
+            const value = mergedConfig[field];
+            if (value !== undefined && value !== null && value !== '') {
+              formData.append(field, String(value));
+            }
+          });
+          const pdfFile = mergedConfig.businessPdfFile;
+          if (pdfFile instanceof File) {
+            formData.append('businessPdf', pdfFile);
+          }
+          const res = await api.post('/automations/lead-hunter/start', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
           setRunSuccessMessage(res.data?.message || 'Lead Hunter campaign started.');
           fetchData();
         }
@@ -250,7 +278,7 @@ const Automations = () => {
         setRunLoadingId(null);
       }
     },
-    [youtubeConnected, fetchLastYoutubeRun]
+    [youtubeConnected, fetchLastYoutubeRun, fetchData]
   );
 
   const handleRetry = useCallback(

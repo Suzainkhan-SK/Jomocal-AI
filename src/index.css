@@ -354,3 +354,41 @@
   background-size: 200% auto;
   animation: text-gradient-flow 5s ease infinite;
 }
+
+/* ═══ Spotlight Card Hover Effect ═══ */
+.spotlight-card {
+  position: relative;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.spotlight-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  background: radial-gradient(
+    600px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
+    rgba(59, 130, 246, 0.06),
+    transparent 40%
+  );
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 5;
+}
+
+.spotlight-card:hover::after {
+  opacity: 1;
+}
+
+/* ═══ Marquee / Logo Scroll ═══ */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}

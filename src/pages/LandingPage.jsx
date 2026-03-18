@@ -1,67 +1,26 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import {
-    ArrowRight,
-    MessageSquare,
-    Users,
-    Zap,
-    CheckCircle,
-    Bot,
-    Play,
-    TrendingUp,
-    Globe,
-    ShoppingBag,
-    Sparkles,
-    Video,
-    Mic,
-    UploadCloud,
-    ShieldCheck,
-    Layers,
-    DollarSign,
-    Star,
-    Clock,
-    BarChart3,
-    Send,
-    ChevronRight
+    ArrowRight, Play, Zap, Users, MessageSquare, Video, Bot,
+    Sparkles, ShieldCheck, CheckCircle, Globe, Layers, TrendingUp,
+    ChevronRight, Activity, Youtube, Instagram, Facebook, Mail, Link as LinkIcon, Smartphone,
+    Check, MousePointerClick, Mic, Rocket, Phone
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import WorkflowAnimation from '../components/WorkflowAnimation';
 
-// --- ANIMATION VARIANTS ---
-const fadeUp = {
-    hidden: { opacity: 0, y: 30 },
-    visible: (custom = 0) => ({
-        opacity: 1,
-        y: 0,
-        transition: { delay: custom * 0.12, duration: 0.6, ease: [0.22, 1, 0.36, 1] }
-    })
-};
-
-const staggerContainer = {
-    hidden: {},
-    visible: { transition: { staggerChildren: 0.08 } }
-};
-
-// --- SPOTLIGHT HOVER EFFECT (CSS-driven, zero-JS-per-frame) ---
-const SpotlightCard = ({ children, className = "" }) => {
-    const ref = useRef(null);
-
-    const handleMouseMove = useCallback((e) => {
-        if (!ref.current) return;
-        const rect = ref.current.getBoundingClientRect();
-        ref.current.style.setProperty('--spotlight-x', `${e.clientX - rect.left}px`);
-        ref.current.style.setProperty('--spotlight-y', `${e.clientY - rect.top}px`);
-    }, []);
-
+// --- Reusable Spotlight Wrapper ---
+const SpotlightCard = ({ children, className = "", ...props }) => {
     return (
-        <div ref={ref} onMouseMove={handleMouseMove} className={`spotlight-card ${className}`}>
-            {children}
+        <div className={`spotlight-card relative overflow-hidden transition-all duration-500 rounded-3xl border border-main bg-surface/60 backdrop-blur-xl hover:border-blue-500/40 group ${className}`} {...props}>
+            <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+            <div className="spotlight-bg z-0 pointer-events-none"></div>
+            <div className="relative z-10 h-full">{children}</div>
         </div>
     );
 };
 
-// --- COUNTER ANIMATION ---
+// --- Animated Counter ---
 const AnimatedCounter = ({ target, suffix = "", duration = 2000 }) => {
     const [count, setCount] = useState(0);
     const ref = useRef(null);
@@ -86,673 +45,577 @@ const AnimatedCounter = ({ target, suffix = "", duration = 2000 }) => {
         return () => observer.disconnect();
     }, [target, duration]);
 
-    return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+    return <span ref={ref} className="font-display font-bold tracking-tight">{count.toLocaleString()}{suffix}</span>;
 };
-
 
 const LandingPage = () => {
     const heroRef = useRef(null);
-    const [badgeText, setBadgeText] = useState("Now Live — AI-Powered Video Automation");
-
-    useEffect(() => {
-        const texts = [
-            "Now Live — AI-Powered Video Automation",
-            "Trusted by MSMEs & Creators Across India",
-            "Save 20+ Hours Every Week with AI",
-            "New: WhatsApp & Instagram Auto-Replies"
-        ];
-        let index = 0;
-        const interval = setInterval(() => {
-            index = (index + 1) % texts.length;
-            setBadgeText(texts[index]);
-        }, 3500);
-        return () => clearInterval(interval);
-    }, []);
-
     const { scrollYProgress } = useScroll({
         target: heroRef,
         offset: ["start start", "end start"]
     });
-    const heroY = useTransform(scrollYProgress, [0, 1], [0, 150]);
+    
+    // Parallax logic
+    const heroY = useTransform(scrollYProgress, [0, 1], [0, 200]);
+    const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+    
+    // Dashboard mockup 3D rotation logic
+    const dashRotateX = useTransform(scrollYProgress, [0, 0.5], [20, 0]);
+    const dashScale = useTransform(scrollYProgress, [0, 0.5], [0.92, 1]);
+    const dashY = useTransform(scrollYProgress, [0, 0.5], [60, 0]);
 
     return (
-        <div className="min-h-screen flex flex-col bg-body relative selection:bg-blue-500/30 selection:text-white transition-colors">
-
+        <div className="min-h-screen bg-body flex flex-col relative overflow-hidden selection:bg-blue-500/30">
             <Navbar />
 
-            {/* ═══════════════════════ HERO ═══════════════════════ */}
-            <header ref={heroRef} className="relative pt-20 pb-12 md:pt-36 md:pb-40 overflow-hidden bg-body transition-colors">
-                {/* Background Animation */}
-                <div className="absolute inset-0 overflow-hidden">
-                    <WorkflowAnimation />
-                    <div className="absolute inset-0 bg-black/5 dark:bg-[#020617]/50 backdrop-blur-[1px] z-0 pointer-events-none"></div>
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 dark:via-[#0f172a]/20 to-body transition-colors pointer-events-none"></div>
-
-                    {/* Badge */}
-                    <div className="absolute top-4 right-4 md:top-10 md:right-10 z-20 pointer-events-auto">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={badgeText}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.3 }}
-                                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-black/80 backdrop-blur-md border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-100 text-[10px] md:text-xs font-medium hover:bg-white dark:hover:bg-black shadow-lg transition-all cursor-default"
-                            >
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                                </span>
-                                <span>{badgeText}</span>
-                            </motion.div>
-                        </AnimatePresence>
-                    </div>
+            {/* ═══════════════════════ ABSOLUTE STUNNING HERO ═══════════════════════ */}
+            <header ref={heroRef} className="relative pt-12 md:pt-28 pb-32 overflow-hidden min-h-[95vh] flex flex-col justify-start">
+                
+                {/* Immersive Background System */}
+                <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
+                    {/* Perspective Grid with deep vanishing point */}
+                    <div className="absolute inset-x-0 bottom-0 h-[80vh] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+Cgk8cGF0aCBkPSJNMCAwbDQwIDBMMDAgNDBsLTQwIDBMMCAwaHoiIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSIjODg4IiBzdHJva2Utd2lkdGg9IjAuMiIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')] [mask-image:linear-gradient(to_top,white_10%,transparent_90%)] mix-blend-overlay dark:opacity-[0.15] opacity-30 transform perspective-1000 rotateX-60 scale-150 translate-y-[20%]"></div>
+                    
+                    {/* Massive Glowing Orbs */}
+                    <motion.div 
+                        animate={{ scale: [1, 1.1, 1], opacity: [0.6, 0.8, 0.6] }}
+                        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute top-0 right-[10%] w-[60vw] h-[60vw] rounded-full bg-blue-500/20 dark:bg-blue-500/10 blur-[150px] mix-blend-screen pointer-events-none"
+                    ></motion.div>
+                    <motion.div 
+                        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.7, 0.5] }}
+                        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                        className="absolute bottom-[20%] left-[5%] w-[50vw] h-[50vw] rounded-full bg-purple-500/20 dark:bg-purple-500/10 blur-[130px] mix-blend-screen pointer-events-none"
+                    ></motion.div>
+                    
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-body/50 to-body"></div>
                 </div>
 
-                <motion.div style={{ y: heroY }} className="container relative z-10 px-4 text-center max-w-5xl">
-                    {/* Headline */}
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-                        className="relative z-30 text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-display font-bold tracking-tight text-main mb-4 md:mb-6 leading-tight md:leading-[1.1] drop-shadow-[0_4px_30px_rgba(0,0,0,0.6)] transition-colors"
+                <motion.div 
+                    style={{ y: heroY, opacity: heroOpacity }} 
+                    className="container relative z-10 px-4 text-center max-w-5xl mx-auto flex flex-col items-center"
+                >
+                    {/* Interactive Connected Apps Graphic */}
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className="relative mb-8 w-full max-w-[300px] h-16 flex items-center justify-center pointer-events-none"
                     >
-                        Automate Your <br className="hidden md:block" />
-                        <span className="animate-text-color bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
-                            Business Growth.
-                        </span>
+                        <motion.div animate={{ y: [-3, 3, -3] }} transition={{ duration: 4, repeat: Infinity }} className="absolute left-0 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-pink-500 z-10"><Instagram className="w-5 h-5"/></motion.div>
+                        <motion.div animate={{ y: [3, -3, 3] }} transition={{ duration: 3.5, repeat: Infinity }} className="absolute left-1/4 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-red-500 z-10"><Youtube className="w-5 h-5"/></motion.div>
+                        <motion.div animate={{ y: [-2, 2, -2] }} transition={{ duration: 4.5, repeat: Infinity }} className="absolute right-1/4 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-green-500 z-10"><Phone className="w-5 h-5"/></motion.div>  {/* Replaced MessageSquare with Phone to signify WhatsApp locally */}
+                        <motion.div animate={{ y: [2, -2, 2] }} transition={{ duration: 3.8, repeat: Infinity }} className="absolute right-0 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-blue-500 z-10"><Facebook className="w-5 h-5"/></motion.div>
+                        
+                        {/* Connecting Line */}
+                        <div className="absolute inset-x-4 h-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50 z-0"></div>
+                        <div className="absolute left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_2px_rgba(59,130,246,0.5)] z-0"></div>
+                    </motion.div>
+
+                    {/* Sensational Linear-Style TypographyHeadline */}
+                    <motion.h1
+                        initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
+                        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                        transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                        className="text-[36px] sm:text-[40px] leading-[1.1] md:text-8xl lg:text-[6.5rem] font-display font-extrabold tracking-tight text-main mb-6 px-2"
+                    >
+                        Skip the building. <br className="hidden md:block"/>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 animate-gradient-x">Just click activate.</span>
                     </motion.h1>
 
-                    {/* Subheadline */}
+                    {/* Crisp Subheadline focusing on UVP. Removed Zapier mention for simplicity */}
                     <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="relative z-30 text-sm sm:text-lg md:text-2xl text-secondary mb-10 md:mb-16 max-w-2xl mx-auto font-light leading-relaxed px-4 md:px-0 drop-shadow-xl transition-colors"
+                        initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
+                        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                        className="text-base sm:text-lg md:text-2xl text-secondary mb-10 max-w-3xl mx-auto font-light leading-relaxed px-4"
                     >
-                        <span className="md:hidden">AI-powered automation for customer engagement, content creation, and daily operations.</span>
-                        <span className="hidden md:inline">The all-in-one AI automation platform that handles your customer engagement, content creation, and daily operations — so you can focus on what matters most.</span>
+                        Don’t waste hours trying to learn complicated software or hiring expensive agencies. Just select a ready-made AI solution for your business, connect your accounts, and let it work for you.
                     </motion.p>
 
-                    {/* CTA Buttons */}
+                    {/* Conversion CTAs */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.3 }}
-                        className="flex flex-col sm:flex-row items-center justify-center gap-3 px-4"
+                        transition={{ duration: 0.8, delay: 0.3 }}
+                        className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto px-4 z-20"
                     >
-                        <Link to="/signup" className="btn btn-primary text-sm md:text-lg px-6 md:px-8 py-3 w-full sm:w-auto shadow-xl shadow-blue-500/20 group hover:scale-[1.03] transition-transform duration-200">
-                            Start Free Trial
-                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        <Link to="/signup" className="group relative inline-flex items-center justify-center px-6 py-3.5 md:px-8 md:py-4 text-sm sm:text-base md:text-lg font-bold text-white bg-blue-600 rounded-full shadow-[0_0_40px_-5px_rgba(37,99,235,0.4)] overflow-hidden transition-all hover:scale-105 hover:shadow-[0_0_60px_-10px_rgba(37,99,235,0.6)] w-full sm:w-auto">
+                            <span className="relative z-10 flex items-center gap-2">
+                                Start Free Trial <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                            </span>
+                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
                         </Link>
-                        <button className="btn btn-secondary text-sm md:text-lg px-6 md:px-8 py-3 w-full sm:w-auto group flex items-center gap-2 border-main text-secondary hover:bg-surface hover:text-blue-500 transition-colors">
-                            <Play size={18} className="fill-current transition-colors" />
-                            Watch Demo
+                        
+                        <button className="group relative inline-flex items-center justify-center gap-3 px-6 py-3.5 md:px-8 md:py-4 text-sm sm:text-base md:text-lg font-bold text-main bg-surface/50 backdrop-blur-md border border-main rounded-full hover:bg-black/5 dark:hover:bg-white/5 shadow-xl transition-all w-full sm:w-auto">
+                            <span className="relative z-10 flex items-center gap-2">
+                                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-main text-body">
+                                    <Play size={10} className="ml-0.5 fill-current" />
+                                </span>
+                                See The 1-Click Magic
+                            </span>
                         </button>
                     </motion.div>
-
-                    {/* Social Proof Micro-Bar */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.6 }}
-                        className="mt-8 md:mt-12 flex flex-wrap items-center justify-center gap-4 md:gap-8 text-xs text-secondary"
-                    >
-                        <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-green-500" /> No credit card required</span>
-                        <span className="flex items-center gap-1.5"><Clock size={14} className="text-blue-500" /> Setup in 2 minutes</span>
-                        <span className="flex items-center gap-1.5">
-                            <div className="flex -space-x-1">
-                                {[...Array(5)].map((_, i) => <Star key={i} size={12} className="text-amber-400 fill-amber-400" />)}
-                            </div>
-                            <span className="ml-1">Rated 4.9/5</span>
-                        </span>
-                    </motion.div>
                 </motion.div>
+
+                {/* The Floating App Interface UI - HIGHLIGHTING THE "1-CLICK" NATURE */}
+                <div className="relative z-20 w-full px-2 sm:px-4 md:px-8 mt-12 md:mt-24 perspective-[1000px] md:perspective-[2000px] overflow-hidden md:overflow-visible pb-10">
+                    <motion.div 
+                        style={{ rotateX: dashRotateX, scale: dashScale, y: dashY }}
+                        className="w-[125%] md:w-full ml-[-12.5%] md:ml-0 max-w-none md:max-w-[70rem] mx-auto xl:ml-auto relative transform-gpu origin-top"
+                    >
+                        {/* Dramatic Glow under the dashboard */}
+                        <div className="absolute -inset-10 bg-gradient-to-b from-blue-600/30 to-purple-600/0 blur-[100px] -z-10 rounded-[3rem] pointer-events-none"></div>
+                        
+                        {/* Dashboard Frame */}
+                        <div className="rounded-[1.5rem] md:rounded-[2.5rem] p-2 bg-gradient-to-b from-white/60 to-white/10 dark:from-white/10 dark:to-white/5 border border-white/40 dark:border-white/10 shadow-2xl backdrop-blur-2xl ring-1 ring-black/5">
+                            <div className="relative rounded-xl md:rounded-[2rem] overflow-hidden bg-white dark:bg-[#0a0a0c] shadow-inner h-[600px] sm:h-[650px] md:h-auto md:aspect-[16/9] border border-gray-200/50 dark:border-[#222]">
+                                
+                                {/* macOS Header */}
+                                <div className="absolute top-0 left-0 right-0 h-14 bg-gray-50/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-[#222] flex items-center px-6 justify-between z-30">
+                                    <div className="flex gap-2">
+                                        <div className="w-3.5 h-3.5 rounded-full bg-[#ff5f56]"></div>
+                                        <div className="w-3.5 h-3.5 rounded-full bg-[#ffbd2e]"></div>
+                                        <div className="w-3.5 h-3.5 rounded-full bg-[#27c93f]"></div>
+                                    </div>
+                                    <div className="hidden md:flex items-center justify-center gap-2 bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-lg px-32 py-2 text-xs font-medium text-secondary shadow-sm">
+                                        jomocal.ai/automations
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 border-2 border-white dark:border-[#222]"></div>
+                                    </div>
+                                </div>
+                                
+                                {/* App Content Mockup - "Store of Automations" Layout */}
+                                <div className="absolute inset-0 pt-14 flex bg-slate-50/50 dark:bg-[#08080A]">
+                                    
+                                    {/* Sidebar */}
+                                    <div className="hidden md:flex w-64 border-r border-gray-200/60 dark:border-[#222] bg-white/50 dark:bg-[#0c0c0e]/50 p-6 flex-col justify-between z-20">
+                                        <div className="space-y-3">
+                                            <div className="text-xs font-bold text-secondary uppercase tracking-widest mb-4">Library</div>
+                                            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold text-sm border border-blue-100 dark:border-blue-500/20 shadow-sm">
+                                                <Zap size={18} /> Active Solutions
+                                            </div>
+                                            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-secondary hover:bg-white dark:hover:bg-[#111] font-medium text-sm transition-colors cursor-pointer border border-transparent">
+                                                <Globe size={18} /> Social Connections
+                                            </div>
+                                            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-secondary hover:bg-white dark:hover:bg-[#111] font-medium text-sm transition-colors cursor-pointer border border-transparent">
+                                                <Users size={18} /> Customer Details
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Canvas Area - Showing Toggles, NOT Nodes */}
+                                    <div className="flex-1 p-4 md:p-10 relative overflow-y-auto">
+                                        <div className="max-w-4xl mx-auto">
+                                            <h2 className="text-2xl font-display font-bold text-main mb-2">Available Solutions</h2>
+                                            <p className="text-secondary text-sm mb-8">Turn on the switches to let the computer do your daily work.</p>
+                                            
+                                            <div className="grid grid-cols-1 gap-4">
+                                                
+                                                {/* Pre-built Automation 1 */}
+                                                <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-xl hover:border-blue-500/30 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 group relative overflow-hidden">
+                                                    <div className="absolute inset-y-0 left-0 w-1 bg-green-500"></div>
+                                                    <div className="flex items-start sm:items-center gap-3 sm:gap-5 w-full sm:w-auto">
+                                                        <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center bg-red-50 dark:bg-red-500/10 text-red-500 shrink-0 mt-1 sm:mt-0">
+                                                            <Youtube size={24} className="sm:w-7 sm:h-7" />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <h3 className="font-bold text-main text-base sm:text-lg leading-tight">Daily YouTube Shorts Maker</h3>
+                                                                <span className="px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 text-[10px] font-bold shrink-0">ON</span>
+                                                            </div>
+                                                            <p className="text-secondary text-xs sm:text-sm mt-1">Automatically creates and uploads marketing videos for you.</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-row-reverse sm:flex-row items-center justify-between sm:justify-end gap-6 w-full sm:w-auto mt-2 sm:mt-0">
+                                                        <div className="hidden lg:flex items-center -space-x-2">
+                                                            <div className="w-8 h-8 rounded-full border-2 border-white dark:border-[#111] bg-gray-100 dark:bg-[#222] flex items-center justify-center"><Check size={14} className="text-green-500"/></div>
+                                                        </div>
+                                                        {/* Animated Toggle Switch */}
+                                                        <div className="relative">
+                                                            <div className="w-14 h-8 bg-green-500 rounded-full shadow-inner flex items-center px-1 cursor-pointer">
+                                                                <motion.div animate={{ x: 24 }} className="w-6 h-6 bg-white rounded-full shadow-md"></motion.div>
+                                                            </div>
+                                                            <div className="absolute -inset-4 bg-green-500/20 blur-xl rounded-full z-0 opacity-50 block"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Pre-built Automation 2 */}
+                                                <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-xl hover:border-blue-500/30 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 group">
+                                                    <div className="flex items-start sm:items-center gap-3 sm:gap-5 w-full sm:w-auto">
+                                                        <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center bg-purple-50 dark:bg-purple-500/10 text-purple-500 shrink-0 mt-1 sm:mt-0">
+                                                            <Instagram size={24} className="sm:w-7 sm:h-7" />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <h3 className="font-bold text-main text-base sm:text-lg leading-tight">Instagram Auto-Reply</h3>
+                                                            </div>
+                                                            <p className="text-secondary text-xs sm:text-sm mt-1">Chats with customers who message you and saves their numbers.</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-row-reverse sm:flex-row items-center justify-between sm:justify-end gap-6 w-full sm:w-auto mt-2 sm:mt-0">
+                                                        <div className="w-14 h-8 bg-gray-200 dark:bg-[#333] rounded-full shadow-inner flex items-center px-1 cursor-pointer transition-colors group-hover:bg-gray-300 dark:group-hover:bg-[#444]">
+                                                            <div className="w-6 h-6 bg-white rounded-full shadow-md"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Pre-built Automation 3 */}
+                                                <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-xl hover:border-blue-500/30 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 group">
+                                                    <div className="flex items-start sm:items-center gap-3 sm:gap-5 w-full sm:w-auto">
+                                                        <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center bg-green-50 dark:bg-green-500/10 text-green-500 shrink-0 mt-1 sm:mt-0">
+                                                            <Phone size={24} className="sm:w-7 sm:h-7" /> {/* Represents WhatsApp */}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <h3 className="font-bold text-main text-base sm:text-lg leading-tight">WhatsApp Appointment Booking</h3>
+                                                            </div>
+                                                            <p className="text-secondary text-xs sm:text-sm mt-1">Automatically books meetings right inside WhatsApp chat.</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-row-reverse sm:flex-row items-center justify-between sm:justify-end gap-6 w-full sm:w-auto mt-2 sm:mt-0">
+                                                        <div className="w-14 h-8 bg-gray-200 dark:bg-[#333] rounded-full shadow-inner flex items-center px-1 cursor-pointer">
+                                                            <div className="w-6 h-6 bg-white rounded-full shadow-md"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Floating Cursor proving it's easy */}
+                            <motion.div 
+                                animate={{ x: [0, 80, 0], y: [0, -30, 0] }}
+                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute top-1/2 right-[20%] z-40 drop-shadow-2xl"
+                            >
+                                <MousePointerClick className="w-10 h-10 text-main fill-body" />
+                                <div className="absolute top-8 left-6 bg-black text-white px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shadow-xl border border-white/20">Just 1 Click</div>
+                            </motion.div>
+                        </div>
+                    </motion.div>
+                </div>
             </header>
 
-            {/* ═══════════════════════ DASHBOARD PREVIEW ═══════════════════════ */}
-            <div className="relative -mt-4 md:-mt-12 z-20 px-2 sm:px-4 pb-12 md:pb-20">
-                <motion.div
-                    initial={{ opacity: 0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-                    className="max-w-6xl mx-auto"
-                >
-                    <div className="relative rounded-xl md:rounded-3xl bg-surface/5 p-1 md:p-3 ring-1 ring-inset ring-main/10 backdrop-blur-sm transition-colors shadow-2xl dark:shadow-blue-500/5">
-                        <div className="rounded-lg md:rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-2xl border border-slate-200/60 dark:border-slate-700/50 aspect-[16/12] md:aspect-[21/9] relative group">
+            {/* ═══════════════════════ LOGO STRIP ═══════════════════════ */}
+            <section className="py-10 border-y border-main bg-surface/30 backdrop-blur-md relative overflow-hidden z-20">
+                <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-body to-transparent z-10 pointer-events-none"></div>
+                <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-body to-transparent z-10 pointer-events-none"></div>
+                
+                <div className="container px-4 text-center mb-6">
+                    <p className="text-xs font-semibold tracking-[0.2em] text-secondary uppercase">Integrates instantly with platforms you already use</p>
+                </div>
+                
+                {/* INFINITE MARQUEE FIX */}
+                <div className="flex overflow-hidden relative w-full group pt-2 pb-4 md:py-0">
+                    <div className="flex animate-marquee min-w-max items-center">
+                        {[...Array(2)].map((_, idx) => (
+                            <div key={idx} className="flex gap-8 md:gap-24 px-4 md:px-8 items-center justify-around opacity-70 hover:opacity-100 transition-opacity">
+                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><Youtube className="w-6 h-6 md:w-8 md:h-8 text-red-500"/> YouTube</div>
+                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><Instagram className="w-6 h-6 md:w-8 md:h-8 text-pink-500"/> Instagram</div>
+                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><Phone className="w-6 h-6 md:w-8 md:h-8 text-green-500"/> WhatsApp</div>
+                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><Mail className="w-6 h-6 md:w-8 md:h-8 text-blue-500"/> Gmail</div>
+                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><Layers className="w-6 h-6 md:w-8 md:h-8 text-indigo-500"/> Notion</div>
+                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><Users className="w-6 h-6 md:w-8 md:h-8 text-blue-400"/> Telegram</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
 
-                            {/* Dashboard Header */}
-                            <div className="absolute top-0 left-0 right-0 h-8 md:h-12 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex items-center px-3 md:px-4 justify-between z-10">
-                                <div className="flex gap-1.5 md:gap-2">
-                                    <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 group-hover:bg-red-400 transition-colors duration-300"></div>
-                                    <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 group-hover:bg-amber-400 transition-colors duration-300"></div>
-                                    <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 group-hover:bg-green-400 transition-colors duration-300"></div>
+            {/* ═══════════════════════ HOW IT WORKS (3 STEPS) ═══════════════════════ */}
+            <section className="py-24 md:py-36 relative bg-body z-10">
+                <div className="container px-4 max-w-6xl mx-auto">
+                    <div className="text-center mb-20">
+                        <h2 className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-main mb-6 leading-tight tracking-tight">
+                            Build an automation empire.<br/>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">Without writing a single rule.</span>
+                        </h2>
+                        <p className="text-lg md:text-xl text-secondary font-light max-w-2xl mx-auto">
+                            Other software is too complicated and hard to learn. Jomocal AI does all the heavy lifting for you. Just 3 simple steps.
+                        </p>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-8 relative">
+                        {/* Connecting Line */}
+                        <div className="hidden md:block absolute top-[60px] left-[15%] right-[15%] h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 opacity-20 z-0 rounded-full"></div>
+                        <div className="hidden md:block absolute top-[60px] left-[15%] w-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500 z-10 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.8)] motion-safe:animate-[expand_2s_ease-out_forwards]" style={{ animationTimeline: 'view()', animationRange: 'cover 0% cover 50%' }}></div>
+
+                        {/* Step 1 */}
+                        <div className="relative z-20 flex flex-col items-center text-center group">
+                            <div className="w-24 h-24 rounded-3xl bg-surface border border-main shadow-xl flex items-center justify-center mb-8 relative group-hover:-translate-y-2 transition-transform duration-300">
+                                <LinkIcon size={32} className="text-blue-500" />
+                                <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-blue-500 text-white font-bold flex items-center justify-center shadow-lg border-2 border-body text-sm">1</div>
+                            </div>
+                            <h3 className="text-2xl font-bold text-main mb-3">Login Safely</h3>
+                            <p className="text-secondary leading-relaxed px-4">Securely connect your store, YouTube, Instagram, or WhatsApp account with a simple click.</p>
+                        </div>
+
+                        {/* Step 2 */}
+                        <div className="relative z-20 flex flex-col items-center text-center group">
+                            <div className="w-24 h-24 rounded-3xl bg-surface border border-main shadow-xl flex items-center justify-center mb-8 relative group-hover:-translate-y-2 transition-transform duration-300">
+                                <Layers size={32} className="text-purple-500" />
+                                <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-purple-500 text-white font-bold flex items-center justify-center shadow-lg border-2 border-body text-sm">2</div>
+                            </div>
+                            <h3 className="text-2xl font-bold text-main mb-3">Choose Solution</h3>
+                            <p className="text-secondary leading-relaxed px-4">Browse our massive library of ready-made business apps designed specially for Indian business owners.</p>
+                        </div>
+
+                        {/* Step 3 */}
+                        <div className="relative z-20 flex flex-col items-center text-center group">
+                            <div className="w-24 h-24 rounded-3xl bg-surface border border-main shadow-xl flex items-center justify-center mb-8 relative group-hover:-translate-y-2 transition-transform duration-300">
+                                <div className="absolute inset-0 bg-green-500/20 rounded-3xl blur-md group-hover:blur-xl transition-all"></div>
+                                <Zap size={32} className="text-green-500 relative z-10" />
+                                <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-green-500 text-white font-bold flex items-center justify-center shadow-lg border-2 border-body text-sm z-20">3</div>
+                            </div>
+                            <h3 className="text-2xl font-bold text-main mb-3">Turn Switch ON</h3>
+                            <p className="text-secondary leading-relaxed px-4">Click the switch. The computer starts doing your daily marketing, replies, and lead collection automatically.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════ BENTO GRID FEATURES (SIMPLIFIED FOR MSMES) ═══════════════════════ */}
+            <section id="features" className="py-24 relative overflow-hidden">
+                {/* Background Decor */}
+                <div className="absolute top-[20%] left-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+                <div className="absolute bottom-[20%] right-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+                <div className="container px-4">
+                    <div className="text-center max-w-3xl mx-auto mb-20 relative">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold mb-6 border border-blue-500/20 uppercase tracking-widest">
+                            Ready-To-Use Solutions
+                        </div>
+                        <h2 className="text-3xl md:text-5xl font-display font-bold text-main mb-6 leading-tight tracking-tight">
+                            Run your entire business.<br/>
+                            <span className="text-secondary">From one simple dashboard.</span>
+                        </h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-12 auto-rows-[minmax(300px,auto)] gap-6 max-w-7xl mx-auto">
+                        
+                        {/* FEATURE 1: VIDEO AI (LARGE) */}
+                        <SpotlightCard className="md:col-span-8 p-6 sm:p-8 md:p-12 flex flex-col justify-between overflow-visible">
+                            <div className="relative z-20 max-w-lg mb-8">
+                                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-red-50 dark:bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 mb-6 md:mb-8 shadow-lg shadow-red-500/20">
+                                    <Video size={24} className="w-5 h-5 md:w-6 md:h-6" />
+                                </div>
+                                <h3 className="text-2xl md:text-3xl font-display font-bold text-main mb-4">Make Marketing Videos Without Face</h3>
+                                <p className="text-secondary text-sm sm:text-base md:text-lg mb-8 leading-relaxed">
+                                    Type a simple sentence about your product, and our smart AI creates a complete, professional video. It writes the script, speaks in a clear local voice, and adds images—ready for you to upload on YouTube or Instagram Reels instantly!
+                                </p>
+                                <div className="flex flex-wrap gap-3">
+                                    <div className="flex items-center gap-2 text-sm font-semibold bg-white dark:bg-black border border-main rounded-xl px-4 py-2.5 text-main shadow-sm"><Mic size={16} className="text-blue-500"/> Beautiful Voices</div>
+                                    <div className="flex items-center gap-2 text-sm font-semibold bg-white dark:bg-black border border-main rounded-xl px-4 py-2.5 text-main shadow-sm"><Youtube size={16} className="text-red-500"/> Perfect for Reels</div>
                                 </div>
                             </div>
+                            
+                            {/* Visual Asset floating right */}
+                            <div className="absolute right-0 bottom-0 top-0 w-1/2 opacity-30 md:opacity-100 pointer-events-none hidden md:block">
+                                <div className="absolute inset-0 bg-gradient-to-l from-transparent via-surface/60 to-surface z-10"></div>
+                                <motion.div animate={{ y: [-15, 15, -15] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-12 -right-16 w-80 h-64 bg-black rounded-2xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden rotate-[-5deg] p-1">
+                                    {/* Mock Video UI */}
+                                    <div className="w-full h-full bg-[#111] rounded-xl relative overflow-hidden flex flex-col">
+                                        <div className="h-40 bg-[url('https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=400&auto=format&fit=crop')] bg-cover bg-center flex items-center justify-center relative">
+                                            <div className="absolute inset-0 bg-black/40"></div>
+                                            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative z-10"><Play className="text-white fill-white" size={24}/></div>
+                                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-1.5 rounded-lg border border-white/20 text-white font-bold text-sm backdrop-blur">"Grow Your Views"</div>
+                                        </div>
+                                        <div className="p-4 flex-1">
+                                            <div className="h-2 w-full bg-[#333] rounded-full overflow-hidden"><div className="w-1/3 h-full bg-red-500"></div></div>
+                                            <div className="flex justify-between mt-2 text-[#777] text-xs font-mono"><span>Processing...</span><span>Done</span></div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </div>
+                        </SpotlightCard>
 
-                            {/* Dashboard Body */}
-                            <div className="absolute inset-0 pt-8 md:pt-12 bg-slate-50/50 dark:bg-slate-900/50 flex">
-                                {/* Sidebar */}
-                                <div className="hidden md:flex w-16 lg:w-48 border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex-col p-3 gap-2">
-                                    {[1, 2, 3, 4, 5].map(i => (
-                                        <div key={i} className={`h-8 w-full rounded-lg ${i === 1 ? 'bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}></div>
-                                    ))}
+                        {/* FEATURE 2: AUTO DMs */}
+                        <SpotlightCard className="md:col-span-4 p-6 sm:p-8 bg-gradient-to-b from-surface to-indigo-500/5">
+                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500 mb-6 md:mb-8 shadow-lg shadow-indigo-500/20">
+                                <Bot size={24} className="w-5 h-5 md:w-6 md:h-6" />
+                            </div>
+                            <h3 className="text-xl md:text-2xl font-display font-bold text-main mb-3 md:mb-4">Automatic WhatsApp Replies</h3>
+                            <p className="text-secondary text-sm sm:text-base leading-relaxed mb-6">
+                                Never miss a customer again. When someone asks for price or details on WhatsApp or Instagram, our auto-reply bot replies immediately, day or night, just like a human assistant.
+                            </p>
+                            <Link to="/features" className="inline-flex items-center gap-2 text-sm font-bold text-indigo-600 dark:text-indigo-400 group-hover:gap-3 transition-all mt-auto">
+                                View Chat Features <ArrowRight size={16} />
+                            </Link>
+                        </SpotlightCard>
+
+                        {/* FEATURE 3: CRM */}
+                        <SpotlightCard className="md:col-span-4 p-8 bg-gradient-to-b from-surface to-green-500/5">
+                            <div className="w-14 h-14 rounded-full bg-green-50 dark:bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-500 mb-8 shadow-lg shadow-green-500/20">
+                                <Users size={24} />
+                            </div>
+                            <h3 className="text-2xl font-display font-bold text-main mb-4">Auto-Save Customer Details</h3>
+                            <p className="text-secondary text-base leading-relaxed mb-6">
+                                Stop writing down phone numbers manually! Jomocal silently saves the phone numbers and names from your chats directly into a neat list so you can call them later.
+                            </p>
+                        </SpotlightCard>
+
+                        {/* FEATURE 4: PRE-BUILT LIBRARY */}
+                        <SpotlightCard className="md:col-span-8 p-8 md:p-12">
+                            <div className="relative z-20 flex flex-col md:flex-row gap-8 items-center h-full">
+                                <div className="flex-1">
+                                    <div className="w-14 h-14 rounded-full bg-amber-50 dark:bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 mb-8 shadow-lg shadow-amber-500/20">
+                                        <Layers size={24} />
+                                    </div>
+                                    <h3 className="text-3xl font-display font-bold text-main mb-4">A Store Full of Ready Solutions</h3>
+                                    <p className="text-secondary text-lg leading-relaxed mb-8">
+                                        Need more stuff done? We have ready-made apps for managing Facebook posts, sending automatic invoices, and booking appointments. Browse our store, flip the switch, and relax.
+                                    </p>
                                 </div>
-
-                                {/* Main Area */}
-                                <div className="flex-1 p-3 md:p-6 overflow-hidden relative">
-                                    {/* Stats Row */}
-                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6">
-                                        {[1, 2, 3, 4].map(i => (
-                                            <div key={i} className="bg-white dark:bg-slate-800 p-2 md:p-4 rounded-lg md:rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
-                                                <div className="h-1.5 md:h-2 w-8 md:w-12 bg-slate-100 dark:bg-slate-700 rounded mb-2"></div>
-                                                <div className="h-4 md:h-6 w-16 md:w-20 bg-slate-200 dark:bg-slate-600 rounded"></div>
+                                <div className="flex-1 w-full relative h-[250px] flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/10 to-transparent blur-2xl"></div>
+                                    <div className="grid grid-cols-2 gap-4 w-full px-4">
+                                        {[1,2,3,4].map((i) => (
+                                            <div key={i} className="bg-surface border border-main rounded-xl p-3 shadow-sm flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center shadow-lg"><CheckCircle size={14} className="text-white"/></div>
+                                                <div className="flex flex-col gap-1 w-full">
+                                                    <div className="h-2 w-16 bg-main/20 rounded-full"></div>
+                                                    <div className="h-1.5 w-10 bg-main/10 rounded-full"></div>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
-
-                                    {/* Charts Area */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 h-full">
-                                        <div className="md:col-span-2 bg-white dark:bg-slate-800 rounded-lg md:rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 relative overflow-hidden">
-                                            <div className="absolute inset-x-0 bottom-0 top-10 bg-gradient-to-t from-blue-50/50 dark:from-blue-500/5 to-transparent"></div>
-                                            <div className="absolute bottom-0 left-0 right-0 h-24 md:h-32 flex items-end justify-between px-4 md:px-6 pb-4 md:pb-6 gap-2">
-                                                {[40, 60, 45, 70, 50, 80, 65, 85, 90, 70].map((h, i) => (
-                                                    <div key={i} className="w-full bg-blue-500 rounded-t-sm opacity-20 dark:opacity-30" style={{ height: `${h}%` }}></div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 hidden md:block">
-                                            <div className="space-y-3">
-                                                {[1, 2, 3, 4].map(i => (
-                                                    <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50">
-                                                        <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-600 border border-slate-100 dark:border-slate-600"></div>
-                                                        <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-600 rounded-full w-12"></div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
+                        </SpotlightCard>
 
-                            {/* Floating Card: AI Video */}
-                            <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 1, duration: 0.8 }}
-                                className="absolute bottom-3 right-3 md:bottom-6 md:right-10 bg-white dark:bg-slate-800 p-2 md:p-4 rounded-xl md:rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 z-20 w-40 md:w-64"
-                            >
-                                <div className="flex items-center gap-2 md:gap-3 mb-1.5 md:mb-3">
-                                    <div className="w-6 h-6 md:w-10 md:h-10 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center text-red-600 dark:text-red-400">
-                                        <Video size={12} className="md:hidden" />
-                                        <Video size={18} className="hidden md:block" />
-                                    </div>
-                                    <div>
-                                        <div className="text-[8px] md:text-xs font-semibold text-slate-500 dark:text-slate-400">AI Video Studio</div>
-                                        <div className="text-[10px] md:text-sm font-bold text-slate-900 dark:text-white">Render Complete</div>
-                                    </div>
-                                </div>
-                                <div className="h-1 md:h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                                    <div className="h-full bg-green-500 w-full animate-pulse"></div>
-                                </div>
-                            </motion.div>
+                    </div>
+                </div>
+            </section>
 
-                            {/* Floating Card: New Lead */}
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 1.5, duration: 0.5 }}
-                                className="absolute top-10 left-3 md:top-20 md:left-24 bg-white dark:bg-slate-800 p-1.5 md:p-3 rounded-lg md:rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 z-20 flex items-center gap-2 md:gap-3"
-                            >
-                                <div className="relative">
-                                    <div className="w-6 h-6 md:w-10 md:h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-[10px] md:text-sm">JD</div>
-                                    <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 md:w-4 md:h-4 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></span>
-                                </div>
-                                <div>
-                                    <div className="text-[10px] md:text-xs font-bold text-slate-900 dark:text-white">New Lead Captured</div>
-                                    <div className="text-[8px] md:text-[10px] text-slate-500 dark:text-slate-400">Via Instagram DM</div>
-                                </div>
-                            </motion.div>
-
+            {/* ═══════════════════════ STATS & PROOF (SIMPLIFIED) ═══════════════════════ */}
+            <section className="py-24 border-y border-main bg-surface/30 backdrop-blur-sm relative overflow-hidden">
+                <div className="container relative z-10 px-4">
+                    <div className="text-center mb-12">
+                        <p className="text-secondary font-medium tracking-widest uppercase">Trusted By Smart Business Owners Across India</p>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 text-center divide-x-0 md:divide-x divide-main">
+                        <div className="flex flex-col items-center justify-center">
+                            <h3 className="text-4xl md:text-6xl text-main font-semibold mb-2"><AnimatedCounter target={2.5} suffix="M+" /></h3>
+                            <p className="text-[10px] sm:text-[11px] md:text-sm font-medium text-secondary uppercase tracking-widest mt-1">Customer Messages</p>
                         </div>
+                        <div className="flex flex-col items-center justify-center">
+                            <h3 className="text-4xl md:text-6xl text-main font-semibold mb-2"><AnimatedCounter target={99} suffix=".9%" /></h3>
+                            <p className="text-[10px] sm:text-[11px] md:text-sm font-medium text-secondary uppercase tracking-widest mt-1">Platform Reliability</p>
+                        </div>
+                        <div className="flex flex-col items-center justify-center">
+                            <h3 className="text-4xl md:text-6xl text-main font-semibold mb-2"><AnimatedCounter target={150} suffix="+" /></h3>
+                            <p className="text-[10px] sm:text-[11px] md:text-sm font-medium text-secondary uppercase tracking-widest mt-1">App Connections</p>
+                        </div>
+                        <div className="flex flex-col items-center justify-center">
+                            <h3 className="text-4xl md:text-6xl text-main font-semibold mb-2"><AnimatedCounter target={40} suffix="k+" /></h3>
+                            <p className="text-[10px] sm:text-[11px] md:text-sm font-medium text-secondary uppercase tracking-widest mt-1">Happy Businesses</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════ FINAL MASSIVE CTA (NON-TECH FRIENDLY) ═══════════════════════ */}
+            <section className="py-24 md:py-40 relative overflow-hidden flex items-center justify-center">
+                
+                {/* Stunning Glowing Background */}
+                <div className="absolute inset-0 bg-blue-600 dark:bg-blue-900/40 opacity-10"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] md:w-[800px] md:h-[500px] bg-blue-600/30 dark:bg-blue-600/60 blur-[150px] rounded-[100%] pointer-events-none z-0"></div>
+
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="container relative z-10 px-4 max-w-5xl"
+                >
+                    <div className="bg-surface/80 dark:bg-[#0a0a0c]/80 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-[2.5rem] md:rounded-[4rem] p-6 sm:p-10 md:p-24 text-center shadow-2xl relative overflow-hidden ring-1 ring-black/5">
+                        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500"></div>
+                        
+                        <div className="inline-flex items-center justify-center p-3 sm:p-4 bg-blue-500/10 rounded-full mb-6 sm:mb-8">
+                            <Rocket size={32} className="text-blue-500 sm:w-10 sm:h-10" />
+                        </div>
+
+                        <h2 className="text-3xl sm:text-4xl md:text-7xl font-display font-extrabold text-main mb-6 sm:mb-8 tracking-tighter leading-tight">
+                            Start growing your <br className="hidden md:block"/>
+                            business today.
+                        </h2>
+                        <p className="text-base sm:text-lg md:text-2xl text-secondary mb-8 sm:mb-12 max-w-2xl mx-auto font-light leading-relaxed px-2">
+                            Stop doing manual typing all day. Just select what you need, turn it on, and let Jomocal handle your daily tasks.
+                        </p>
+                        
+                        <div className="flex flex-col md:flex-row justify-center items-center gap-4 sm:gap-6">
+                            <Link to="/signup" className="group relative inline-flex items-center justify-center px-8 sm:px-12 py-4 sm:py-5 text-base sm:text-xl font-bold text-white bg-blue-600 rounded-full shadow-[0_0_40px_-10px_rgba(37,99,235,0.5)] overflow-hidden transition-all hover:scale-[1.03] hover:shadow-[0_0_60px_-15px_rgba(37,99,235,0.7)] w-full sm:w-auto">
+                                <span className="relative z-10 flex items-center gap-2">
+                                    Get Started For Free <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                </span>
+                            </Link>
+                        </div>
+                        <p className="mt-8 text-sm text-secondary font-medium">No Card Required • Simple Setup • Cancel Anytime</p>
                     </div>
                 </motion.div>
-            </div>
-
-            {/* ═══════════════════════ STATS BAR ═══════════════════════ */}
-            <section className="py-10 md:py-14 border-y border-main bg-body transition-colors relative z-10">
-                <div className="container px-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 text-center">
-                        <div>
-                            <div className="text-3xl md:text-5xl font-bold text-main font-display transition-colors"><AnimatedCounter target={2500} suffix="+" /></div>
-                            <p className="text-xs md:text-sm text-secondary mt-2 font-medium">Businesses Automated</p>
-                        </div>
-                        <div>
-                            <div className="text-3xl md:text-5xl font-bold text-main font-display transition-colors"><AnimatedCounter target={50} suffix="K+" /></div>
-                            <p className="text-xs md:text-sm text-secondary mt-2 font-medium">Tasks Completed</p>
-                        </div>
-                        <div>
-                            <div className="text-3xl md:text-5xl font-bold text-main font-display transition-colors"><AnimatedCounter target={20} suffix="+" /></div>
-                            <p className="text-xs md:text-sm text-secondary mt-2 font-medium">Hours Saved Weekly</p>
-                        </div>
-                        <div>
-                            <div className="text-3xl md:text-5xl font-bold text-main font-display transition-colors"><AnimatedCounter target={99} suffix="%" /></div>
-                            <p className="text-xs md:text-sm text-secondary mt-2 font-medium">Customer Satisfaction</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ═══════════════════════ TRUSTED LOGOS ═══════════════════════ */}
-            <section className="py-6 md:py-10 border-b border-main bg-body shadow-sm overflow-hidden relative transition-colors">
-                <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-body to-transparent z-10 transition-colors"></div>
-                <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-body to-transparent z-10 transition-colors"></div>
-
-                <div className="container mb-6 md:mb-8 text-center text-secondary">
-                    <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest font-sans">Trusted by Growing Businesses Across India</p>
-                </div>
-
-                <div className="flex overflow-hidden relative w-full">
-                    <div className="animate-marquee flex gap-8 md:gap-24 items-center whitespace-nowrap min-w-full">
-                        {[...Array(6)].map((_, setIndex) => (
-                            <React.Fragment key={setIndex}>
-                                <div className="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer">
-                                    <Globe className="w-5 h-5 md:w-6 md:h-6 text-blue-400" /> <span className="text-lg md:text-xl font-bold text-secondary font-display">GlobalScale</span>
-                                </div>
-                                <div className="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer">
-                                    <Layers className="w-5 h-5 md:w-6 md:h-6 text-indigo-400" /> <span className="text-lg md:text-xl font-bold text-secondary font-display">StackFlow</span>
-                                </div>
-                                <div className="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer">
-                                    <Zap className="w-5 h-5 md:w-6 md:h-6 text-amber-400" /> <span className="text-lg md:text-xl font-bold text-secondary font-display">FastTrack</span>
-                                </div>
-                                <div className="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer">
-                                    <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-emerald-400" /> <span className="text-lg md:text-xl font-bold text-secondary font-display">SecureNet</span>
-                                </div>
-                                <div className="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer">
-                                    <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-purple-400" /> <span className="text-lg md:text-xl font-bold text-secondary font-display">GrowthLab</span>
-                                </div>
-                            </React.Fragment>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* ═══════════════════════ WHO IS IT FOR ═══════════════════════ */}
-            <section className="py-16 md:py-32 bg-body transition-colors">
-                <div className="container px-4">
-                    <motion.div
-                        variants={staggerContainer}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true, margin: "-100px" }}
-                        className="text-center max-w-3xl mx-auto mb-10 md:mb-20"
-                    >
-                        <motion.h2 variants={fadeUp} className="text-2xl md:text-5xl font-bold mb-4 md:mb-6 text-main font-display transition-colors">Built for Your Success</motion.h2>
-                        <motion.p variants={fadeUp} className="text-sm md:text-lg text-secondary font-light transition-colors">Whether you run a growing business or create content for a living — Jomocal AI adapts to your unique workflow and accelerates your results.</motion.p>
-                    </motion.div>
-
-                    <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
-                        {/* MSME Card */}
-                        <SpotlightCard className="group p-6 md:p-10 bg-surface border-2 border-main shadow-xl hover:border-blue-500/50 transition-all duration-300 relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 dark:from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <div className="absolute top-0 right-0 p-8 opacity-[0.05] group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
-                                <ShoppingBag size={150} className="md:w-[200px] md:h-[200px]" />
-                            </div>
-                            <div className="relative z-10">
-                                <div className="mb-4 md:mb-6 flex items-center justify-between">
-                                    <span className="inline-block px-2.5 py-1 bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] md:text-xs font-bold rounded-full border border-blue-200 dark:border-blue-500/20">FOR MSMEs</span>
-                                    <ShoppingBag className="text-blue-200 dark:text-blue-500/30 w-6 h-6 md:hidden" />
-                                </div>
-
-                                <h3 className="text-xl md:text-3xl font-bold mb-2 md:mb-4 text-main font-display transition-colors">Small & Medium Businesses</h3>
-                                <p className="text-xs md:text-base text-secondary mb-6 md:mb-8 leading-relaxed transition-colors">
-                                    Streamline your customer support, lead management, and invoicing — all on autopilot. Focus on growing your business, not managing repetitive tasks.
-                                </p>
-                                <ul className="space-y-3 md:space-y-4 mb-8 md:mb-10">
-                                    <li className="flex items-start gap-2.5 md:gap-3 text-secondary font-medium text-xs md:text-base transition-colors">
-                                        <CheckCircle size={16} className="text-blue-400 shrink-0 mt-0.5" />
-                                        <span className="text-secondary">Respond to customer enquiries 24/7</span>
-                                    </li>
-                                    <li className="flex items-start gap-2.5 md:gap-3 font-medium text-xs md:text-base transition-colors">
-                                        <CheckCircle size={16} className="text-blue-400 shrink-0 mt-0.5" />
-                                        <span className="text-secondary">Automated invoice & payment reminders</span>
-                                    </li>
-                                    <li className="flex items-start gap-2.5 md:gap-3 font-medium text-xs md:text-base transition-colors">
-                                        <CheckCircle size={16} className="text-blue-400 shrink-0 mt-0.5" />
-                                        <span className="text-secondary">Capture & qualify leads automatically</span>
-                                    </li>
-                                </ul>
-                                <Link to="/signup?type=business" className="btn btn-outline bg-surface border-main text-secondary w-full justify-between group-hover:border-blue-500 group-hover:text-blue-500 text-xs md:text-base py-3 transition-colors">
-                                    Get Started for Business <ArrowRight size={16} />
-                                </Link>
-                            </div>
-                        </SpotlightCard>
-
-                        {/* Creator Card */}
-                        <SpotlightCard className="group p-6 md:p-10 bg-surface border-2 border-main shadow-xl hover:border-purple-500/50 transition-all duration-300 relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 dark:from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <div className="absolute top-0 right-0 p-8 opacity-[0.05] group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
-                                <Sparkles size={150} className="md:w-[200px] md:h-[200px]" />
-                            </div>
-                            <div className="relative z-10">
-                                <div className="mb-4 md:mb-6 flex items-center justify-between">
-                                    <span className="inline-block px-2.5 py-1 bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 text-[10px] md:text-xs font-bold rounded-full border border-purple-200 dark:border-purple-500/20">FOR CREATORS</span>
-                                    <Sparkles className="text-purple-200 dark:text-purple-500/30 w-6 h-6 md:hidden" />
-                                </div>
-                                <h3 className="text-xl md:text-3xl font-bold mb-2 md:mb-4 text-main font-display transition-colors">Content Creators</h3>
-                                <p className="text-xs md:text-base text-secondary mb-6 md:mb-8 leading-relaxed transition-colors">
-                                    Scale your content production effortlessly. Create professional videos, engage your community, and grow your audience — without the burnout.
-                                </p>
-                                <ul className="space-y-3 md:space-y-4 mb-8 md:mb-10">
-                                    <li className="flex items-start gap-2.5 md:gap-3 text-secondary font-medium text-xs md:text-base transition-colors">
-                                        <CheckCircle size={16} className="text-purple-500 shrink-0 mt-0.5" />
-                                        <span>AI-powered video creation & publishing</span>
-                                    </li>
-                                    <li className="flex items-start gap-2.5 md:gap-3 text-secondary font-medium text-xs md:text-base transition-colors">
-                                        <CheckCircle size={16} className="text-purple-500 shrink-0 mt-0.5" />
-                                        <span>Automated DMs & audience engagement</span>
-                                    </li>
-                                    <li className="flex items-start gap-2.5 md:gap-3 text-secondary font-medium text-xs md:text-base transition-colors">
-                                        <CheckCircle size={16} className="text-purple-500 shrink-0 mt-0.5" />
-                                        <span>Smart content scheduling & distribution</span>
-                                    </li>
-                                </ul>
-                                <Link to="/signup?type=creator" className="btn btn-outline bg-surface border-main text-secondary w-full justify-between group-hover:border-purple-500 group-hover:text-purple-500 text-xs md:text-base py-3 transition-colors">
-                                    Get Started for Creators <ArrowRight size={16} />
-                                </Link>
-                            </div>
-                        </SpotlightCard>
-                    </div>
-                </div>
-            </section>
-
-            {/* ═══════════════════════ FEATURES BENTO GRID ═══════════════════════ */}
-            <section id="features" className="py-12 md:py-24 bg-body relative transition-colors">
-                <div className="absolute top-1/4 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -z-10 pointer-events-none"></div>
-                <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl -z-10 pointer-events-none"></div>
-
-                <div className="container px-4">
-                    <motion.div
-                        variants={staggerContainer}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true, margin: "-100px" }}
-                        className="text-center max-w-3xl mx-auto mb-10 md:mb-20"
-                    >
-                        <motion.h2 variants={fadeUp} className="text-2xl md:text-5xl font-bold mb-4 md:mb-6 text-main font-display transition-colors">Everything You Need to Grow</motion.h2>
-                        <motion.p variants={fadeUp} className="text-sm md:text-lg text-secondary font-light transition-colors">
-                            Powerful AI-driven tools designed to save you hours every day — from content creation to customer management.
-                        </motion.p>
-                    </motion.div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-4 gap-4 md:gap-6 max-w-7xl mx-auto">
-
-                        {/* YouTube AI (Hero Feature) */}
-                        <SpotlightCard className="md:col-span-6 lg:col-span-4 card group relative overflow-hidden bg-surface text-main border-main p-6 md:p-8 transition-colors">
-                            <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-red-500/10 to-transparent"></div>
-                            <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-                                <div className="flex-1 text-center md:text-left">
-                                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-red-500 text-[10px] md:text-xs font-bold mb-4 md:mb-6 border border-red-500/20">
-                                        <Sparkles size={12} /> FLAGSHIP FEATURE
-                                    </div>
-                                    <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4 font-display text-main transition-colors">AI Video Automation</h3>
-                                    <p className="text-secondary text-sm md:text-base leading-relaxed mb-6 md:mb-8 max-w-lg transition-colors">
-                                        Create professional-quality videos from a simple text prompt. Our AI writes the script, generates voiceovers, edits the video, adds subtitles, and publishes it — all automatically.
-                                    </p>
-                                    <div className="flex flex-wrap gap-2 md:gap-3 justify-center md:justify-start">
-                                        <span className="px-2 md:px-3 py-1 bg-surface rounded-lg text-[10px] md:text-xs font-medium text-secondary border border-main flex items-center gap-1 transition-colors"><Mic size={12} /> AI Voiceover</span>
-                                        <span className="px-2 md:px-3 py-1 bg-surface rounded-lg text-[10px] md:text-xs font-medium text-secondary border border-main flex items-center gap-1 transition-colors"><Video size={12} /> Smart Editing</span>
-                                        <span className="px-2 md:px-3 py-1 bg-surface rounded-lg text-[10px] md:text-xs font-medium text-secondary border border-main flex items-center gap-1 transition-colors"><UploadCloud size={12} /> Auto-Publish</span>
-                                    </div>
-                                </div>
-                                <div className="flex-1 relative w-full h-48 md:h-64 rounded-xl bg-body border border-main overflow-hidden shadow-2xl transition-colors">
-                                    <div className="absolute inset-x-0 bottom-0 h-1 bg-red-600 z-20"></div>
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-xl group-hover:scale-110 transition-transform duration-300 cursor-pointer">
-                                            <Play size={20} className="fill-white text-white ml-1 md:w-6 md:h-6" />
-                                        </div>
-                                    </div>
-                                    <div className="absolute bottom-4 left-4 right-4 z-10">
-                                        <div className="h-1.5 md:h-2 w-2/3 bg-slate-700 rounded-lg mb-2"></div>
-                                        <div className="h-1.5 md:h-2 w-1/2 bg-slate-700 rounded-lg"></div>
-                                    </div>
-                                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md text-[10px] md:text-xs font-bold font-mono text-white">
-                                        AI POWERED
-                                    </div>
-                                </div>
-                            </div>
-                        </SpotlightCard>
-
-                        {/* Feature Cards */}
-                        <BentoCard
-                            title="Smart Auto-Replies"
-                            desc="Respond to customer messages on WhatsApp & Instagram instantly with human-like AI conversations."
-                            icon={<MessageSquare size={20} />}
-                            color="blue"
-                            className="md:col-span-3 lg:col-span-2 min-h-[220px]"
-                        />
-
-                        <BentoCard
-                            title="Lead Capture & CRM"
-                            desc="Automatically capture every potential customer and organize them — never lose a lead again."
-                            icon={<Users size={20} />}
-                            color="green"
-                            className="md:col-span-3 lg:col-span-2 min-h-[220px]"
-                        />
-
-                        <BentoCard
-                            title="Automated Invoicing"
-                            desc="Generate and send professional invoices, track payments, and send reminders — all on autopilot."
-                            icon={<DollarSign size={20} />}
-                            color="orange"
-                            className="md:col-span-6 lg:col-span-4 min-h-[180px] flex-row items-center"
-                        />
-                    </div>
-                </div>
-            </section>
-
-            {/* ═══════════════════════ HOW IT WORKS ═══════════════════════ */}
-            <section id="how-it-works" className="py-16 md:py-28 bg-surface border-y border-main transition-colors">
-                <div className="container px-4">
-                    <motion.div
-                        variants={staggerContainer}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true, margin: "-100px" }}
-                        className="text-center max-w-3xl mx-auto mb-12 md:mb-20"
-                    >
-                        <motion.h2 variants={fadeUp} className="text-2xl md:text-5xl font-bold mb-4 md:mb-6 text-main font-display transition-colors">Up and Running in 3 Simple Steps</motion.h2>
-                        <motion.p variants={fadeUp} className="text-sm md:text-lg text-secondary font-light transition-colors">
-                            No technical skills required. Connect your accounts, choose your automations, and let Jomocal AI do the rest.
-                        </motion.p>
-                    </motion.div>
-
-                    <div className="grid md:grid-cols-3 gap-8 md:gap-12 max-w-5xl mx-auto">
-                        {[
-                            { step: "01", icon: <Globe size={28} />, title: "Connect Your Accounts", desc: "Link your YouTube, Instagram, WhatsApp, Gmail, or Telegram accounts securely in just a few clicks." },
-                            { step: "02", icon: <Zap size={28} />, title: "Choose Your Automations", desc: "Select from ready-made AI workflows — video creation, auto-replies, lead capture, invoicing, and more." },
-                            { step: "03", icon: <BarChart3 size={28} />, title: "Watch Results Roll In", desc: "Sit back and monitor everything from your dashboard. Jomocal AI works around the clock for you." },
-                        ].map((item, i) => (
-                            <motion.div
-                                key={i}
-                                variants={fadeUp}
-                                custom={i}
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true }}
-                                className="text-center md:text-left group"
-                            >
-                                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/10 dark:bg-blue-500/10 text-blue-500 mb-6 group-hover:shadow-lg group-hover:shadow-blue-500/10 transition-all duration-300 group-hover:scale-110 border border-blue-500/20">
-                                    {item.icon}
-                                </div>
-                                <div className="text-xs font-bold text-blue-500 mb-2 tracking-widest uppercase">Step {item.step}</div>
-                                <h3 className="text-lg md:text-xl font-bold mb-3 text-main font-display transition-colors">{item.title}</h3>
-                                <p className="text-sm md:text-base text-secondary leading-relaxed transition-colors">{item.desc}</p>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* ═══════════════════════ TESTIMONIAL ═══════════════════════ */}
-            <section className="py-16 md:py-24 bg-body transition-colors">
-                <div className="container px-4">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6 }}
-                        className="max-w-4xl mx-auto text-center"
-                    >
-                        <div className="flex justify-center mb-4">
-                            {[...Array(5)].map((_, i) => <Star key={i} size={20} className="text-amber-400 fill-amber-400" />)}
-                        </div>
-                        <blockquote className="text-xl md:text-3xl font-display font-medium text-main mb-8 leading-relaxed italic transition-colors">
-                            "Jomocal AI has completely transformed how we manage our business. We used to spend hours replying to messages and creating content — now it's all automated. It's like having an entire operations team working 24/7."
-                        </blockquote>
-                        <div>
-                            <p className="font-bold text-main transition-colors">Priya Sharma</p>
-                            <p className="text-sm text-secondary transition-colors">Founder, ShopEase India</p>
-                        </div>
-                    </motion.div>
-                </div>
-            </section>
-
-            {/* ═══════════════════════ CTA SECTION ═══════════════════════ */}
-            <section className="py-16 md:py-24 relative overflow-hidden bg-body transition-colors">
-                <div className="absolute top-0 right-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-blue-600/20 rounded-full blur-[80px] md:blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
-                <div className="absolute bottom-0 left-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-purple-600/20 rounded-full blur-[80px] md:blur-[120px] translate-y-1/2 -translate-x-1/2"></div>
-
-                <div className="container text-center px-4 relative z-10">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5 }}
-                        className="max-w-4xl mx-auto"
-                    >
-                        <h2 className="text-3xl md:text-6xl font-bold text-main mb-6 md:mb-8 tracking-tight font-display transition-colors">
-                            Ready to Automate Your Growth?
-                        </h2>
-                        <p className="text-base md:text-xl text-secondary mb-8 md:mb-10 max-w-2xl mx-auto font-light leading-relaxed transition-colors">
-                            Join thousands of smart businesses and creators across India who are saving 20+ hours every week with Jomocal AI.
-                        </p>
-                        <div className="flex flex-col sm:flex-row justify-center gap-3 md:gap-4">
-                            <Link to="/signup" className="btn bg-blue-600 text-white hover:bg-blue-700 text-base md:text-lg px-8 md:px-10 py-3 md:py-5 shadow-2xl shadow-blue-900/20 border-none font-bold hover:scale-[1.03] transition-all">
-                                Start Your Free Trial
-                            </Link>
-                            <Link to="/contact" className="btn bg-transparent text-main border border-main hover:bg-surface text-base md:text-lg px-8 md:px-10 py-3 md:py-5 transition-colors">
-                                Talk to Our Team
-                            </Link>
-                        </div>
-                        <div className="mt-8 md:mt-12 flex flex-col md:flex-row items-center justify-center gap-3 md:gap-8 text-xs md:text-sm text-secondary">
-                            <span className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> No credit card required</span>
-                            <span className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> Free 14-day trial</span>
-                            <span className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> Cancel anytime</span>
-                        </div>
-                    </motion.div>
-                </div>
             </section>
 
             {/* ═══════════════════════ FOOTER ═══════════════════════ */}
-            <footer className="bg-body text-secondary py-12 md:py-16 border-t border-main font-sans transition-colors">
+            <footer className="bg-surface/50 border-t border-main py-16 relative z-10 backdrop-blur-md">
                 <div className="container px-4">
-                    <div className="grid md:grid-cols-4 gap-8 md:gap-12 mb-8 md:mb-12">
-                        <div className="col-span-1 md:col-span-1">
-                            <Link to="/" className="flex items-center mb-4 md:mb-6">
-                                <img
-                                    src="/jomocal ai logo.png"
-                                    alt="Jomocal AI"
-                                    className="w-32 md:w-40 h-auto object-contain scale-125"
-                                />
+                    <div className="grid grid-cols-2 md:grid-cols-12 gap-10 mb-16">
+                        <div className="col-span-2 md:col-span-12 lg:col-span-4">
+                            <Link to="/" className="inline-block mb-6">
+                                <img src="/jomocal ai logo.png" alt="Jomocal AI" className="h-8 md:h-10 w-auto scale-[1.5] origin-left object-contain" />
                             </Link>
-                            <p className="text-secondary text-xs md:text-sm leading-relaxed mb-6 transition-colors">
-                                AI Automation Studio for MSMEs and Creators. Making operations clever, automated, and localized.
+                            <p className="text-secondary max-w-sm mb-8 text-sm leading-relaxed font-medium">
+                                Jomocal AI provides the easiest software solutions for Indian business owners to increase their sales online without any technical skills.
                             </p>
-                            <div className="flex gap-4">
-                                <SocialIcon icon={<Globe size={18} />} />
-                                <SocialIcon icon={<MessageSquare size={18} />} />
+                            <div className="flex gap-3">
+                                <a href="#" className="w-10 h-10 rounded-full bg-body border border-main flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 text-secondary hover:text-blue-500 transition-colors shadow-sm"><Globe size={18} /></a>
+                                <a href="#" className="w-10 h-10 rounded-full bg-body border border-main flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 text-secondary hover:text-blue-500 transition-colors shadow-sm"><MessageSquare size={18} /></a>
                             </div>
                         </div>
 
-                        <div className="hidden md:block">
-                            <h4 className="font-bold text-main mb-6 transition-colors">Platform</h4>
-                            <FooterLinks links={['Features', 'Pricing', 'Integrations', 'Changelog']} />
+                        <div className="md:col-span-4 lg:col-span-2 lg:col-start-6">
+                            <h4 className="font-bold text-main mb-6 font-display text-base tracking-widest uppercase">Solutions</h4>
+                            <ul className="space-y-4 text-sm font-medium text-secondary">
+                                <li><a href="#" className="hover:text-blue-500 transition-colors">Video Maker</a></li>
+                                <li><a href="#" className="hover:text-blue-500 transition-colors">WhatsApp Bot</a></li>
+                                <li><a href="#" className="hover:text-blue-500 transition-colors">Customer List</a></li>
+                                <li><a href="#" className="hover:text-blue-500 transition-colors">Pricing Plans</a></li>
+                            </ul>
                         </div>
 
-                        <div className="hidden md:block">
-                            <h4 className="font-bold text-main mb-6 transition-colors">Resources</h4>
-                            <FooterLinks links={['Help Center', 'Community', 'Blog', 'Status']} />
+                        <div className="md:col-span-4 lg:col-span-2">
+                            <h4 className="font-bold text-main mb-6 font-display text-base tracking-widest uppercase">Useful Links</h4>
+                            <ul className="space-y-4 text-sm font-medium text-secondary">
+                                <li><a href="#" className="hover:text-blue-500 transition-colors">How to Use</a></li>
+                                <li><a href="#" className="hover:text-blue-500 transition-colors">Video Guides</a></li>
+                                <li><a href="#" className="hover:text-blue-500 transition-colors">Support Team</a></li>
+                            </ul>
                         </div>
 
-                        <div className="hidden md:block">
-                            <h4 className="font-bold text-main mb-6 transition-colors">Company</h4>
-                            <FooterLinks links={['About Us', 'Contact', 'Privacy Policy', 'Terms of Service']} />
-                        </div>
-
-                        {/* Mobile Footer Links */}
-                        <div className="md:hidden grid grid-cols-2 gap-8">
-                            <div>
-                                <h4 className="font-bold text-main mb-4 transition-colors">Platform</h4>
-                                <FooterLinks links={['Features', 'Pricing', 'Login']} />
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-main mb-4 transition-colors">Company</h4>
-                                <FooterLinks links={['About', 'Contact', 'Legal']} />
-                            </div>
+                        <div className="col-span-2 md:col-span-4 lg:col-span-2">
+                            <h4 className="font-bold text-main mb-6 font-display text-base tracking-widest uppercase">Company</h4>
+                            <ul className="space-y-4 text-sm font-medium text-secondary">
+                                <li><a href="#" className="hover:text-blue-500 transition-colors">About Jomocal</a></li>
+                                <li><a href="#" className="hover:text-blue-500 transition-colors">Contact Us</a></li>
+                                <li><a href="#" className="hover:text-blue-500 transition-colors">Privacy Rules</a></li>
+                                <li><a href="#" className="hover:text-blue-500 transition-colors">Terms of Use</a></li>
+                            </ul>
                         </div>
                     </div>
 
-                    <div className="border-t border-main pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-secondary text-xs md:text-sm transition-colors">
-                        <p>&copy; {new Date().getFullYear()} Jomocal Technologies Pvt. Ltd. All rights reserved.</p>
-                        <p>Made with ❤️ in India</p>
+                    <div className="pt-8 border-t border-main flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-semibold text-secondary">
+                        <p>© {new Date().getFullYear()} Jomocal Technologies Pvt. Ltd. All rights reserved.</p>
+                        <p className="flex items-center gap-1">Crafted with <span className="text-blue-500">♥</span> in India</p>
                     </div>
                 </div>
             </footer>
         </div>
     );
 };
-
-// ═══════════════════════ SUBCOMPONENTS ═══════════════════════
-
-const BentoCard = ({ title, desc, icon, color, className = "" }) => {
-    const colorClasses = {
-        blue: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-        green: "bg-green-500/10 text-green-500 border-green-500/20",
-        purple: "bg-purple-500/10 text-purple-500 border-purple-500/20",
-        orange: "bg-orange-500/10 text-orange-500 border-orange-500/20",
-        indigo: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
-    };
-
-    return (
-        <motion.div
-            whileHover={{ y: -5 }}
-            className={`card group relative overflow-hidden border border-main bg-surface/50 backdrop-blur-sm hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 p-6 ${className}`}
-        >
-            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center mb-4 md:mb-6 transition-transform group-hover:scale-110 border ${colorClasses[color]} bg-opacity-50`}>
-                <div className="scale-90 md:scale-100">{icon}</div>
-            </div>
-            <h3 className="text-lg md:text-xl font-bold mb-2 md:mb-3 text-main group-hover:text-blue-500 transition-colors">{title}</h3>
-            <p className="text-secondary leading-relaxed text-xs md:text-sm transition-colors">{desc}</p>
-        </motion.div>
-    );
-};
-
-
-const FooterLinks = ({ links }) => (
-    <ul className="space-y-2 md:space-y-3">
-        {links.map((link) => (
-            <li key={link}>
-                <a href="#" className="text-secondary hover:text-main transition-colors text-xs md:text-sm">{link}</a>
-            </li>
-        ))}
-    </ul>
-);
-
-const SocialIcon = ({ icon }) => (
-    <a href="#" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-surface flex items-center justify-center hover:bg-blue-600 transition-colors text-secondary hover:text-white border border-main">
-        {icon}
-    </a>
-)
 
 export default LandingPage;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 // Layouts
@@ -20,6 +20,24 @@ import MessageHistory from './pages/MessageHistory';
 import BotCustomization from './pages/BotCustomization';
 
 function App() {
+  // Global mouse tracking for ultra-premium 3D spotlight effects
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      // Find all spotlight cards and update their specific mouse coordinates
+      const cards = document.querySelectorAll('.spotlight-card');
+      cards.forEach((card) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   return (
     <Router>
       <Routes>

@@ -3,35 +3,75 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --color-primary: #3b82f6;
-  --color-primary-dark: #2563eb;
-  --color-background: #f1f5f9;
-  --color-surface: #ffffff;
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #334155;
-  --color-border: #cbd5e1;
-  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  /* Ultra-Premium Light Mode Colors */
+  --color-primary: #0070F3; /* Sharp Vercel-like blue */
+  --color-primary-dark: #0051B3;
+  --color-primary-glow: rgba(0, 112, 243, 0.4);
+  
+  --color-background: #ffffff;
+  --color-surface: #fafafa;
+  --color-surface-hover: #f1f1f1;
+  
+  --color-text-primary: #111111;
+  --color-text-secondary: #666666;
+  --color-text-tertiary: #A1A1AA;
+  
+  --color-border: #EAEAEA;
+  --color-border-hover: #D0D0D0;
+  
+  --shadow-sm: 0 2px 8px -2px rgba(0,0,0,0.05);
+  --shadow-md: 0 8px 30px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.08);
+  --shadow-glow: 0 0 24px rgba(0, 112, 243, 0.15);
+  --shadow-card: var(--shadow-md);
+  
   --color-sidebar: #ffffff;
-  --color-sidebar-text: #0f172a;
-  --color-sidebar-text-secondary: #475569;
-  --color-sidebar-hover: #f1f5f9;
-  --color-header: rgba(255, 255, 255, 0.95);
+  --color-sidebar-text: #111111;
+  --color-sidebar-text-secondary: #666666;
+  --color-sidebar-hover: #fafafa;
+  --color-header: rgba(255, 255, 255, 0.85);
   --color-input: #ffffff;
+  
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  
+  --grid-color: rgba(0,0,0,0.03);
 }
 
 .dark {
-  --color-background: #020617;
-  --color-surface: #0f172a;
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #94a3b8;
-  --color-border: #1e293b;
-  --shadow-card: 0 4px 20px -1px rgba(0, 0, 0, 0.3);
-  --color-sidebar: #0f172a;
-  --color-sidebar-text: #f8fafc;
-  --color-sidebar-text-secondary: #94a3b8;
+  /* Ultra-Premium Dark Mode Colors (Linear / Modern SaaS) */
+  --color-primary: #3b82f6; /* Bright vibrant blue */
+  --color-primary-dark: #60a5fa;
+  --color-primary-glow: rgba(59, 130, 246, 0.5);
+  
+  --color-background: #000000;
+  --color-surface: #0a0a0a;
+  --color-surface-hover: #171717;
+  
+  --color-text-primary: #ededed;
+  --color-text-secondary: #a1a1aa;
+  --color-text-tertiary: #52525b;
+  
+  --color-border: #1f1f1f;
+  --color-border-hover: #333333;
+  
+  --shadow-sm: 0 0 1px 1px rgba(255,255,255,0.05);
+  --shadow-md: 0 0 0 1px rgba(255,255,255,0.05), 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-lg: 0 0 0 1px rgba(255,255,255,0.1), 0 24px 40px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 24px rgba(59, 130, 246, 0.25);
+  --shadow-card: var(--shadow-md);
+  
+  --color-sidebar: #0a0a0a;
+  --color-sidebar-text: #ededed;
+  --color-sidebar-text-secondary: #a1a1aa;
   --color-sidebar-hover: rgba(255, 255, 255, 0.05);
-  --color-header: rgba(15, 23, 42, 0.95);
-  --color-input: #020617;
+  --color-header: rgba(0, 0, 0, 0.85);
+  --color-input: #0a0a0a;
+  
+  --glass-bg: rgba(10, 10, 10, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  
+  --grid-color: rgba(255,255,255,0.03);
 }
 
 @theme {
@@ -48,7 +88,7 @@
   --color-header-bg: var(--color-header);
   --color-field-bg: var(--color-input);
 
-  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+  --shadow-glow: var(--shadow-glow);
   --shadow-main: var(--shadow-card);
 }
 
@@ -56,28 +96,58 @@
   html {
     color-scheme: light dark;
     scroll-behavior: smooth;
-  }
-
-  body {
-    @apply font-sans antialiased selection:bg-blue-500/30 selection:text-white;
-    background-color: var(--color-background);
-    color: var(--color-text-primary);
-    background-image:
-      radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.03) 0%, transparent 40%),
-      radial-gradient(circle at 0% 100%, rgba(99, 102, 241, 0.03) 0%, transparent 40%);
-    background-attachment: fixed;
-    transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-display tracking-tight;
+  body {
+    @apply font-sans selection:bg-blue-500/30 selection:text-white transition-colors duration-500 ease-in-out;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    
+    /* Subtle dot grid pattern */
+    background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: center;
+  }
+  
+  /* Adding gradient ambient glow behind app */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -20vh;
+    left: -20vw;
+    width: 60vw;
+    height: 60vh;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, var(--color-primary-glow) 0%, transparent 60%);
+    filter: blur(100px);
+    z-index: -1;
+    opacity: 0.15;
+    transform: translateZ(0);
+    pointer-events: none;
+    transition: background 0.7s ease;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -20vh;
+    right: -20vw;
+    width: 50vw;
+    height: 50vh;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.3) 0%, transparent 70%); /* Purple faint glow */
+    filter: blur(100px);
+    z-index: -1;
+    opacity: 0.15;
+    transform: translateZ(0);
+    pointer-events: none;
+    transition: background 0.7s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight text-balance;
     color: var(--color-text-primary);
   }
 }
@@ -87,210 +157,187 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
+  /* Ultra-Premium Button Styles */
   .btn {
-    @apply inline-flex items-center justify-center px-6 py-3 rounded-xl font-medium transition-all duration-300 ease-out gap-2 cursor-pointer relative overflow-hidden;
-    will-change: transform, background-color, box-shadow;
+    @apply relative inline-flex items-center justify-center px-6 py-3 text-sm font-medium transition-all duration-300 gap-2 cursor-pointer overflow-hidden rounded-full;
+    will-change: transform, box-shadow;
   }
 
   .btn-primary {
-    @apply bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:shadow-blue-500/30 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed;
+    background-color: var(--color-text-primary);
+    color: var(--color-background);
+    @apply shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .dark .btn-primary {
+    background-color: var(--color-text-primary);
+    color: var(--color-background);
+    @apply shadow-[0_0_20px_rgba(255,255,255,0.1)];
+  }
+  
+  .btn-primary:hover {
+    box-shadow: 0 4px 20px var(--color-primary-glow);
   }
 
-  .btn-primary::after {
+  .btn-primary::before {
     content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full;
-    transition: transform 0.6s ease;
+    @apply absolute inset-0 bg-white/20 opacity-0 transition-opacity duration-300 rounded-full;
+  }
+  .dark .btn-primary::before {
+    @apply bg-black/20;
   }
 
-  .btn-primary:hover::after {
-    @apply translate-x-full;
+  .btn-primary:hover::before {
+    @apply opacity-100;
   }
 
   .btn-secondary {
-    background-color: var(--color-surface);
+    background-color: transparent;
     color: var(--color-text-primary);
     border: 1px solid var(--color-border);
-    @apply shadow-sm hover:-translate-y-0.5 transition-all duration-300;
+    @apply hover:bg-black/5 hover:border-black/20 transition-all duration-300;
   }
 
-  .btn-secondary:hover {
-    @apply shadow-md;
-    border-color: var(--color-primary);
-    background-color: var(--color-background);
+  .dark .btn-secondary {
+    @apply hover:bg-white/5 hover:border-white/20;
   }
 
+  /* Premium Card Styles */
   .card {
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     color: var(--color-text-primary);
-    @apply rounded-2xl p-8 transition-all duration-300 ease-out relative overflow-hidden backdrop-blur-sm;
     box-shadow: var(--shadow-card);
-    will-change: transform, box-shadow;
-  }
-
-  .dark .card {
-    background-color: rgba(15, 23, 42, 0.6);
+    @apply rounded-2xl p-6 transition-all duration-500 relative overflow-hidden;
+    transform-style: preserve-3d;
   }
 
   .card:hover {
     @apply -translate-y-1;
-    box-shadow: var(--shadow-card-hover, 0 20px 25px -5px rgba(0, 0, 0, 0.1));
-    border-color: var(--color-primary);
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-lg);
   }
 
-  .badge-success {
-    @apply bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  /* Glassmorphic Panel (Apple-like) */
+  .glass-panel {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .dark .glass-panel {
+    background: rgba(10, 10, 10, 0.4);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
-  .dark .badge-success {
-    @apply text-emerald-400;
-  }
-
-  .badge-warning {
-    @apply bg-amber-500/10 text-amber-600 border border-amber-500/20 px-2.5 py-0.5 rounded-full text-xs font-semibold;
-  }
-
-  .dark .badge-warning {
-    @apply text-amber-400;
-  }
-
-  .badge-neutral {
-    @apply bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
-  }
-
-  .dark .badge-neutral {
-    @apply bg-slate-800 text-slate-300 border-slate-700;
-  }
-
+  /* Input fields */
   .input {
     background-color: var(--color-input);
     border: 1px solid var(--color-border);
     color: var(--color-text-primary);
-    @apply w-full px-4 py-3 rounded-xl backdrop-blur-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm;
+    @apply w-full px-4 py-3 rounded-xl transition-all shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500;
+  }
+  
+  .dark .input:focus {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3), inset 0 1px 1px rgba(0,0,0,0.5);
   }
 
   .label {
-    @apply block text-sm font-semibold mb-2;
+    @apply block text-sm font-medium mb-1.5;
     color: var(--color-text-secondary);
   }
 
-  .glass-panel {
-    background-color: var(--color-header);
-    @apply backdrop-blur-xl border border-slate-200 shadow-2xl;
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-colors;
   }
 
-  .dark .glass-panel {
-    @apply border-slate-800 shadow-black/50;
+  .badge-success {
+    @apply bg-emerald-100 text-emerald-800 border border-emerald-200;
+  }
+  .dark .badge-success {
+    @apply bg-emerald-500/10 text-emerald-400 border-emerald-500/20;
+  }
+
+  .badge-warning {
+    @apply bg-amber-100 text-amber-800 border border-amber-200;
+  }
+  .dark .badge-warning {
+    @apply bg-amber-500/10 text-amber-400 border-amber-500/20;
+  }
+
+  .badge-neutral {
+    @apply bg-gray-100 text-gray-800 border border-gray-200;
+  }
+  .dark .badge-neutral {
+    @apply bg-white/5 text-gray-300 border-white/10;
   }
 }
 
 @layer utilities {
-  .bg-body {
-    background-color: var(--color-background);
+  .bg-body { background-color: var(--color-background); }
+  .text-main { color: var(--color-text-primary); }
+  .text-secondary { color: var(--color-text-secondary); }
+  .border-main { border-color: var(--color-border); }
+  .bg-card { background-color: var(--color-surface); }
+  .bg-surface { background-color: var(--color-surface); }
+  
+  /* Text gradients */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, var(--color-text-primary) 0%, var(--color-text-secondary) 100%);
+  }
+  
+  .dark .text-gradient {
+    background-image: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
   }
 
-  .text-main {
-    color: var(--color-text-primary);
-  }
-
-  .text-secondary {
-    color: var(--color-text-secondary);
-  }
-
-  .border-main {
-    border-color: var(--color-border);
-  }
-
-  .bg-card {
-    background-color: var(--color-surface);
-  }
-
-  .bg-surface {
-    background-color: var(--color-surface);
-  }
-
-  .bg-sidebar {
-    background-color: var(--color-sidebar);
-  }
-
-  .text-sidebar-primary {
-    color: var(--color-sidebar-text);
-  }
-
-  .text-sidebar-secondary {
-    color: var(--color-sidebar-text-secondary);
-  }
-
-  .bg-sidebar-hover {
-    background-color: var(--color-sidebar-hover);
-  }
-
-  .text-link {
-    @apply text-blue-500;
-  }
-
-  .bg-header {
-    background-color: var(--color-header);
-  }
-
-  .bg-table-header {
-    background-color: var(--color-background);
-    @apply opacity-80 backdrop-blur-md;
-  }
-
-  .divide-main {
-    border-color: var(--color-border);
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   }
 }
 
-/* Custom Animations */
+/* ═══ Ultra Smooth Animations ═══ */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-    filter: blur(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
+  from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 
 @keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-10px);
-  }
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(0.5deg); }
 }
 
 @keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; transform: scale(1); filter: blur(10px); }
+  50% { opacity: 1; transform: scale(1.05); filter: blur(15px); }
+}
 
-  0%,
-  100% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
+@keyframes revealSlow {
+  from { clip-path: inset(100% 0 0 0); opacity: 0; }
+  to { clip-path: inset(0 0 0 0); opacity: 1; }
+}
 
-  50% {
-    opacity: 0.8;
-    transform: scale(1.05);
-  }
+@keyframes gradient-x {
+  0%, 100% { background-size: 200% 200%; background-position: left center; }
+  50% { background-size: 200% 200%; background-position: right center; }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   will-change: transform, opacity, filter;
 }
 
 .animate-float {
-  animation: float 6s ease-in-out infinite;
+  animation: float 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   will-change: transform;
 }
 
@@ -298,97 +345,97 @@
   animation: pulse-glow 4s ease-in-out infinite;
 }
 
-.delay-100 {
-  animation-delay: 100ms;
-}
-
-.delay-200 {
-  animation-delay: 200ms;
-}
-
-.delay-300 {
-  animation-delay: 300ms;
-}
-
-.delay-400 {
-  animation-delay: 400ms;
-}
-
-.delay-500 {
-  animation-delay: 500ms;
-}
-
-@keyframes gradient-x {
-
-  0%,
-  100% {
-    background-size: 200% 200%;
-    background-position: left center;
-  }
-
-  50% {
-    background-size: 200% 200%;
-    background-position: right center;
-  }
-}
-
-@keyframes text-gradient-flow {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
+.animate-reveal {
+  animation: revealSlow 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards;
 }
 
 .animate-gradient-x {
-  animation: gradient-x 15s ease infinite;
-}
-
-.animate-text-color {
-  background-size: 200% auto;
-  animation: text-gradient-flow 5s ease infinite;
-}
-
-/* ═══ Spotlight Card Hover Effect ═══ */
-.spotlight-card {
-  position: relative;
-  border-radius: 1.5rem;
-  overflow: hidden;
-  transition: border-color 0.4s ease, box-shadow 0.4s ease;
-}
-
-.spotlight-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  opacity: 0;
-  background: radial-gradient(
-    600px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
-    rgba(59, 130, 246, 0.06),
-    transparent 40%
-  );
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  z-index: 5;
-}
-
-.spotlight-card:hover::after {
-  opacity: 1;
-}
-
-/* ═══ Marquee / Logo Scroll ═══ */
-@keyframes marquee {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
+  animation: gradient-x 10s ease infinite;
 }
 
 .animate-marquee {
   animation: marquee 30s linear infinite;
+}
+
+/* Staggered animation delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+
+/* ═══ Spotlight Hover Effect ═══ */
+/* For React components that track mouse position (e.g., using onMouseMove to set --mouse-x, --mouse-y) */
+.spotlight-card {
+  position: relative;
+}
+
+.spotlight-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+    rgba(255, 255, 255, 0.1),
+    transparent 40%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.5s;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+.spotlight-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+    rgba(255, 255, 255, 0.03),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.5s;
+  pointer-events: none;
+}
+
+.dark .spotlight-bg {
+  background: radial-gradient(
+    800px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+    rgba(255, 255, 255, 0.06),
+    transparent 40%
+  );
+}
+
+.spotlight-card:hover > .spotlight-bg {
+  opacity: 1;
+}
+
+/* Spline 3D container default states */
+.spline-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+  transition: filter 0.5s ease;
+}
+
+.spline-container.loading {
+  filter: blur(10px);
+  opacity: 0;
+}
+
+.spline-container.ready {
+  filter: blur(0px);
+  opacity: 1;
 }

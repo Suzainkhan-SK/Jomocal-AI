@@ -115,7 +115,7 @@ const LandingPage = () => {
             <Navbar />
 
             {/* ═══════════════════════ ABSOLUTE STUNNING HERO ═══════════════════════ */}
-            <header ref={heroRef} className="relative pt-12 md:pt-28 pb-32 overflow-hidden min-h-[95vh] flex flex-col justify-start">
+            <header ref={heroRef} className="relative pt-12 md:pt-28 pb-32 overflow-visible md:overflow-hidden min-h-[95vh] flex flex-col justify-start">
                 
                 {/* Immersive Background System */}
                 <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
@@ -207,7 +207,7 @@ const LandingPage = () => {
                 </motion.div>
 
                 {/* The Floating App Interface UI - HIGHLIGHTING THE "1-CLICK" NATURE */}
-                <div className="relative z-20 w-full px-2 sm:px-4 md:px-8 mt-12 md:mt-24 perspective-[1000px] md:perspective-[2000px] overflow-hidden md:overflow-visible pb-10">
+                <div className="relative z-20 w-full px-2 sm:px-4 md:px-8 mt-12 md:mt-24 perspective-[1000px] md:perspective-[2000px] overflow-visible pb-10">
                     <motion.div 
                         style={{ rotateX: dashRotateX, scale: dashScale, y: dashY }}
                         className="w-full md:w-full ml-0 md:ml-0 max-w-[95%] md:max-w-[70rem] mx-auto xl:ml-auto relative transform-gpu origin-top will-change-transform"

@@ -74,18 +74,20 @@ const LandingPage = () => {
                 {/* Immersive Background System */}
                 <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
                     {/* Perspective Grid with deep vanishing point */}
-                    <div className="absolute inset-x-0 bottom-0 h-[80vh] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+Cgk8cGF0aCBkPSJNMCAwbDQwIDBMMDAgNDBsLTQwIDBMMCAwaHoiIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSIjODg4IiBzdHJva2Utd2lkdGg9IjAuMiIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')] [mask-image:linear-gradient(to_top,white_10%,transparent_90%)] mix-blend-overlay dark:opacity-[0.15] opacity-30 transform perspective-1000 rotateX-60 scale-150 translate-y-[20%]"></div>
+                    <div className="absolute inset-x-0 bottom-0 h-[80vh] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+Cgk8cGF0aCBkPSJNMCAwbDQwIDBMMDAgNDBsLTQwIDBMMCAwaHoiIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSIjODg4IiBzdHJva2Utd2lkdGg9IjAuMiIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')] [mask-image:linear-gradient(to_top,white_10%,transparent_90%)] mix-blend-overlay dark:opacity-[0.15] opacity-30 transform-gpu perspective-1000 rotateX-60 scale-150 translate-y-[20%] will-change-transform"></div>
                     
                     {/* Massive Glowing Orbs */}
                     <motion.div 
                         animate={{ scale: [1, 1.1, 1], opacity: [0.6, 0.8, 0.6] }}
                         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute top-0 right-[10%] w-[60vw] h-[60vw] rounded-full bg-blue-500/20 dark:bg-blue-500/10 blur-[150px] mix-blend-screen pointer-events-none"
+                        className="absolute top-0 right-[10%] w-[60vw] h-[60vw] rounded-full bg-blue-500/20 dark:bg-blue-500/10 blur-[150px] mix-blend-screen pointer-events-none transform-gpu will-change-transform opacity-60"
+                        style={{ translateZ: 0 }}
                     ></motion.div>
                     <motion.div 
                         animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.7, 0.5] }}
                         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                        className="absolute bottom-[20%] left-[5%] w-[50vw] h-[50vw] rounded-full bg-purple-500/20 dark:bg-purple-500/10 blur-[130px] mix-blend-screen pointer-events-none"
+                        className="absolute bottom-[20%] left-[5%] w-[50vw] h-[50vw] rounded-full bg-purple-500/20 dark:bg-purple-500/10 blur-[130px] mix-blend-screen pointer-events-none transform-gpu will-change-transform opacity-50"
+                        style={{ translateZ: 0 }}
                     ></motion.div>
                     
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-body/50 to-body"></div>
@@ -162,13 +164,13 @@ const LandingPage = () => {
                 <div className="relative z-20 w-full px-2 sm:px-4 md:px-8 mt-12 md:mt-24 perspective-[1000px] md:perspective-[2000px] overflow-hidden md:overflow-visible pb-10">
                     <motion.div 
                         style={{ rotateX: dashRotateX, scale: dashScale, y: dashY }}
-                        className="w-[125%] md:w-full ml-[-12.5%] md:ml-0 max-w-none md:max-w-[70rem] mx-auto xl:ml-auto relative transform-gpu origin-top"
+                        className="w-[125%] md:w-full ml-[-12.5%] md:ml-0 max-w-none md:max-w-[70rem] mx-auto xl:ml-auto relative transform-gpu origin-top will-change-transform"
                     >
                         {/* Dramatic Glow under the dashboard */}
-                        <div className="absolute -inset-10 bg-gradient-to-b from-blue-600/30 to-purple-600/0 blur-[100px] -z-10 rounded-[3rem] pointer-events-none"></div>
+                        <div className="absolute -inset-10 bg-gradient-to-b from-blue-600/30 to-purple-600/0 blur-[100px] -z-10 rounded-[3rem] pointer-events-none transform-gpu"></div>
                         
                         {/* Dashboard Frame */}
-                        <div className="rounded-[1.5rem] md:rounded-[2.5rem] p-2 bg-gradient-to-b from-white/60 to-white/10 dark:from-white/10 dark:to-white/5 border border-white/40 dark:border-white/10 shadow-2xl backdrop-blur-2xl ring-1 ring-black/5">
+                        <div className="rounded-[1.5rem] md:rounded-[2.5rem] p-2 bg-gradient-to-b from-white/60 to-white/10 dark:from-white/10 dark:to-white/5 border border-white/40 dark:border-white/10 shadow-2xl backdrop-blur-lg ring-1 ring-black/5 transform-gpu">
                             <div className="relative rounded-xl md:rounded-[2rem] overflow-hidden bg-white dark:bg-[#0a0a0c] shadow-inner h-[600px] sm:h-[650px] md:h-auto md:aspect-[16/9] border border-gray-200/50 dark:border-[#222]">
                                 
                                 {/* macOS Header */}
@@ -235,9 +237,9 @@ const LandingPage = () => {
                                                         {/* Animated Toggle Switch */}
                                                         <div className="relative">
                                                             <div className="w-14 h-8 bg-green-500 rounded-full shadow-inner flex items-center px-1 cursor-pointer">
-                                                                <motion.div animate={{ x: 24 }} className="w-6 h-6 bg-white rounded-full shadow-md"></motion.div>
+                                                                <motion.div animate={{ x: 24 }} className="w-6 h-6 bg-white rounded-full shadow-md transform-gpu"></motion.div>
                                                             </div>
-                                                            <div className="absolute -inset-4 bg-green-500/20 blur-xl rounded-full z-0 opacity-50 block"></div>
+                                                            <div className="absolute -inset-4 bg-green-500/20 blur-xl rounded-full z-0 opacity-50 block transform-gpu pointer-events-none"></div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -292,7 +294,7 @@ const LandingPage = () => {
                             <motion.div 
                                 animate={{ x: [0, 80, 0], y: [0, -30, 0] }}
                                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute top-1/2 right-[20%] z-40 drop-shadow-2xl"
+                                className="absolute top-1/2 right-[20%] z-40 drop-shadow-2xl transform-gpu will-change-transform"
                             >
                                 <MousePointerClick className="w-10 h-10 text-main fill-body" />
                                 <div className="absolute top-8 left-6 bg-black text-white px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shadow-xl border border-white/20">Just 1 Click</div>

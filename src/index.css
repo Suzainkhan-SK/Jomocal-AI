@@ -121,12 +121,12 @@
     height: 60vh;
     border-radius: 50%;
     background: radial-gradient(ellipse at center, var(--color-primary-glow) 0%, transparent 60%);
-    filter: blur(100px);
     z-index: -1;
     opacity: 0.15;
     transform: translateZ(0);
     pointer-events: none;
     transition: background 0.7s ease;
+    will-change: transform;
   }
 
   body::after {
@@ -138,12 +138,12 @@
     height: 50vh;
     border-radius: 50%;
     background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.3) 0%, transparent 70%); /* Purple faint glow */
-    filter: blur(100px);
     z-index: -1;
     opacity: 0.15;
     transform: translateZ(0);
     pointer-events: none;
     transition: background 0.7s ease;
+    will-change: transform;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -312,8 +312,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.6; transform: scale(1); filter: blur(10px); }
-  50% { opacity: 1; transform: scale(1.05); filter: blur(15px); }
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
 }
 
 @keyframes revealSlow {

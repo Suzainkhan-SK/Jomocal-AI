@@ -1,13 +1,15 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence, useSpring } from 'framer-motion';
 import {
     ArrowRight, Play, Zap, Users, MessageSquare, Video, Bot,
     Sparkles, ShieldCheck, CheckCircle, Globe, Layers, TrendingUp,
     ChevronRight, Activity, Youtube, Instagram, Facebook, Mail, Link as LinkIcon, Smartphone,
-    Check, MousePointerClick, Mic, Rocket, Phone
+    Check, MousePointerClick, Mic, Rocket, Phone, Store
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import { Player } from '@remotion/player';
+import { JomocalIntro } from '../remotion/compositions/JomocalIntro';
 
 // --- Reusable Spotlight Wrapper ---
 const SpotlightCard = ({ children, className = "", ...props }) => {
@@ -535,38 +537,38 @@ const LandingPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-12 auto-rows-[minmax(300px,auto)] gap-6 max-w-7xl mx-auto">
                         
                         {/* FEATURE 1: VIDEO AI (LARGE) */}
-                        <SpotlightCard className="md:col-span-8 p-6 sm:p-8 md:p-12 flex flex-col justify-between overflow-visible">
-                            <div className="relative z-20 max-w-lg mb-8">
-                                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-red-50 dark:bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 mb-6 md:mb-8 shadow-lg shadow-red-500/20">
-                                    <Video size={24} className="w-5 h-5 md:w-6 md:h-6" />
-                                </div>
-                                <h3 className="text-2xl md:text-3xl font-display font-bold text-main mb-4">Make Marketing Videos Without Face</h3>
-                                <p className="text-secondary text-sm sm:text-base md:text-lg mb-8 leading-relaxed">
-                                    Type a simple sentence about your product, and our smart AI creates a complete, professional video. It writes the script, speaks in a clear local voice, and adds images—ready for you to upload on YouTube or Instagram Reels instantly!
-                                </p>
-                                <div className="flex flex-wrap gap-3">
-                                    <div className="flex items-center gap-2 text-sm font-semibold bg-white dark:bg-black border border-main rounded-xl px-4 py-2.5 text-main shadow-sm"><Mic size={16} className="text-blue-500"/> Beautiful Voices</div>
-                                    <div className="flex items-center gap-2 text-sm font-semibold bg-white dark:bg-black border border-main rounded-xl px-4 py-2.5 text-main shadow-sm"><YoutubeIcon size={16} className="text-red-500"/> Perfect for Reels</div>
-                                </div>
-                            </div>
-                            
-                            {/* Visual Asset floating right */}
-                            <div className="absolute right-0 bottom-0 top-0 w-1/2 opacity-30 md:opacity-100 pointer-events-none hidden md:block">
-                                <div className="absolute inset-0 bg-gradient-to-l from-transparent via-surface/60 to-surface z-10"></div>
-                                <motion.div animate={{ y: [-15, 15, -15] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-12 -right-16 w-80 h-64 bg-black rounded-2xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden rotate-[-5deg] p-1">
-                                    {/* Mock Video UI */}
-                                    <div className="w-full h-full bg-[#111] rounded-xl relative overflow-hidden flex flex-col">
-                                        <div className="h-40 bg-[url('https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=400&auto=format&fit=crop')] bg-cover bg-center flex items-center justify-center relative">
-                                            <div className="absolute inset-0 bg-black/40"></div>
-                                            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative z-10"><Play className="text-white fill-white" size={24}/></div>
-                                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-1.5 rounded-lg border border-white/20 text-white font-bold text-sm backdrop-blur">"Grow Your Views"</div>
-                                        </div>
-                                        <div className="p-4 flex-1">
-                                            <div className="h-2 w-full bg-[#333] rounded-full overflow-hidden"><div className="w-1/3 h-full bg-red-500"></div></div>
-                                            <div className="flex justify-between mt-2 text-[#777] text-xs font-mono"><span>Processing...</span><span>Done</span></div>
-                                        </div>
+                        <SpotlightCard className="md:col-span-8 p-6 sm:p-8 md:p-12">
+                            <div className="flex flex-col md:flex-row gap-8 items-center h-full">
+                                {/* Left: Text Content */}
+                                <div className="relative z-20 flex-1">
+                                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-red-50 dark:bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 mb-6 md:mb-8 shadow-lg shadow-red-500/20">
+                                        <Video size={24} className="w-5 h-5 md:w-6 md:h-6" />
                                     </div>
-                                </motion.div>
+                                    <h3 className="text-2xl md:text-3xl font-display font-bold text-main mb-4">Make Marketing Videos Without Face</h3>
+                                    <p className="text-secondary text-sm sm:text-base md:text-lg mb-8 leading-relaxed">
+                                        Type a simple sentence about your product, and our smart AI creates a complete, professional video. It writes the script, speaks in a clear local voice, and adds images—ready for you to upload on YouTube or Instagram Reels instantly!
+                                    </p>
+                                    <div className="flex flex-wrap gap-3">
+                                        <div className="flex items-center gap-2 text-sm font-semibold bg-white dark:bg-black border border-main rounded-xl px-4 py-2.5 text-main shadow-sm"><Mic size={16} className="text-blue-500"/> Beautiful Voices</div>
+                                        <div className="flex items-center gap-2 text-sm font-semibold bg-white dark:bg-black border border-main rounded-xl px-4 py-2.5 text-main shadow-sm"><YoutubeIcon size={16} className="text-red-500"/> Perfect for Reels</div>
+                                    </div>
+                                </div>
+
+                                {/* Right: Live Remotion Motion Graphic Preview */}
+                                <div className="flex-1 w-full flex items-center justify-center">
+                                    <div className="w-full rounded-2xl overflow-hidden border border-gray-200/50 dark:border-white/10 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)] hover:scale-[1.02] transition-all duration-500">
+                                        <Player
+                                            component={JomocalIntro}
+                                            compositionWidth={1920}
+                                            compositionHeight={1080}
+                                            durationInFrames={300}
+                                            fps={30}
+                                            loop
+                                            autoPlay
+                                            style={{ width: '100%', height: 'auto', aspectRatio: '16/9' }}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </SpotlightCard>
 
@@ -596,26 +598,47 @@ const LandingPage = () => {
                         </SpotlightCard>
 
                         {/* FEATURE 4: PRE-BUILT LIBRARY */}
-                        <SpotlightCard className="md:col-span-8 p-8 md:p-12">
-                            <div className="relative z-20 flex flex-col md:flex-row gap-8 items-center h-full">
-                                <div className="flex-1">
-                                    <div className="w-14 h-14 rounded-full bg-amber-50 dark:bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 mb-8 shadow-lg shadow-amber-500/20">
+                        <SpotlightCard className="md:col-span-8 p-6 sm:p-8 md:p-12">
+                            <div className="flex flex-col lg:flex-row gap-10 md:gap-16 items-center h-full">
+                                <div className="flex-1 text-center lg:text-left">
+                                    <div className="w-14 h-14 rounded-full bg-amber-50 dark:bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 mb-8 shadow-lg shadow-amber-500/20 mx-auto lg:mx-0">
                                         <Layers size={24} />
                                     </div>
-                                    <h3 className="text-3xl font-display font-bold text-main mb-4">A Store Full of Ready Solutions</h3>
-                                    <p className="text-secondary text-lg leading-relaxed mb-8">
+                                    <h3 className="text-3xl md:text-4xl font-display font-bold text-main mb-6 leading-tight">A Store Full of <br className="hidden md:block"/> Ready Solutions</h3>
+                                    <p className="text-secondary text-lg leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0">
                                         Need more stuff done? We have ready-made apps for managing Facebook posts, sending automatic invoices, and booking appointments. Browse our store, flip the switch, and relax.
                                     </p>
+                                    <div className="flex justify-center lg:justify-start">
+                                        <div className="inline-flex items-center gap-2 px-6 py-3.5 bg-amber-500 text-white rounded-2xl font-bold hover:bg-amber-600 transition-all shadow-xl shadow-amber-500/20 cursor-pointer group">
+                                            <Store size={18} /> 
+                                            <span>Explore Marketplace</span>
+                                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex-1 w-full relative h-[250px] flex items-center justify-center">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/10 to-transparent blur-2xl"></div>
-                                    <div className="grid grid-cols-2 gap-4 w-full px-4">
-                                        {[1,2,3,4].map((i) => (
-                                            <div key={i} className="bg-surface border border-main rounded-xl p-3 shadow-sm flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center shadow-lg"><CheckCircle size={14} className="text-white"/></div>
-                                                <div className="flex flex-col gap-1 w-full">
-                                                    <div className="h-2 w-16 bg-main/20 rounded-full"></div>
-                                                    <div className="h-1.5 w-10 bg-main/10 rounded-full"></div>
+
+                                <div className="flex-1 w-full relative min-h-[320px] lg:min-h-0 flex items-center justify-center">
+                                    {/* Glassy Background Surface */}
+                                    <div className="absolute inset-0 bg-blue-500/5 dark:bg-white/5 rounded-3xl backdrop-blur-3xl border border-main -rotate-1 skew-x-1"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-blue-500/5 blur-2xl opacity-60"></div>
+                                    
+                                    <div className="grid grid-cols-2 gap-4 w-full relative z-10 p-4">
+                                        {[
+                                            { name: 'Facebook Poster', icon: <FacebookIcon size={18} className="text-white" />, color: 'bg-blue-500' },
+                                            { name: 'Invoice Sender', icon: <GmailIcon size={18} className="text-white" />, color: 'bg-red-500' },
+                                            { name: 'Lead Collector', icon: <WhatsAppIcon size={18} className="text-white" />, color: 'bg-green-500' },
+                                            { name: 'Story Scheduler', icon: <InstagramIcon size={18} className="text-white" />, color: 'bg-purple-500' },
+                                        ].map((item, i) => (
+                                            <div key={i} className="group/item bg-surface border border-main rounded-2xl p-4 shadow-lg hover:-translate-y-1 hover:border-amber-500/30 transition-all duration-300">
+                                                <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center shadow-lg mb-4 group-hover/item:scale-110 transition-transform duration-300`}>
+                                                    {item.icon}
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-bold text-main leading-tight mb-1.5">{item.name}</span>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                                        <span className="text-[10px] text-secondary font-bold tracking-wider uppercase">Active</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}

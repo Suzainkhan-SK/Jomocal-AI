@@ -1,0 +1,758 @@
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { motion, useScroll, useTransform, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import {
+    ArrowRight,
+    MessageSquare,
+    Users,
+    Zap,
+    CheckCircle,
+    Bot,
+    Play,
+    TrendingUp,
+    Globe,
+    ShoppingBag,
+    Sparkles,
+    Video,
+    Mic,
+    UploadCloud,
+    ShieldCheck,
+    Layers,
+    DollarSign,
+    Star,
+    Clock,
+    BarChart3,
+    Send,
+    ChevronRight
+} from 'lucide-react';
+import Navbar from '../components/Navbar';
+import WorkflowAnimation from '../components/WorkflowAnimation';
+
+// --- ANIMATION VARIANTS ---
+const fadeUp = {
+    hidden: { opacity: 0, y: 30 },
+    visible: (custom = 0) => ({
+        opacity: 1,
+        y: 0,
+        transition: { delay: custom * 0.12, duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+    })
+};
+
+const staggerContainer = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.08 } }
+};
+
+// --- SPOTLIGHT HOVER EFFECT (CSS-driven, zero-JS-per-frame) ---
+const SpotlightCard = ({ children, className = "" }) => {
+    const ref = useRef(null);
+
+    const handleMouseMove = useCallback((e) => {
+        if (!ref.current) return;
+        const rect = ref.current.getBoundingClientRect();
+        ref.current.style.setProperty('--spotlight-x', `${e.clientX - rect.left}px`);
+        ref.current.style.setProperty('--spotlight-y', `${e.clientY - rect.top}px`);
+    }, []);
+
+    return (
+        <div ref={ref} onMouseMove={handleMouseMove} className={`spotlight-card ${className}`}>
+            {children}
+        </div>
+    );
+};
+
+// --- COUNTER ANIMATION ---
+const AnimatedCounter = ({ target, suffix = "", duration = 2000 }) => {
+    const [count, setCount] = useState(0);
+    const ref = useRef(null);
+    const started = useRef(false);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting && !started.current) {
+                started.current = true;
+                const startTime = Date.now();
+                const tick = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    setCount(Math.round(eased * target));
+                    if (progress < 1) requestAnimationFrame(tick);
+                };
+                requestAnimationFrame(tick);
+            }
+        }, { threshold: 0.5 });
+        if (ref.current) observer.observe(ref.current);
+        return () => observer.disconnect();
+    }, [target, duration]);
+
+    return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+};
+
+
+const LandingPage = () => {
+    const heroRef = useRef(null);
+    const [badgeText, setBadgeText] = useState("Now Live — AI-Powered Video Automation");
+
+    useEffect(() => {
+        const texts = [
+            "Now Live — AI-Powered Video Automation",
+            "Trusted by MSMEs & Creators Across India",
+            "Save 20+ Hours Every Week with AI",
+            "New: WhatsApp & Instagram Auto-Replies"
+        ];
+        let index = 0;
+        const interval = setInterval(() => {
+            index = (index + 1) % texts.length;
+            setBadgeText(texts[index]);
+        }, 3500);
+        return () => clearInterval(interval);
+    }, []);
+
+    const { scrollYProgress } = useScroll({
+        target: heroRef,
+        offset: ["start start", "end start"]
+    });
+    const heroY = useTransform(scrollYProgress, [0, 1], [0, 150]);
+
+    return (
+        <div className="min-h-screen flex flex-col bg-body relative selection:bg-blue-500/30 selection:text-white transition-colors">
+
+            <Navbar />
+
+            {/* ═══════════════════════ HERO ═══════════════════════ */}
+            <header ref={heroRef} className="relative pt-20 pb-12 md:pt-36 md:pb-40 overflow-hidden bg-body transition-colors">
+                {/* Background Animation */}
+                <div className="absolute inset-0 overflow-hidden">
+                    <WorkflowAnimation />
+                    <div className="absolute inset-0 bg-black/5 dark:bg-[#020617]/50 backdrop-blur-[1px] z-0 pointer-events-none"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 dark:via-[#0f172a]/20 to-body transition-colors pointer-events-none"></div>
+
+                    {/* Badge */}
+                    <div className="absolute top-4 right-4 md:top-10 md:right-10 z-20 pointer-events-auto">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={badgeText}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.3 }}
+                                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-black/80 backdrop-blur-md border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-100 text-[10px] md:text-xs font-medium hover:bg-white dark:hover:bg-black shadow-lg transition-all cursor-default"
+                            >
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                </span>
+                                <span>{badgeText}</span>
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+                </div>
+
+                <motion.div style={{ y: heroY }} className="container relative z-10 px-4 text-center max-w-5xl">
+                    {/* Headline */}
+                    <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                        className="relative z-30 text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-display font-bold tracking-tight text-main mb-4 md:mb-6 leading-tight md:leading-[1.1] drop-shadow-[0_4px_30px_rgba(0,0,0,0.6)] transition-colors"
+                    >
+                        Automate Your <br className="hidden md:block" />
+                        <span className="animate-text-color bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
+                            Business Growth.
+                        </span>
+                    </motion.h1>
+
+                    {/* Subheadline */}
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="relative z-30 text-sm sm:text-lg md:text-2xl text-secondary mb-10 md:mb-16 max-w-2xl mx-auto font-light leading-relaxed px-4 md:px-0 drop-shadow-xl transition-colors"
+                    >
+                        <span className="md:hidden">AI-powered automation for customer engagement, content creation, and daily operations.</span>
+                        <span className="hidden md:inline">The all-in-one AI automation platform that handles your customer engagement, content creation, and daily operations — so you can focus on what matters most.</span>
+                    </motion.p>
+
+                    {/* CTA Buttons */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.3 }}
+                        className="flex flex-col sm:flex-row items-center justify-center gap-3 px-4"
+                    >
+                        <Link to="/signup" className="btn btn-primary text-sm md:text-lg px-6 md:px-8 py-3 w-full sm:w-auto shadow-xl shadow-blue-500/20 group hover:scale-[1.03] transition-transform duration-200">
+                            Start Free Trial
+                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                        <button className="btn btn-secondary text-sm md:text-lg px-6 md:px-8 py-3 w-full sm:w-auto group flex items-center gap-2 border-main text-secondary hover:bg-surface hover:text-blue-500 transition-colors">
+                            <Play size={18} className="fill-current transition-colors" />
+                            Watch Demo
+                        </button>
+                    </motion.div>
+
+                    {/* Social Proof Micro-Bar */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.6 }}
+                        className="mt-8 md:mt-12 flex flex-wrap items-center justify-center gap-4 md:gap-8 text-xs text-secondary"
+                    >
+                        <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-green-500" /> No credit card required</span>
+                        <span className="flex items-center gap-1.5"><Clock size={14} className="text-blue-500" /> Setup in 2 minutes</span>
+                        <span className="flex items-center gap-1.5">
+                            <div className="flex -space-x-1">
+                                {[...Array(5)].map((_, i) => <Star key={i} size={12} className="text-amber-400 fill-amber-400" />)}
+                            </div>
+                            <span className="ml-1">Rated 4.9/5</span>
+                        </span>
+                    </motion.div>
+                </motion.div>
+            </header>
+
+            {/* ═══════════════════════ DASHBOARD PREVIEW ═══════════════════════ */}
+            <div className="relative -mt-4 md:-mt-12 z-20 px-2 sm:px-4 pb-12 md:pb-20">
+                <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+                    className="max-w-6xl mx-auto"
+                >
+                    <div className="relative rounded-xl md:rounded-3xl bg-surface/5 p-1 md:p-3 ring-1 ring-inset ring-main/10 backdrop-blur-sm transition-colors shadow-2xl dark:shadow-blue-500/5">
+                        <div className="rounded-lg md:rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-2xl border border-slate-200/60 dark:border-slate-700/50 aspect-[16/12] md:aspect-[21/9] relative group">
+
+                            {/* Dashboard Header */}
+                            <div className="absolute top-0 left-0 right-0 h-8 md:h-12 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex items-center px-3 md:px-4 justify-between z-10">
+                                <div className="flex gap-1.5 md:gap-2">
+                                    <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 group-hover:bg-red-400 transition-colors duration-300"></div>
+                                    <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 group-hover:bg-amber-400 transition-colors duration-300"></div>
+                                    <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 group-hover:bg-green-400 transition-colors duration-300"></div>
+                                </div>
+                            </div>
+
+                            {/* Dashboard Body */}
+                            <div className="absolute inset-0 pt-8 md:pt-12 bg-slate-50/50 dark:bg-slate-900/50 flex">
+                                {/* Sidebar */}
+                                <div className="hidden md:flex w-16 lg:w-48 border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex-col p-3 gap-2">
+                                    {[1, 2, 3, 4, 5].map(i => (
+                                        <div key={i} className={`h-8 w-full rounded-lg ${i === 1 ? 'bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}></div>
+                                    ))}
+                                </div>
+
+                                {/* Main Area */}
+                                <div className="flex-1 p-3 md:p-6 overflow-hidden relative">
+                                    {/* Stats Row */}
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6">
+                                        {[1, 2, 3, 4].map(i => (
+                                            <div key={i} className="bg-white dark:bg-slate-800 p-2 md:p-4 rounded-lg md:rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
+                                                <div className="h-1.5 md:h-2 w-8 md:w-12 bg-slate-100 dark:bg-slate-700 rounded mb-2"></div>
+                                                <div className="h-4 md:h-6 w-16 md:w-20 bg-slate-200 dark:bg-slate-600 rounded"></div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Charts Area */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 h-full">
+                                        <div className="md:col-span-2 bg-white dark:bg-slate-800 rounded-lg md:rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 relative overflow-hidden">
+                                            <div className="absolute inset-x-0 bottom-0 top-10 bg-gradient-to-t from-blue-50/50 dark:from-blue-500/5 to-transparent"></div>
+                                            <div className="absolute bottom-0 left-0 right-0 h-24 md:h-32 flex items-end justify-between px-4 md:px-6 pb-4 md:pb-6 gap-2">
+                                                {[40, 60, 45, 70, 50, 80, 65, 85, 90, 70].map((h, i) => (
+                                                    <div key={i} className="w-full bg-blue-500 rounded-t-sm opacity-20 dark:opacity-30" style={{ height: `${h}%` }}></div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 hidden md:block">
+                                            <div className="space-y-3">
+                                                {[1, 2, 3, 4].map(i => (
+                                                    <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50">
+                                                        <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-600 border border-slate-100 dark:border-slate-600"></div>
+                                                        <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-600 rounded-full w-12"></div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Floating Card: AI Video */}
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 1, duration: 0.8 }}
+                                className="absolute bottom-3 right-3 md:bottom-6 md:right-10 bg-white dark:bg-slate-800 p-2 md:p-4 rounded-xl md:rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 z-20 w-40 md:w-64"
+                            >
+                                <div className="flex items-center gap-2 md:gap-3 mb-1.5 md:mb-3">
+                                    <div className="w-6 h-6 md:w-10 md:h-10 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center text-red-600 dark:text-red-400">
+                                        <Video size={12} className="md:hidden" />
+                                        <Video size={18} className="hidden md:block" />
+                                    </div>
+                                    <div>
+                                        <div className="text-[8px] md:text-xs font-semibold text-slate-500 dark:text-slate-400">AI Video Studio</div>
+                                        <div className="text-[10px] md:text-sm font-bold text-slate-900 dark:text-white">Render Complete</div>
+                                    </div>
+                                </div>
+                                <div className="h-1 md:h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                    <div className="h-full bg-green-500 w-full animate-pulse"></div>
+                                </div>
+                            </motion.div>
+
+                            {/* Floating Card: New Lead */}
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 1.5, duration: 0.5 }}
+                                className="absolute top-10 left-3 md:top-20 md:left-24 bg-white dark:bg-slate-800 p-1.5 md:p-3 rounded-lg md:rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 z-20 flex items-center gap-2 md:gap-3"
+                            >
+                                <div className="relative">
+                                    <div className="w-6 h-6 md:w-10 md:h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-[10px] md:text-sm">JD</div>
+                                    <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 md:w-4 md:h-4 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></span>
+                                </div>
+                                <div>
+                                    <div className="text-[10px] md:text-xs font-bold text-slate-900 dark:text-white">New Lead Captured</div>
+                                    <div className="text-[8px] md:text-[10px] text-slate-500 dark:text-slate-400">Via Instagram DM</div>
+                                </div>
+                            </motion.div>
+
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* ═══════════════════════ STATS BAR ═══════════════════════ */}
+            <section className="py-10 md:py-14 border-y border-main bg-body transition-colors relative z-10">
+                <div className="container px-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 text-center">
+                        <div>
+                            <div className="text-3xl md:text-5xl font-bold text-main font-display transition-colors"><AnimatedCounter target={2500} suffix="+" /></div>
+                            <p className="text-xs md:text-sm text-secondary mt-2 font-medium">Businesses Automated</p>
+                        </div>
+                        <div>
+                            <div className="text-3xl md:text-5xl font-bold text-main font-display transition-colors"><AnimatedCounter target={50} suffix="K+" /></div>
+                            <p className="text-xs md:text-sm text-secondary mt-2 font-medium">Tasks Completed</p>
+                        </div>
+                        <div>
+                            <div className="text-3xl md:text-5xl font-bold text-main font-display transition-colors"><AnimatedCounter target={20} suffix="+" /></div>
+                            <p className="text-xs md:text-sm text-secondary mt-2 font-medium">Hours Saved Weekly</p>
+                        </div>
+                        <div>
+                            <div className="text-3xl md:text-5xl font-bold text-main font-display transition-colors"><AnimatedCounter target={99} suffix="%" /></div>
+                            <p className="text-xs md:text-sm text-secondary mt-2 font-medium">Customer Satisfaction</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════ TRUSTED LOGOS ═══════════════════════ */}
+            <section className="py-6 md:py-10 border-b border-main bg-body shadow-sm overflow-hidden relative transition-colors">
+                <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-body to-transparent z-10 transition-colors"></div>
+                <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-body to-transparent z-10 transition-colors"></div>
+
+                <div className="container mb-6 md:mb-8 text-center text-secondary">
+                    <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest font-sans">Trusted by Growing Businesses Across India</p>
+                </div>
+
+                <div className="flex overflow-hidden relative w-full">
+                    <div className="animate-marquee flex gap-8 md:gap-24 items-center whitespace-nowrap min-w-full">
+                        {[...Array(6)].map((_, setIndex) => (
+                            <React.Fragment key={setIndex}>
+                                <div className="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer">
+                                    <Globe className="w-5 h-5 md:w-6 md:h-6 text-blue-400" /> <span className="text-lg md:text-xl font-bold text-secondary font-display">GlobalScale</span>
+                                </div>
+                                <div className="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer">
+                                    <Layers className="w-5 h-5 md:w-6 md:h-6 text-indigo-400" /> <span className="text-lg md:text-xl font-bold text-secondary font-display">StackFlow</span>
+                                </div>
+                                <div className="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer">
+                                    <Zap className="w-5 h-5 md:w-6 md:h-6 text-amber-400" /> <span className="text-lg md:text-xl font-bold text-secondary font-display">FastTrack</span>
+                                </div>
+                                <div className="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer">
+                                    <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-emerald-400" /> <span className="text-lg md:text-xl font-bold text-secondary font-display">SecureNet</span>
+                                </div>
+                                <div className="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer">
+                                    <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-purple-400" /> <span className="text-lg md:text-xl font-bold text-secondary font-display">GrowthLab</span>
+                                </div>
+                            </React.Fragment>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════ WHO IS IT FOR ═══════════════════════ */}
+            <section className="py-16 md:py-32 bg-body transition-colors">
+                <div className="container px-4">
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        className="text-center max-w-3xl mx-auto mb-10 md:mb-20"
+                    >
+                        <motion.h2 variants={fadeUp} className="text-2xl md:text-5xl font-bold mb-4 md:mb-6 text-main font-display transition-colors">Built for Your Success</motion.h2>
+                        <motion.p variants={fadeUp} className="text-sm md:text-lg text-secondary font-light transition-colors">Whether you run a growing business or create content for a living — Jomocal AI adapts to your unique workflow and accelerates your results.</motion.p>
+                    </motion.div>
+
+                    <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
+                        {/* MSME Card */}
+                        <SpotlightCard className="group p-6 md:p-10 bg-surface border-2 border-main shadow-xl hover:border-blue-500/50 transition-all duration-300 relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 dark:from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="absolute top-0 right-0 p-8 opacity-[0.05] group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
+                                <ShoppingBag size={150} className="md:w-[200px] md:h-[200px]" />
+                            </div>
+                            <div className="relative z-10">
+                                <div className="mb-4 md:mb-6 flex items-center justify-between">
+                                    <span className="inline-block px-2.5 py-1 bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] md:text-xs font-bold rounded-full border border-blue-200 dark:border-blue-500/20">FOR MSMEs</span>
+                                    <ShoppingBag className="text-blue-200 dark:text-blue-500/30 w-6 h-6 md:hidden" />
+                                </div>
+
+                                <h3 className="text-xl md:text-3xl font-bold mb-2 md:mb-4 text-main font-display transition-colors">Small & Medium Businesses</h3>
+                                <p className="text-xs md:text-base text-secondary mb-6 md:mb-8 leading-relaxed transition-colors">
+                                    Streamline your customer support, lead management, and invoicing — all on autopilot. Focus on growing your business, not managing repetitive tasks.
+                                </p>
+                                <ul className="space-y-3 md:space-y-4 mb-8 md:mb-10">
+                                    <li className="flex items-start gap-2.5 md:gap-3 text-secondary font-medium text-xs md:text-base transition-colors">
+                                        <CheckCircle size={16} className="text-blue-400 shrink-0 mt-0.5" />
+                                        <span className="text-secondary">Respond to customer enquiries 24/7</span>
+                                    </li>
+                                    <li className="flex items-start gap-2.5 md:gap-3 font-medium text-xs md:text-base transition-colors">
+                                        <CheckCircle size={16} className="text-blue-400 shrink-0 mt-0.5" />
+                                        <span className="text-secondary">Automated invoice & payment reminders</span>
+                                    </li>
+                                    <li className="flex items-start gap-2.5 md:gap-3 font-medium text-xs md:text-base transition-colors">
+                                        <CheckCircle size={16} className="text-blue-400 shrink-0 mt-0.5" />
+                                        <span className="text-secondary">Capture & qualify leads automatically</span>
+                                    </li>
+                                </ul>
+                                <Link to="/signup?type=business" className="btn btn-outline bg-surface border-main text-secondary w-full justify-between group-hover:border-blue-500 group-hover:text-blue-500 text-xs md:text-base py-3 transition-colors">
+                                    Get Started for Business <ArrowRight size={16} />
+                                </Link>
+                            </div>
+                        </SpotlightCard>
+
+                        {/* Creator Card */}
+                        <SpotlightCard className="group p-6 md:p-10 bg-surface border-2 border-main shadow-xl hover:border-purple-500/50 transition-all duration-300 relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 dark:from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="absolute top-0 right-0 p-8 opacity-[0.05] group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
+                                <Sparkles size={150} className="md:w-[200px] md:h-[200px]" />
+                            </div>
+                            <div className="relative z-10">
+                                <div className="mb-4 md:mb-6 flex items-center justify-between">
+                                    <span className="inline-block px-2.5 py-1 bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 text-[10px] md:text-xs font-bold rounded-full border border-purple-200 dark:border-purple-500/20">FOR CREATORS</span>
+                                    <Sparkles className="text-purple-200 dark:text-purple-500/30 w-6 h-6 md:hidden" />
+                                </div>
+                                <h3 className="text-xl md:text-3xl font-bold mb-2 md:mb-4 text-main font-display transition-colors">Content Creators</h3>
+                                <p className="text-xs md:text-base text-secondary mb-6 md:mb-8 leading-relaxed transition-colors">
+                                    Scale your content production effortlessly. Create professional videos, engage your community, and grow your audience — without the burnout.
+                                </p>
+                                <ul className="space-y-3 md:space-y-4 mb-8 md:mb-10">
+                                    <li className="flex items-start gap-2.5 md:gap-3 text-secondary font-medium text-xs md:text-base transition-colors">
+                                        <CheckCircle size={16} className="text-purple-500 shrink-0 mt-0.5" />
+                                        <span>AI-powered video creation & publishing</span>
+                                    </li>
+                                    <li className="flex items-start gap-2.5 md:gap-3 text-secondary font-medium text-xs md:text-base transition-colors">
+                                        <CheckCircle size={16} className="text-purple-500 shrink-0 mt-0.5" />
+                                        <span>Automated DMs & audience engagement</span>
+                                    </li>
+                                    <li className="flex items-start gap-2.5 md:gap-3 text-secondary font-medium text-xs md:text-base transition-colors">
+                                        <CheckCircle size={16} className="text-purple-500 shrink-0 mt-0.5" />
+                                        <span>Smart content scheduling & distribution</span>
+                                    </li>
+                                </ul>
+                                <Link to="/signup?type=creator" className="btn btn-outline bg-surface border-main text-secondary w-full justify-between group-hover:border-purple-500 group-hover:text-purple-500 text-xs md:text-base py-3 transition-colors">
+                                    Get Started for Creators <ArrowRight size={16} />
+                                </Link>
+                            </div>
+                        </SpotlightCard>
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════ FEATURES BENTO GRID ═══════════════════════ */}
+            <section id="features" className="py-12 md:py-24 bg-body relative transition-colors">
+                <div className="absolute top-1/4 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+                <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+
+                <div className="container px-4">
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        className="text-center max-w-3xl mx-auto mb-10 md:mb-20"
+                    >
+                        <motion.h2 variants={fadeUp} className="text-2xl md:text-5xl font-bold mb-4 md:mb-6 text-main font-display transition-colors">Everything You Need to Grow</motion.h2>
+                        <motion.p variants={fadeUp} className="text-sm md:text-lg text-secondary font-light transition-colors">
+                            Powerful AI-driven tools designed to save you hours every day — from content creation to customer management.
+                        </motion.p>
+                    </motion.div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-4 gap-4 md:gap-6 max-w-7xl mx-auto">
+
+                        {/* YouTube AI (Hero Feature) */}
+                        <SpotlightCard className="md:col-span-6 lg:col-span-4 card group relative overflow-hidden bg-surface text-main border-main p-6 md:p-8 transition-colors">
+                            <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-red-500/10 to-transparent"></div>
+                            <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                                <div className="flex-1 text-center md:text-left">
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-red-500 text-[10px] md:text-xs font-bold mb-4 md:mb-6 border border-red-500/20">
+                                        <Sparkles size={12} /> FLAGSHIP FEATURE
+                                    </div>
+                                    <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4 font-display text-main transition-colors">AI Video Automation</h3>
+                                    <p className="text-secondary text-sm md:text-base leading-relaxed mb-6 md:mb-8 max-w-lg transition-colors">
+                                        Create professional-quality videos from a simple text prompt. Our AI writes the script, generates voiceovers, edits the video, adds subtitles, and publishes it — all automatically.
+                                    </p>
+                                    <div className="flex flex-wrap gap-2 md:gap-3 justify-center md:justify-start">
+                                        <span className="px-2 md:px-3 py-1 bg-surface rounded-lg text-[10px] md:text-xs font-medium text-secondary border border-main flex items-center gap-1 transition-colors"><Mic size={12} /> AI Voiceover</span>
+                                        <span className="px-2 md:px-3 py-1 bg-surface rounded-lg text-[10px] md:text-xs font-medium text-secondary border border-main flex items-center gap-1 transition-colors"><Video size={12} /> Smart Editing</span>
+                                        <span className="px-2 md:px-3 py-1 bg-surface rounded-lg text-[10px] md:text-xs font-medium text-secondary border border-main flex items-center gap-1 transition-colors"><UploadCloud size={12} /> Auto-Publish</span>
+                                    </div>
+                                </div>
+                                <div className="flex-1 relative w-full h-48 md:h-64 rounded-xl bg-body border border-main overflow-hidden shadow-2xl transition-colors">
+                                    <div className="absolute inset-x-0 bottom-0 h-1 bg-red-600 z-20"></div>
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-xl group-hover:scale-110 transition-transform duration-300 cursor-pointer">
+                                            <Play size={20} className="fill-white text-white ml-1 md:w-6 md:h-6" />
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-4 left-4 right-4 z-10">
+                                        <div className="h-1.5 md:h-2 w-2/3 bg-slate-700 rounded-lg mb-2"></div>
+                                        <div className="h-1.5 md:h-2 w-1/2 bg-slate-700 rounded-lg"></div>
+                                    </div>
+                                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md text-[10px] md:text-xs font-bold font-mono text-white">
+                                        AI POWERED
+                                    </div>
+                                </div>
+                            </div>
+                        </SpotlightCard>
+
+                        {/* Feature Cards */}
+                        <BentoCard
+                            title="Smart Auto-Replies"
+                            desc="Respond to customer messages on WhatsApp & Instagram instantly with human-like AI conversations."
+                            icon={<MessageSquare size={20} />}
+                            color="blue"
+                            className="md:col-span-3 lg:col-span-2 min-h-[220px]"
+                        />
+
+                        <BentoCard
+                            title="Lead Capture & CRM"
+                            desc="Automatically capture every potential customer and organize them — never lose a lead again."
+                            icon={<Users size={20} />}
+                            color="green"
+                            className="md:col-span-3 lg:col-span-2 min-h-[220px]"
+                        />
+
+                        <BentoCard
+                            title="Automated Invoicing"
+                            desc="Generate and send professional invoices, track payments, and send reminders — all on autopilot."
+                            icon={<DollarSign size={20} />}
+                            color="orange"
+                            className="md:col-span-6 lg:col-span-4 min-h-[180px] flex-row items-center"
+                        />
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════ HOW IT WORKS ═══════════════════════ */}
+            <section id="how-it-works" className="py-16 md:py-28 bg-surface border-y border-main transition-colors">
+                <div className="container px-4">
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        className="text-center max-w-3xl mx-auto mb-12 md:mb-20"
+                    >
+                        <motion.h2 variants={fadeUp} className="text-2xl md:text-5xl font-bold mb-4 md:mb-6 text-main font-display transition-colors">Up and Running in 3 Simple Steps</motion.h2>
+                        <motion.p variants={fadeUp} className="text-sm md:text-lg text-secondary font-light transition-colors">
+                            No technical skills required. Connect your accounts, choose your automations, and let Jomocal AI do the rest.
+                        </motion.p>
+                    </motion.div>
+
+                    <div className="grid md:grid-cols-3 gap-8 md:gap-12 max-w-5xl mx-auto">
+                        {[
+                            { step: "01", icon: <Globe size={28} />, title: "Connect Your Accounts", desc: "Link your YouTube, Instagram, WhatsApp, Gmail, or Telegram accounts securely in just a few clicks." },
+                            { step: "02", icon: <Zap size={28} />, title: "Choose Your Automations", desc: "Select from ready-made AI workflows — video creation, auto-replies, lead capture, invoicing, and more." },
+                            { step: "03", icon: <BarChart3 size={28} />, title: "Watch Results Roll In", desc: "Sit back and monitor everything from your dashboard. Jomocal AI works around the clock for you." },
+                        ].map((item, i) => (
+                            <motion.div
+                                key={i}
+                                variants={fadeUp}
+                                custom={i}
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true }}
+                                className="text-center md:text-left group"
+                            >
+                                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/10 dark:bg-blue-500/10 text-blue-500 mb-6 group-hover:shadow-lg group-hover:shadow-blue-500/10 transition-all duration-300 group-hover:scale-110 border border-blue-500/20">
+                                    {item.icon}
+                                </div>
+                                <div className="text-xs font-bold text-blue-500 mb-2 tracking-widest uppercase">Step {item.step}</div>
+                                <h3 className="text-lg md:text-xl font-bold mb-3 text-main font-display transition-colors">{item.title}</h3>
+                                <p className="text-sm md:text-base text-secondary leading-relaxed transition-colors">{item.desc}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════ TESTIMONIAL ═══════════════════════ */}
+            <section className="py-16 md:py-24 bg-body transition-colors">
+                <div className="container px-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                        className="max-w-4xl mx-auto text-center"
+                    >
+                        <div className="flex justify-center mb-4">
+                            {[...Array(5)].map((_, i) => <Star key={i} size={20} className="text-amber-400 fill-amber-400" />)}
+                        </div>
+                        <blockquote className="text-xl md:text-3xl font-display font-medium text-main mb-8 leading-relaxed italic transition-colors">
+                            "Jomocal AI has completely transformed how we manage our business. We used to spend hours replying to messages and creating content — now it's all automated. It's like having an entire operations team working 24/7."
+                        </blockquote>
+                        <div>
+                            <p className="font-bold text-main transition-colors">Priya Sharma</p>
+                            <p className="text-sm text-secondary transition-colors">Founder, ShopEase India</p>
+                        </div>
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════ CTA SECTION ═══════════════════════ */}
+            <section className="py-16 md:py-24 relative overflow-hidden bg-body transition-colors">
+                <div className="absolute top-0 right-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-blue-600/20 rounded-full blur-[80px] md:blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute bottom-0 left-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-purple-600/20 rounded-full blur-[80px] md:blur-[120px] translate-y-1/2 -translate-x-1/2"></div>
+
+                <div className="container text-center px-4 relative z-10">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5 }}
+                        className="max-w-4xl mx-auto"
+                    >
+                        <h2 className="text-3xl md:text-6xl font-bold text-main mb-6 md:mb-8 tracking-tight font-display transition-colors">
+                            Ready to Automate Your Growth?
+                        </h2>
+                        <p className="text-base md:text-xl text-secondary mb-8 md:mb-10 max-w-2xl mx-auto font-light leading-relaxed transition-colors">
+                            Join thousands of smart businesses and creators across India who are saving 20+ hours every week with Jomocal AI.
+                        </p>
+                        <div className="flex flex-col sm:flex-row justify-center gap-3 md:gap-4">
+                            <Link to="/signup" className="btn bg-blue-600 text-white hover:bg-blue-700 text-base md:text-lg px-8 md:px-10 py-3 md:py-5 shadow-2xl shadow-blue-900/20 border-none font-bold hover:scale-[1.03] transition-all">
+                                Start Your Free Trial
+                            </Link>
+                            <Link to="/contact" className="btn bg-transparent text-main border border-main hover:bg-surface text-base md:text-lg px-8 md:px-10 py-3 md:py-5 transition-colors">
+                                Talk to Our Team
+                            </Link>
+                        </div>
+                        <div className="mt-8 md:mt-12 flex flex-col md:flex-row items-center justify-center gap-3 md:gap-8 text-xs md:text-sm text-secondary">
+                            <span className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> No credit card required</span>
+                            <span className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> Free 14-day trial</span>
+                            <span className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> Cancel anytime</span>
+                        </div>
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════ FOOTER ═══════════════════════ */}
+            <footer className="bg-body text-secondary py-12 md:py-16 border-t border-main font-sans transition-colors">
+                <div className="container px-4">
+                    <div className="grid md:grid-cols-4 gap-8 md:gap-12 mb-8 md:mb-12">
+                        <div className="col-span-1 md:col-span-1">
+                            <Link to="/" className="flex items-center mb-4 md:mb-6">
+                                <img
+                                    src="/jomocal ai logo.png"
+                                    alt="Jomocal AI"
+                                    className="w-32 md:w-40 h-auto object-contain scale-125"
+                                />
+                            </Link>
+                            <p className="text-secondary text-xs md:text-sm leading-relaxed mb-6 transition-colors">
+                                AI Automation Studio for MSMEs and Creators. Making operations clever, automated, and localized.
+                            </p>
+                            <div className="flex gap-4">
+                                <SocialIcon icon={<Globe size={18} />} />
+                                <SocialIcon icon={<MessageSquare size={18} />} />
+                            </div>
+                        </div>
+
+                        <div className="hidden md:block">
+                            <h4 className="font-bold text-main mb-6 transition-colors">Platform</h4>
+                            <FooterLinks links={['Features', 'Pricing', 'Integrations', 'Changelog']} />
+                        </div>
+
+                        <div className="hidden md:block">
+                            <h4 className="font-bold text-main mb-6 transition-colors">Resources</h4>
+                            <FooterLinks links={['Help Center', 'Community', 'Blog', 'Status']} />
+                        </div>
+
+                        <div className="hidden md:block">
+                            <h4 className="font-bold text-main mb-6 transition-colors">Company</h4>
+                            <FooterLinks links={['About Us', 'Contact', 'Privacy Policy', 'Terms of Service']} />
+                        </div>
+
+                        {/* Mobile Footer Links */}
+                        <div className="md:hidden grid grid-cols-2 gap-8">
+                            <div>
+                                <h4 className="font-bold text-main mb-4 transition-colors">Platform</h4>
+                                <FooterLinks links={['Features', 'Pricing', 'Login']} />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-main mb-4 transition-colors">Company</h4>
+                                <FooterLinks links={['About', 'Contact', 'Legal']} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="border-t border-main pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-secondary text-xs md:text-sm transition-colors">
+                        <p>&copy; {new Date().getFullYear()} Jomocal Technologies Pvt. Ltd. All rights reserved.</p>
+                        <p>Made with ❤️ in India</p>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    );
+};
+
+// ═══════════════════════ SUBCOMPONENTS ═══════════════════════
+
+const BentoCard = ({ title, desc, icon, color, className = "" }) => {
+    const colorClasses = {
+        blue: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+        green: "bg-green-500/10 text-green-500 border-green-500/20",
+        purple: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+        orange: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+        indigo: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
+    };
+
+    return (
+        <motion.div
+            whileHover={{ y: -5 }}
+            className={`card group relative overflow-hidden border border-main bg-surface/50 backdrop-blur-sm hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 p-6 ${className}`}
+        >
+            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center mb-4 md:mb-6 transition-transform group-hover:scale-110 border ${colorClasses[color]} bg-opacity-50`}>
+                <div className="scale-90 md:scale-100">{icon}</div>
+            </div>
+            <h3 className="text-lg md:text-xl font-bold mb-2 md:mb-3 text-main group-hover:text-blue-500 transition-colors">{title}</h3>
+            <p className="text-secondary leading-relaxed text-xs md:text-sm transition-colors">{desc}</p>
+        </motion.div>
+    );
+};
+
+
+const FooterLinks = ({ links }) => (
+    <ul className="space-y-2 md:space-y-3">
+        {links.map((link) => (
+            <li key={link}>
+                <a href="#" className="text-secondary hover:text-main transition-colors text-xs md:text-sm">{link}</a>
+            </li>
+        ))}
+    </ul>
+);
+
+const SocialIcon = ({ icon }) => (
+    <a href="#" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-surface flex items-center justify-center hover:bg-blue-600 transition-colors text-secondary hover:text-white border border-main">
+        {icon}
+    </a>
+)
+
+export default LandingPage;

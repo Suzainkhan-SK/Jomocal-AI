@@ -11,6 +11,8 @@
     "start": "node serve.js"
   },
   "dependencies": {
+    "@remotion/cli": "^4.0.436",
+    "@remotion/player": "^4.0.436",
     "@splinetool/react-spline": "^4.1.0",
     "@splinetool/runtime": "^1.12.69",
     "@tailwindcss/postcss": "^4.1.18",
@@ -32,6 +34,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.0",
+    "remotion": "^4.0.436",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {

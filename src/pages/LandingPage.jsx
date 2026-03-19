@@ -91,6 +91,111 @@ const AnimatedCounter = ({ target, suffix = "", duration = 2000 }) => {
     return <span ref={ref} className="font-display font-bold tracking-tight">{count.toLocaleString()}{suffix}</span>;
 };
 
+// --- Hero Typewriter Content ---
+const heroContent = [
+    {
+        head1: "Skip the building.",
+        head2: "Just click activate.",
+        sub: "Don’t waste hours trying to learn complicated software or hiring expensive agencies. Just select a ready-made AI solution for your business, connect your accounts, and let it work for you."
+    },
+    {
+        head1: "Jomocal AI.",
+        head2: "Your 1-Click Automation.",
+        sub: "Designed exclusively for small shop owners and creators in India. Stop worrying about complex workflows. Simply pick a pre-built automation, connect, and watch your business grow automatically."
+    },
+    {
+        head1: "No technical skills?",
+        head2: "We've got you covered.",
+        sub: "You don't need to build AI agents from scratch anymore. We provide a one-tap solution for all your daily tasks so non-technical users can automate effortlessly without any coding knowledge."
+    },
+    {
+        head1: "Built for India.",
+        head2: "Automate in seconds.",
+        sub: "Focus on growing your business while we handle the repetitive work. Access a store full of ready-to-use AI workflows crafted specifically for the unique needs of Indian MSMEs."
+    }
+];
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const HeroTypography = () => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [displayState, setDisplayState] = useState({ head1: "", head2: "", sub: "" });
+
+    useEffect(() => {
+        let active = true;
+
+        const animateSequence = async () => {
+            while (active) {
+                const target = heroContent[currentIndex];
+                const maxSteps = 45; // 45 frames to type everything smoothly and concurrently
+                
+                // Typing mechanism
+                for (let i = 0; i <= maxSteps; i++) {
+                    if (!active) return;
+                    setDisplayState({
+                        head1: target.head1.slice(0, Math.floor((i / maxSteps) * target.head1.length) + 1),
+                        head2: target.head2.slice(0, Math.floor((i / maxSteps) * target.head2.length) + 1),
+                        sub: target.sub.slice(0, Math.floor((i / maxSteps) * target.sub.length) + 1),
+                    });
+                    await sleep(35); // Approx 1.5 seconds typing duration
+                }
+                
+                setDisplayState({ head1: target.head1, head2: target.head2, sub: target.sub });
+
+                // Multi-second reading pause 
+                await sleep(7000);
+
+                if (!active) return;
+
+                // Fast deletion mechanism
+                for (let i = maxSteps; i >= 0; i--) {
+                    if (!active) return;
+                    setDisplayState({
+                        head1: target.head1.slice(0, Math.floor((i / maxSteps) * target.head1.length)),
+                        head2: target.head2.slice(0, Math.floor((i / maxSteps) * target.head2.length)),
+                        sub: target.sub.slice(0, Math.floor((i / maxSteps) * target.sub.length)),
+                    });
+                    await sleep(15); 
+                }
+
+                if (!active) return;
+                
+                await sleep(400); // Tiny pause between words
+
+                if (!active) return;
+                setCurrentIndex((prev) => (prev + 1) % heroContent.length);
+            }
+        };
+
+        animateSequence();
+
+        return () => { active = false; };
+    }, [currentIndex]);
+
+    return (
+        <div className="flex flex-col items-center justify-start w-full min-h-[260px] sm:min-h-[290px] md:min-h-[380px] lg:min-h-[420px]">
+            <motion.h1
+                initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="text-[36px] sm:text-[40px] leading-[1.1] md:text-8xl lg:text-[6.5rem] font-display font-extrabold tracking-tight text-main mb-6 px-2 min-h-[90px] sm:min-h-[100px] md:min-h-[230px] lg:min-h-[250px] flex flex-col items-center w-full"
+            >
+                <div className="w-full text-center">{displayState.head1 || '\u00A0'} <br className="hidden md:block"/></div>
+                <div className="w-full text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 md:animate-gradient-x">{displayState.head2 || '\u00A0'}</div>
+            </motion.h1>
+
+            <motion.p
+                initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-base sm:text-lg md:text-2xl text-secondary mb-10 max-w-3xl mx-auto font-light leading-relaxed px-4 text-center min-h-[120px] sm:min-h-[100px] flex items-start justify-center"
+            >
+                {displayState.sub || '\u00A0'}
+            </motion.p>
+        </div>
+    );
+};
+
 const LandingPage = () => {
     const heroRef = useRef(null);
     const { scrollYProgress } = useScroll({
@@ -160,26 +265,8 @@ const LandingPage = () => {
                         <div className="absolute left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_2px_rgba(59,130,246,0.5)] z-0"></div>
                     </motion.div>
 
-                    {/* Sensational Linear-Style TypographyHeadline */}
-                    <motion.h1
-                        initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
-                        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                        transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                        className="text-[36px] sm:text-[40px] leading-[1.1] md:text-8xl lg:text-[6.5rem] font-display font-extrabold tracking-tight text-main mb-6 px-2"
-                    >
-                        Skip the building. <br className="hidden md:block"/>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 md:animate-gradient-x">Just click activate.</span>
-                    </motion.h1>
-
-                    {/* Crisp Subheadline focusing on UVP. Removed Zapier mention for simplicity */}
-                    <motion.p
-                        initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
-                        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                        className="text-base sm:text-lg md:text-2xl text-secondary mb-10 max-w-3xl mx-auto font-light leading-relaxed px-4"
-                    >
-                        Don’t waste hours trying to learn complicated software or hiring expensive agencies. Just select a ready-made AI solution for your business, connect your accounts, and let it work for you.
-                    </motion.p>
+                    {/* Smooth Multi-State Interactive Typography Box */}
+                    <HeroTypography />
 
                     {/* Conversion CTAs */}
                     <motion.div

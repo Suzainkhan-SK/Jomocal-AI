@@ -74,19 +74,19 @@ const LandingPage = () => {
                 {/* Immersive Background System */}
                 <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
                     {/* Perspective Grid with deep vanishing point */}
-                    <div className="absolute inset-x-0 bottom-0 h-[80vh] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+Cgk8cGF0aCBkPSJNMCAwbDQwIDBMMDAgNDBsLTQwIDBMMCAwaHoiIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSIjODg4IiBzdHJva2Utd2lkdGg9IjAuMiIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')] [mask-image:linear-gradient(to_top,white_10%,transparent_90%)] mix-blend-overlay dark:opacity-[0.15] opacity-30 transform-gpu perspective-1000 rotateX-60 scale-150 translate-y-[20%] will-change-transform"></div>
+                    <div className="absolute inset-x-0 bottom-0 h-[80vh] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+Cgk8cGF0aCBkPSJNMCAwbDQwIDBMMDAgNDBsLTQwIDBMMCAwaHoiIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSIjODg4IiBzdHJva2Utd2lkdGg9IjAuMiIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')] [mask-image:linear-gradient(to_top,white_10%,transparent_90%)] mix-blend-normal md:mix-blend-overlay dark:opacity-[0.15] opacity-30 transform-gpu perspective-1000 rotateX-60 scale-150 translate-y-[20%] will-change-transform"></div>
                     
                     {/* Massive Glowing Orbs */}
                     <motion.div 
                         animate={{ scale: [1, 1.1, 1], opacity: [0.6, 0.8, 0.6] }}
                         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute top-0 right-[10%] w-[60vw] h-[60vw] rounded-full bg-blue-500/20 dark:bg-blue-500/10 blur-[150px] mix-blend-screen pointer-events-none transform-gpu will-change-transform opacity-60"
+                        className="absolute top-0 right-[10%] w-[60vw] h-[60vw] rounded-full bg-blue-500/20 dark:bg-blue-500/10 blur-[60px] md:blur-[150px] mix-blend-normal md:mix-blend-screen pointer-events-none transform-gpu will-change-transform opacity-60"
                         style={{ translateZ: 0 }}
                     ></motion.div>
                     <motion.div 
                         animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.7, 0.5] }}
                         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                        className="absolute bottom-[20%] left-[5%] w-[50vw] h-[50vw] rounded-full bg-purple-500/20 dark:bg-purple-500/10 blur-[130px] mix-blend-screen pointer-events-none transform-gpu will-change-transform opacity-50"
+                        className="absolute bottom-[20%] left-[5%] w-[50vw] h-[50vw] rounded-full bg-purple-500/20 dark:bg-purple-500/10 blur-[60px] md:blur-[130px] mix-blend-normal md:mix-blend-screen pointer-events-none transform-gpu will-change-transform opacity-50"
                         style={{ translateZ: 0 }}
                     ></motion.div>
                     
@@ -164,14 +164,14 @@ const LandingPage = () => {
                 <div className="relative z-20 w-full px-2 sm:px-4 md:px-8 mt-12 md:mt-24 perspective-[1000px] md:perspective-[2000px] overflow-hidden md:overflow-visible pb-10">
                     <motion.div 
                         style={{ rotateX: dashRotateX, scale: dashScale, y: dashY }}
-                        className="w-[125%] md:w-full ml-[-12.5%] md:ml-0 max-w-none md:max-w-[70rem] mx-auto xl:ml-auto relative transform-gpu origin-top will-change-transform"
+                        className="w-full md:w-full ml-0 md:ml-0 max-w-[95%] md:max-w-[70rem] mx-auto xl:ml-auto relative transform-gpu origin-top will-change-transform"
                     >
                         {/* Dramatic Glow under the dashboard */}
-                        <div className="absolute -inset-10 bg-gradient-to-b from-blue-600/30 to-purple-600/0 blur-[100px] -z-10 rounded-[3rem] pointer-events-none transform-gpu"></div>
+                        <div className="absolute -inset-10 bg-gradient-to-b from-blue-600/30 to-purple-600/0 blur-[40px] md:blur-[100px] -z-10 rounded-[3rem] pointer-events-none transform-gpu"></div>
                         
                         {/* Dashboard Frame */}
-                        <div className="rounded-[1.5rem] md:rounded-[2.5rem] p-2 bg-gradient-to-b from-white/60 to-white/10 dark:from-white/10 dark:to-white/5 border border-white/40 dark:border-white/10 shadow-2xl backdrop-blur-lg ring-1 ring-black/5 transform-gpu">
-                            <div className="relative rounded-xl md:rounded-[2rem] overflow-hidden bg-white dark:bg-[#0a0a0c] shadow-inner h-[600px] sm:h-[650px] md:h-auto md:aspect-[16/9] border border-gray-200/50 dark:border-[#222]">
+                        <div className="rounded-[1.5rem] md:rounded-[2.5rem] p-1.5 md:p-2 bg-white/90 dark:bg-[#111]/90 md:bg-gradient-to-b md:from-white/60 md:to-white/10 dark:md:from-white/10 dark:md:to-white/5 border border-white/40 dark:border-white/10 shadow-2xl backdrop-blur-none md:backdrop-blur-lg ring-1 ring-black/5 transform-gpu">
+                            <div className="relative rounded-xl md:rounded-[2rem] overflow-hidden bg-white dark:bg-[#0a0a0c] shadow-inner h-auto md:h-auto md:aspect-[16/9] border border-gray-200/50 dark:border-[#222]">
                                 
                                 {/* macOS Header */}
                                 <div className="absolute top-0 left-0 right-0 h-14 bg-gray-50/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-[#222] flex items-center px-6 justify-between z-30">
@@ -189,7 +189,7 @@ const LandingPage = () => {
                                 </div>
                                 
                                 {/* App Content Mockup - "Store of Automations" Layout */}
-                                <div className="absolute inset-0 pt-14 flex bg-slate-50/50 dark:bg-[#08080A]">
+                                <div className="pt-14 flex md:absolute md:inset-0 bg-slate-50/50 dark:bg-[#08080A]">
                                     
                                     {/* Sidebar */}
                                     <div className="hidden md:flex w-64 border-r border-gray-200/60 dark:border-[#222] bg-white/50 dark:bg-[#0c0c0e]/50 p-6 flex-col justify-between z-20">
@@ -208,7 +208,7 @@ const LandingPage = () => {
                                     </div>
 
                                     {/* Canvas Area - Showing Toggles, NOT Nodes */}
-                                    <div className="flex-1 p-4 md:p-10 relative overflow-y-auto">
+                                    <div className="flex-1 p-3 sm:p-4 md:p-10 relative overflow-hidden md:overflow-y-auto">
                                         <div className="max-w-4xl mx-auto">
                                             <h2 className="text-2xl font-display font-bold text-main mb-2">Available Solutions</h2>
                                             <p className="text-secondary text-sm mb-8">Turn on the switches to let the computer do your daily work.</p>
@@ -216,7 +216,7 @@ const LandingPage = () => {
                                             <div className="grid grid-cols-1 gap-4">
                                                 
                                                 {/* Pre-built Automation 1 */}
-                                                <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-xl hover:border-blue-500/30 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 group relative overflow-hidden">
+                                                <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-2xl p-3 sm:p-4 md:p-5 shadow-sm hover:shadow-xl hover:border-blue-500/30 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 group relative overflow-hidden">
                                                     <div className="absolute inset-y-0 left-0 w-1 bg-green-500"></div>
                                                     <div className="flex items-start sm:items-center gap-3 sm:gap-5 w-full sm:w-auto">
                                                         <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center bg-red-50 dark:bg-red-500/10 text-red-500 shrink-0 mt-1 sm:mt-0">
@@ -245,7 +245,7 @@ const LandingPage = () => {
                                                 </div>
 
                                                 {/* Pre-built Automation 2 */}
-                                                <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-xl hover:border-blue-500/30 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 group">
+                                                <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-2xl p-3 sm:p-4 md:p-5 shadow-sm hover:shadow-xl hover:border-blue-500/30 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 group">
                                                     <div className="flex items-start sm:items-center gap-3 sm:gap-5 w-full sm:w-auto">
                                                         <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center bg-purple-50 dark:bg-purple-500/10 text-purple-500 shrink-0 mt-1 sm:mt-0">
                                                             <Instagram size={24} className="sm:w-7 sm:h-7" />
@@ -265,7 +265,7 @@ const LandingPage = () => {
                                                 </div>
 
                                                 {/* Pre-built Automation 3 */}
-                                                <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-xl hover:border-blue-500/30 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 group">
+                                                <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-2xl p-3 sm:p-4 md:p-5 shadow-sm hover:shadow-xl hover:border-blue-500/30 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 group">
                                                     <div className="flex items-start sm:items-center gap-3 sm:gap-5 w-full sm:w-auto">
                                                         <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center bg-green-50 dark:bg-green-500/10 text-green-500 shrink-0 mt-1 sm:mt-0">
                                                             <Phone size={24} className="sm:w-7 sm:h-7" /> {/* Represents WhatsApp */}

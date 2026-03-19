@@ -143,17 +143,17 @@ const LandingPage = () => {
                     style={{ y: heroY, opacity: heroOpacity }} 
                     className="container relative z-10 px-4 text-center max-w-5xl mx-auto flex flex-col items-center"
                 >
-                    {/* Interactive Connected Apps Graphic */}
+                        {/* Interactive Connected Apps Graphic */}
                     <motion.div 
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 1, ease: "easeOut" }}
                         className="relative mb-8 w-full max-w-[300px] h-16 flex items-center justify-center pointer-events-none"
                     >
-                        <motion.div animate={{ y: [-3, 3, -3] }} transition={{ duration: 4, repeat: Infinity }} className="absolute left-0 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-pink-500 z-10"><InstagramIcon className="w-5 h-5"/></motion.div>
-                        <motion.div animate={{ y: [3, -3, 3] }} transition={{ duration: 3.5, repeat: Infinity }} className="absolute left-1/4 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-red-500 z-10"><YoutubeIcon className="w-5 h-5"/></motion.div>
-                        <motion.div animate={{ y: [-2, 2, -2] }} transition={{ duration: 4.5, repeat: Infinity }} className="absolute right-1/4 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-green-500 z-10"><WhatsAppIcon className="w-5 h-5"/></motion.div>  {/* Replaced MessageSquare with Phone to signify WhatsApp locally */}
-                        <motion.div animate={{ y: [2, -2, 2] }} transition={{ duration: 3.8, repeat: Infinity }} className="absolute right-0 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-blue-500 z-10"><FacebookIcon className="w-5 h-5"/></motion.div>
+                        <motion.div animate={{ y: [-3, 3, -3] }} transition={{ duration: 4, repeat: Infinity }} className="absolute left-0 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-pink-500 z-10 transform-gpu will-change-transform"><InstagramIcon className="w-5 h-5"/></motion.div>
+                        <motion.div animate={{ y: [3, -3, 3] }} transition={{ duration: 3.5, repeat: Infinity }} className="absolute left-1/4 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-red-500 z-10 transform-gpu will-change-transform"><YoutubeIcon className="w-5 h-5"/></motion.div>
+                        <motion.div animate={{ y: [-2, 2, -2] }} transition={{ duration: 4.5, repeat: Infinity }} className="absolute right-1/4 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-green-500 z-10 transform-gpu will-change-transform"><WhatsAppIcon className="w-5 h-5"/></motion.div>  {/* Replaced MessageSquare with WhatsApp locally */}
+                        <motion.div animate={{ y: [2, -2, 2] }} transition={{ duration: 3.8, repeat: Infinity }} className="absolute right-0 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-blue-500 z-10 transform-gpu will-change-transform"><FacebookIcon className="w-5 h-5"/></motion.div>
                         
                         {/* Connecting Line */}
                         <div className="absolute inset-x-4 h-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50 z-0"></div>
@@ -168,7 +168,7 @@ const LandingPage = () => {
                         className="text-[36px] sm:text-[40px] leading-[1.1] md:text-8xl lg:text-[6.5rem] font-display font-extrabold tracking-tight text-main mb-6 px-2"
                     >
                         Skip the building. <br className="hidden md:block"/>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 animate-gradient-x">Just click activate.</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 md:animate-gradient-x">Just click activate.</span>
                     </motion.h1>
 
                     {/* Crisp Subheadline focusing on UVP. Removed Zapier mention for simplicity */}
@@ -340,7 +340,7 @@ const LandingPage = () => {
                             <motion.div 
                                 animate={{ x: [0, 80, 0], y: [0, -30, 0] }}
                                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute top-1/2 right-[20%] z-40 drop-shadow-2xl transform-gpu will-change-transform"
+                                className="absolute top-1/2 right-[20%] z-40 drop-shadow-none md:drop-shadow-2xl transform-gpu will-change-transform"
                             >
                                 <MousePointerClick className="w-10 h-10 text-main fill-body" />
                                 <div className="absolute top-8 left-6 bg-black text-white px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shadow-xl border border-white/20">Just 1 Click</div>

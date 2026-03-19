@@ -20,6 +20,49 @@ const SpotlightCard = ({ children, className = "", ...props }) => {
     );
 };
 
+// --- Custom Brand SVG Icons ---
+const WhatsAppIcon = ({ className, size = 24 }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" className={className} fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" />
+  </svg>
+);
+
+const TelegramIcon = ({ className, size = 24 }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" className={className} fill="currentColor">
+    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.892-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+  </svg>
+);
+
+const YoutubeIcon = ({ className, size = 24 }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} className={className} fill="currentColor">
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.55 9.376.55 9.376.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+  </svg>
+);
+
+const InstagramIcon = ({ className, size = 24 }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} className={className} fill="currentColor">
+    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm3.975-9.658a1.44 1.44 0 100-2.88 1.44 1.44 0 000 2.88z" />
+  </svg>
+);
+
+const FacebookIcon = ({ className, size = 24 }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} className={className} fill="currentColor">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+  </svg>
+);
+
+const GmailIcon = ({ className, size = 24 }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} className={className} fill="currentColor">
+    <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/>
+  </svg>
+);
+
+const NotionIcon = ({ className, size = 24 }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} className={className} fill="currentColor">
+    <path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.98-.373-2.053-.28L3.013 2.434c-.28.047-.326.28-.28.42zm.513 2.333l.047 15.394c0 .327.233.513.56.513l4.385-.28c.28-.046.466-.233.42-.513V7.754l7.138 10.916c.186.28.42.42.746.42l4.105-.327c.326-.046.466-.28.466-.606V2.62c0-.326-.233-.513-.56-.513l-4.105.28c-.28.046-.466.233-.42.513v13.528L10.383 5.421c-.186-.28-.42-.42-.746-.42l-4.198.326c-.326.047-.466.28-.466.607.094.466.513.606.513.606z"/>
+  </svg>
+);
+
 // --- Animated Counter ---
 const AnimatedCounter = ({ target, suffix = "", duration = 2000 }) => {
     const [count, setCount] = useState(0);
@@ -107,10 +150,10 @@ const LandingPage = () => {
                         transition={{ duration: 1, ease: "easeOut" }}
                         className="relative mb-8 w-full max-w-[300px] h-16 flex items-center justify-center pointer-events-none"
                     >
-                        <motion.div animate={{ y: [-3, 3, -3] }} transition={{ duration: 4, repeat: Infinity }} className="absolute left-0 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-pink-500 z-10"><Instagram className="w-5 h-5"/></motion.div>
-                        <motion.div animate={{ y: [3, -3, 3] }} transition={{ duration: 3.5, repeat: Infinity }} className="absolute left-1/4 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-red-500 z-10"><Youtube className="w-5 h-5"/></motion.div>
-                        <motion.div animate={{ y: [-2, 2, -2] }} transition={{ duration: 4.5, repeat: Infinity }} className="absolute right-1/4 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-green-500 z-10"><Phone className="w-5 h-5"/></motion.div>  {/* Replaced MessageSquare with Phone to signify WhatsApp locally */}
-                        <motion.div animate={{ y: [2, -2, 2] }} transition={{ duration: 3.8, repeat: Infinity }} className="absolute right-0 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-blue-500 z-10"><Facebook className="w-5 h-5"/></motion.div>
+                        <motion.div animate={{ y: [-3, 3, -3] }} transition={{ duration: 4, repeat: Infinity }} className="absolute left-0 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-pink-500 z-10"><InstagramIcon className="w-5 h-5"/></motion.div>
+                        <motion.div animate={{ y: [3, -3, 3] }} transition={{ duration: 3.5, repeat: Infinity }} className="absolute left-1/4 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-red-500 z-10"><YoutubeIcon className="w-5 h-5"/></motion.div>
+                        <motion.div animate={{ y: [-2, 2, -2] }} transition={{ duration: 4.5, repeat: Infinity }} className="absolute right-1/4 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-green-500 z-10"><WhatsAppIcon className="w-5 h-5"/></motion.div>  {/* Replaced MessageSquare with Phone to signify WhatsApp locally */}
+                        <motion.div animate={{ y: [2, -2, 2] }} transition={{ duration: 3.8, repeat: Infinity }} className="absolute right-0 w-10 h-10 rounded-xl bg-white dark:bg-[#111] shadow-xl border border-main flex items-center justify-center text-blue-500 z-10"><FacebookIcon className="w-5 h-5"/></motion.div>
                         
                         {/* Connecting Line */}
                         <div className="absolute inset-x-4 h-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50 z-0"></div>
@@ -223,7 +266,7 @@ const LandingPage = () => {
                                                     <div className="absolute inset-y-0 left-0 w-1 bg-green-500"></div>
                                                     <div className="flex items-start sm:items-center gap-3 sm:gap-5 w-full sm:w-auto">
                                                         <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center bg-red-50 dark:bg-red-500/10 text-red-500 shrink-0 mt-1 sm:mt-0">
-                                                            <Youtube size={24} className="sm:w-7 sm:h-7" />
+                                                            <YoutubeIcon size={24} className="sm:w-7 sm:h-7" />
                                                         </div>
                                                         <div className="flex-1">
                                                             <div className="flex flex-wrap items-center gap-2">
@@ -251,7 +294,7 @@ const LandingPage = () => {
                                                 <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-2xl p-3 sm:p-4 md:p-5 shadow-sm hover:shadow-xl hover:border-blue-500/30 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 group">
                                                     <div className="flex items-start sm:items-center gap-3 sm:gap-5 w-full sm:w-auto">
                                                         <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center bg-purple-50 dark:bg-purple-500/10 text-purple-500 shrink-0 mt-1 sm:mt-0">
-                                                            <Instagram size={24} className="sm:w-7 sm:h-7" />
+                                                            <InstagramIcon size={24} className="sm:w-7 sm:h-7" />
                                                         </div>
                                                         <div className="flex-1">
                                                             <div className="flex flex-wrap items-center gap-2">
@@ -271,7 +314,7 @@ const LandingPage = () => {
                                                 <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-2xl p-3 sm:p-4 md:p-5 shadow-sm hover:shadow-xl hover:border-blue-500/30 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 group">
                                                     <div className="flex items-start sm:items-center gap-3 sm:gap-5 w-full sm:w-auto">
                                                         <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center bg-green-50 dark:bg-green-500/10 text-green-500 shrink-0 mt-1 sm:mt-0">
-                                                            <Phone size={24} className="sm:w-7 sm:h-7" /> {/* Represents WhatsApp */}
+                                                            <WhatsAppIcon size={24} className="sm:w-7 sm:h-7" /> {/* Represents WhatsApp */}
                                                         </div>
                                                         <div className="flex-1">
                                                             <div className="flex flex-wrap items-center gap-2">
@@ -321,12 +364,12 @@ const LandingPage = () => {
                     <div className="flex animate-marquee min-w-max items-center">
                         {[...Array(2)].map((_, idx) => (
                             <div key={idx} className="flex gap-8 md:gap-24 px-4 md:px-8 items-center justify-around opacity-70 hover:opacity-100 transition-opacity">
-                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><Youtube className="w-6 h-6 md:w-8 md:h-8 text-red-500"/> YouTube</div>
-                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><Instagram className="w-6 h-6 md:w-8 md:h-8 text-pink-500"/> Instagram</div>
-                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><Phone className="w-6 h-6 md:w-8 md:h-8 text-green-500"/> WhatsApp</div>
-                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><Mail className="w-6 h-6 md:w-8 md:h-8 text-blue-500"/> Gmail</div>
-                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><Layers className="w-6 h-6 md:w-8 md:h-8 text-indigo-500"/> Notion</div>
-                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><Users className="w-6 h-6 md:w-8 md:h-8 text-blue-400"/> Telegram</div>
+                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><YoutubeIcon className="w-6 h-6 md:w-8 md:h-8 text-red-500"/> YouTube</div>
+                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><InstagramIcon className="w-6 h-6 md:w-8 md:h-8 text-pink-500"/> Instagram</div>
+                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><WhatsAppIcon className="w-6 h-6 md:w-8 md:h-8 text-green-500"/> WhatsApp</div>
+                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><GmailIcon className="w-6 h-6 md:w-8 md:h-8 text-blue-500"/> Gmail</div>
+                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><NotionIcon className="w-6 h-6 md:w-8 md:h-8 text-indigo-500"/> Notion</div>
+                                <div className="flex items-center gap-2 md:gap-3 text-base md:text-xl font-display font-extrabold text-main cursor-pointer"><TelegramIcon className="w-6 h-6 md:w-8 md:h-8 text-blue-400"/> Telegram</div>
                             </div>
                         ))}
                     </div>
@@ -416,7 +459,7 @@ const LandingPage = () => {
                                 </p>
                                 <div className="flex flex-wrap gap-3">
                                     <div className="flex items-center gap-2 text-sm font-semibold bg-white dark:bg-black border border-main rounded-xl px-4 py-2.5 text-main shadow-sm"><Mic size={16} className="text-blue-500"/> Beautiful Voices</div>
-                                    <div className="flex items-center gap-2 text-sm font-semibold bg-white dark:bg-black border border-main rounded-xl px-4 py-2.5 text-main shadow-sm"><Youtube size={16} className="text-red-500"/> Perfect for Reels</div>
+                                    <div className="flex items-center gap-2 text-sm font-semibold bg-white dark:bg-black border border-main rounded-xl px-4 py-2.5 text-main shadow-sm"><YoutubeIcon size={16} className="text-red-500"/> Perfect for Reels</div>
                                 </div>
                             </div>
                             

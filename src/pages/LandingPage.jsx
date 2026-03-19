@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence, useSpring } from 'framer-motion';
 import {
     ArrowRight, Play, Zap, Users, MessageSquare, Video, Bot,
     Sparkles, ShieldCheck, CheckCircle, Globe, Layers, TrendingUp,
@@ -55,14 +55,17 @@ const LandingPage = () => {
         offset: ["start start", "end start"]
     });
     
+    // Add physics-based smoothing to completely eliminate scroll jank
+    const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+    
     // Parallax logic
-    const heroY = useTransform(scrollYProgress, [0, 1], [0, 200]);
-    const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+    const heroY = useTransform(smoothProgress, [0, 1], [0, 200]);
+    const heroOpacity = useTransform(smoothProgress, [0, 0.8], [1, 0]);
     
     // Dashboard mockup 3D rotation logic
-    const dashRotateX = useTransform(scrollYProgress, [0, 0.5], [20, 0]);
-    const dashScale = useTransform(scrollYProgress, [0, 0.5], [0.92, 1]);
-    const dashY = useTransform(scrollYProgress, [0, 0.5], [60, 0]);
+    const dashRotateX = useTransform(smoothProgress, [0, 0.5], [20, 0]);
+    const dashScale = useTransform(smoothProgress, [0, 0.5], [0.92, 1]);
+    const dashY = useTransform(smoothProgress, [0, 0.5], [60, 0]);
 
     return (
         <div className="min-h-screen bg-body flex flex-col relative overflow-hidden selection:bg-blue-500/30">

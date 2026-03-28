@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bot, Mail, Lock, Briefcase, Camera, User } from 'lucide-react';
+import { Bot, Mail, Lock, Briefcase, Camera, User, CheckCircle } from 'lucide-react';
 import api from '../utils/api';
 
 const Signup = () => {
@@ -10,6 +10,7 @@ const Signup = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [successMsg, setSuccessMsg] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
@@ -18,14 +19,33 @@ const Signup = () => {
         setLoading(true);
         try {
             const res = await api.post('/auth/signup', { name, email, password, role });
-            localStorage.setItem('token', res.data.token);
-            navigate('/dashboard');
+            setSuccessMsg(res.data.msg || 'Registration successful! Please check your email to verify your account.');
+            // We no longer automatically login and redirect to dashboard, because user is unverified.
         } catch (err) {
             setError(err.response?.data?.msg || 'Something went wrong');
         } finally {
             setLoading(false);
         }
     };
+
+    if (successMsg) {
+        return (
+            <div className="min-h-screen flex items-center justify-center p-4 md:p-6 relative overflow-hidden bg-body transition-colors">
+                <div className="absolute bottom-0 right-1/2 translate-x-1/2 w-[600px] h-[600px] md:w-[1000px] md:h-[1000px] bg-indigo-600/10 rounded-full blur-[80px] md:blur-[120px] -z-10 animate-pulse-slow"></div>
+
+                <div className="w-full max-w-sm md:max-w-md bg-surface backdrop-blur-2xl rounded-2xl md:rounded-3xl shadow-xl border border-main p-6 md:p-10 animate-fade-in relative z-10 transition-colors text-center">
+                    <CheckCircle className="mx-auto text-green-500 mb-6" size={64} />
+                    <h2 className="text-2xl md:text-3xl font-bold text-main mb-4 tracking-tight">Check Your Email</h2>
+                    <p className="text-secondary mb-8 leading-relaxed">
+                        {successMsg}
+                    </p>
+                    <Link to="/login" className="btn btn-primary w-full py-4 text-lg shadow-xl shadow-blue-500/20 block text-center">
+                        Go to Login
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 md:p-6 relative overflow-hidden bg-body transition-colors">

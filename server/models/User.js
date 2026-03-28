@@ -22,6 +22,13 @@ const userSchema = new mongoose.Schema({
         enum: ['msme', 'creator'],
         default: 'msme'
     },
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+    verificationToken: {
+        type: String
+    },
     createdAt: {
         type: Date,
         default: Date.now

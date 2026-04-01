@@ -1,0 +1,438 @@
+You are continuing a long, complex startup + technical journey.
+
+
+
+👤 FOUNDER
+
+
+
+I am Suzain Khan, Founder & CEO of JOMOCAL TECHNOLOGIES PRIVATE LIMITED.
+
+
+
+🏷 BRAND
+
+
+
+Platform name: Jomocal AI
+
+
+
+Meaning: Joy Of Making Operations Clever, Automated, and Localized
+
+
+
+Tagline: AI Automation Studio for MSMEs and Creators
+
+
+
+🎓 COLLEGE & PROGRAM
+
+
+
+I am a BCA student
+
+
+
+This platform is being built as part of Manthan / innovation & startup initiative
+
+
+
+College Mentor:
+
+Mrs. M. P. Madhura Yadav
+
+Assistant Professor, Department of Computer Science
+
+
+
+👥 TEAM STRUCTURE (FINALIZED)
+
+
+
+Suzain Khan — Founder & CEO
+
+
+
+Vision, product, frontend, backend, OAuth, automation architecture, integrations, mentoring team
+
+
+
+Prem — Junior Automation Engineer
+
+
+
+Assists in building & testing n8n workflows under guidance
+
+
+
+Sharath — Growth & Content Lead
+
+
+
+Tutorials, demos, documentation, marketing, explaining automations
+
+
+
+Yashwanth — Business Development Lead
+
+
+
+MSME outreach, partnerships, offline visits, online promotions, customer engagement
+
+
+
+🏗 PLATFORM STATUS (REAL & LIVE)
+
+
+
+This is NOT an idea — the platform is fully built and deployed.
+
+
+
+Frontend
+
+
+
+React + Vite
+
+
+
+Deployed on Render
+
+
+
+SPA routing fixed
+
+
+
+Authentication works
+
+
+
+Dashboard works
+
+
+
+Integrations UI works
+
+
+
+Backend
+
+
+
+Node.js + Express
+
+
+
+Deployed on Render
+
+
+
+MongoDB Atlas
+
+
+
+JWT-based auth
+
+
+
+Platform-owned OAuth (Google / YouTube)
+
+
+
+Secure token encryption
+
+
+
+Webhook-driven automation triggers
+
+
+
+Automation Engine
+
+
+
+n8n Cloud
+
+
+
+Stateless workflows
+
+
+
+Triggered via backend webhooks
+
+
+
+Tokens injected dynamically per user
+
+
+
+No credentials stored inside n8n
+
+
+
+🔐 INTEGRATIONS COMPLETED
+
+
+
+YouTube (OAuth, upload automation)
+
+
+
+Google OAuth base (future Gmail, Sheets, Drive)
+
+
+
+Telegram
+
+
+
+Gmail polling
+
+
+
+Google Sheets
+
+
+
+Email workflows
+
+
+
+🤖 AUTOMATIONS ALREADY BUILT / WORKING
+
+
+
+YouTube AI Video Automation
+
+
+
+Script generation
+
+
+
+Image/video generation
+
+
+
+Voiceover
+
+
+
+Subtitles
+
+
+
+Auto upload to user’s YouTube account
+
+
+
+Telegram customer support bot
+
+
+
+Email automation
+
+
+
+Lead capture & qualification automation
+
+
+
+AI content pipelines (stories, shorts, reels)
+
+
+
+🧠 CORE ARCHITECTURE PRINCIPLE
+
+
+
+Backend owns all OAuth
+
+
+
+Tokens are encrypted
+
+
+
+n8n is execution-only
+
+
+
+Multi-tenant, scalable, SaaS-ready
+
+
+
+Similar to Zapier / Buffer / Hootsuite model
+
+
+
+🎯 CURRENT PHASE
+
+
+
+Platform foundation is complete
+
+
+
+Now focusing on HIGH-LEVEL, ADVANCED, PREMIUM automations
+
+
+
+Goal: reduce workload, increase growth for:
+
+
+
+MSMEs
+
+
+
+Creators
+
+
+
+Agencies
+
+
+
+Solo founders
+
+
+
+🚀 NOW YOUR FIRST RESPONSE SHOULD DO THIS:
+
+
+
+Summarize what you understand about:
+
+
+
+The platform
+
+
+
+The tech stack
+
+
+
+The business vision
+
+
+
+The current stage
+
+
+
+Then answer this question in detail:
+
+
+
+“Now i want you to send me a list of high level automations which i can add in my website. These automations should not be a basic level it should be very very advanced and it can help both businesses and creators in their daily life by reducing their workload or helping them grow their business. Send me a list of 20 automations with also explaining how it works, its difficulty level, and the requirements needed to build it.”
+
+
+
+
+
+Plz also read your memory which you have saved recently.
+
+
+
+Note: The above prompt for this conversation is generated from an previous chat within the chat gpt itself to conitnue that exact conversation in a new chat with the same knowledge. because the previous chat has become laggy because of the long running conversation.
+
+
+
+Also read my website's this  context also:
+
+Context:
+
+# Jomocal AI - Platform Context
+
+
+
+**Platform Name:** Jomocal AI
+
+**Tagline:** An AI Automation Studio for MSMEs and Creators
+
+**Meaning:** Joy of making operations clever, automated, and localized.
+
+PROJECT TITLE:
+
+Jomocal AI - An AI Automation Studio for MSMEs and Creators
+
+
+
+## Core Identity
+
+Jomocal AI is a comprehensive AI automation studio meticulously designed for MSMEs (Micro, Small, and Medium Enterprises), creators, small shop owners, and small businesses. It is purpose-built for the **Indian market**, heavily prioritizing **non-technical users**.
+
+
+
+## The Problem It Solves
+
+Other automation platforms like n8n, Zapier, and Make advertise themselves as "no-code" or "low-code" solutions. However, they still require users to possess basic technical skills to build their own integrations and AI agents from scratch. Indian MSMEs and non-technical business owners often lack the time, resources, or technical know-how to wire these complex workflows together.
+
+
+
+## The Jomocal AI Solution (The Differentiator)
+
+We bridge this gap by providing **ready-to-use, pre-built automations**.
+
+Users do not need to build complex flowcharts or connect APIs. Jomocal AI is a genuine **1-click solution** where users browse an automation they need, click "Activate", and the agent starts working for their business instantly.
+
+
+
+We deliver the results of automation without the learning curve of building it.
+
+
+
+## Key Automations & Features
+
+Our platform features an "Automations" page where users can discover and activate a variety of out-of-the-box workflows:
+
+
+
+1. **YouTube AI Video Automation:**
+
+   - Users select their content type/topic and click "activate".
+
+   - The automation handles everything: scriptwriting, media generation, and voiceover, outputting full short videos.
+
+   - It then automatically uploads the finished video directly to the user's connected YouTube channel.
+
+   - Includes various niches (e.g., Mythical Creatures, Islamic Stories, Sci-Fi & Future Worlds).
+
+
+
+2. **Lead Hunter:**
+
+   - An intelligent automation that actively searches for and qualifies leads for the user's business without requiring manual intervention.
+
+
+
+3. **AI Customer Support Bot:**
+
+   - An intelligent stateless customer support agent that businesses can connect immediately to handle their end-user inquiries automatically.
+
+
+
+I will be adding about 150-200 highly advanced automations in the future which can help us to make an revolutionary impact in India.
+
+
+
+## Design Philosophy & Codebase Context
+
+- **Target Audience Mindset:** Simple, outcome-oriented language. The platform must feel localized, trustworthy, and extremely premium.
+
+- **Tech Stack:** React, Remotion (for video rendering), Vite, Javascript/JSX.
+
+- **Integrations:** Integrates directly with n8n under the hood (for the heavy lifting) via Webhooks, but hides all that complexity from the end-user.
+
+- **UI/UX Standard:** We follow a production-grade SaaS design language (inspired by tools like Stripe, Linear, and Vercel). The application supports both Light and Dark mode optimally. It relies upon sleek micro-animations, vibrant gradients where applicable, and high-quality customized styling rather than basic defaults.
+
+
+
+
+

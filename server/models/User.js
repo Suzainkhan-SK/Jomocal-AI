@@ -19,8 +19,12 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['msme', 'creator'],
-        default: 'msme'
+        enum: ['user', 'admin', 'owner', 'msme', 'creator'],
+        default: 'user'
+    },
+    isSuspended: {
+        type: Boolean,
+        default: false
     },
     isVerified: {
         type: Boolean,
@@ -34,5 +38,9 @@ const userSchema = new mongoose.Schema({
         default: Date.now
     }
 });
+
+// Explicit indexes for faster auth queries
+userSchema.index({ email: 1 });
+userSchema.index({ verificationToken: 1 }, { sparse: true });
 
 module.exports = mongoose.model('User', userSchema);

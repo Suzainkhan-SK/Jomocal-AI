@@ -1,361 +1,275 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, Download, Loader2, Clock, MessageSquare, Users, Calendar, User, Bot as BotIcon, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { Search, Filter, Download, Loader2, Clock, MessageSquare, Users, User, Bot as BotIcon, ChevronRight, RefreshCw, Zap, Calendar } from 'lucide-react';
 import api from '../utils/api';
 import { formatDistanceToNow } from 'date-fns';
 
+const riseUp = {
+    hidden: { opacity: 0, y: 20, filter: 'blur(4px)' },
+    visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
+};
+const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.04, delayChildren: 0.05 } } };
+
+const getAutomationMeta = (name) => {
+    const n = (name || '').toLowerCase();
+    if (n.includes('lead')) return { icon: Users, color: '#10b981', emoji: '🎯' };
+    if (n.includes('schedule') || n.includes('calendar')) return { icon: Calendar, color: '#8b5cf6', emoji: '📅' };
+    if (n.includes('youtube') || n.includes('video')) return { icon: Zap, color: '#ef4444', emoji: '🎥' };
+    if (n.includes('email') || n.includes('gmail')) return { icon: MessageSquare, color: '#3b82f6', emoji: '📧' };
+    if (n.includes('telegram') || n.includes('bot')) return { icon: BotIcon, color: '#0088cc', emoji: '🤖' };
+    return { icon: MessageSquare, color: '#3b82f6', emoji: '⚡' };
+};
+
 const ActivityLogs = () => {
     const [logs, setLogs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [refreshing, setRefreshing] = useState(false);
 
-    // Helper function to safely get message content
     const getMessageContent = (log) => {
         if (log.messageData) {
-            // If messageData is already an object
-            if (typeof log.messageData === 'object') {
-                return (log.messageData.messageContent || log.messageData.userQuery || log.messageData.text || '').trim();
-            }
-            // If messageData is a JSON string, parse it
+            if (typeof log.messageData === 'object') return (log.messageData.messageContent || log.messageData.userQuery || log.messageData.text || '').trim();
             if (typeof log.messageData === 'string') {
-                try {
-                    const parsed = JSON.parse(log.messageData);
-                    return (parsed.messageContent || parsed.userQuery || parsed.text || log.action).trim();
-                } catch (e) {
-                    return log.action;
-                }
+                try { const p = JSON.parse(log.messageData); return (p.messageContent || p.userQuery || p.text || log.action).trim(); } catch { return log.action; }
             }
         }
         return log.action;
     };
 
-    // Helper function to safely get bot response
     const getBotResponse = (log) => {
         if (log.messageData) {
-            // If messageData is already an object
-            if (typeof log.messageData === 'object') {
-                return (log.messageData.botResponse || log.messageData.response || 'Response logged in backend').trim();
-            }
-            // If messageData is a JSON string, parse it
+            if (typeof log.messageData === 'object') return (log.messageData.botResponse || log.messageData.response || 'Response logged in backend').trim();
             if (typeof log.messageData === 'string') {
-                try {
-                    const parsed = JSON.parse(log.messageData);
-                    return (parsed.botResponse || parsed.response || 'Response logged in backend').trim();
-                } catch (e) {
-                    return 'Response logged in backend';
-                }
+                try { const p = JSON.parse(log.messageData); return (p.botResponse || p.response || 'Response logged in backend').trim(); } catch { return 'Response logged in backend'; }
             }
         }
         return 'Response logged in backend';
     };
 
-    // Helper function to safely get recipient username
     const getRecipientUsername = (log) => {
         if (log.messageData) {
-            // If messageData is already an object
-            if (typeof log.messageData === 'object') {
-                return (log.messageData.recipientUsername || log.messageData.recipientName || log.messageData.senderName || 'Unknown').trim();
-            }
-            // If messageData is a JSON string, parse it
+            if (typeof log.messageData === 'object') return (log.messageData.recipientUsername || log.messageData.recipientName || log.messageData.senderName || 'Unknown').trim();
             if (typeof log.messageData === 'string') {
-                try {
-                    const parsed = JSON.parse(log.messageData);
-                    return (parsed.recipientUsername || parsed.recipientName || parsed.senderName || 'Unknown').trim();
-                } catch (e) {
-                    return 'Unknown';
-                }
+                try { const p = JSON.parse(log.messageData); return (p.recipientUsername || p.recipientName || p.senderName || 'Unknown').trim(); } catch { return 'Unknown'; }
             }
         }
         return 'Unknown';
     };
-    const getAutomationIcon = (name) => {
-        const lowerName = name?.toLowerCase() || '';
-        if (lowerName.includes('lead')) return <Users size={18} className="text-emerald-600" />;
-        if (lowerName.includes('schedule')) return <Calendar size={18} className="text-purple-600" />;
-        return <MessageSquare size={18} className="text-blue-600" />;
-    };
 
-    const getIconBgColor = (name) => {
-        const lowerName = name?.toLowerCase() || '';
-        if (lowerName.includes('lead')) return 'bg-emerald-100';
-        if (lowerName.includes('schedule')) return 'bg-purple-100';
-        return 'bg-blue-100';
-    };
-
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-
-    useEffect(() => {
-        fetchLogs();
-
-        // Refresh logs every 10 seconds
-        const interval = setInterval(fetchLogs, 10000);
-        return () => clearInterval(interval);
-    }, []);
-
-    const fetchLogs = async () => {
+    const fetchLogs = useCallback(async (isRefresh = false) => {
         try {
             setError('');
-
-            // Debug localStorage
-            console.log('=== LOCAL STORAGE DEBUG ===');
-            console.log('All localStorage items:', Object.keys(localStorage));
-            console.log('Token item:', localStorage.getItem('token'));
-
+            if (isRefresh) setRefreshing(true);
             const res = await api.get('/logs');
-            console.log('=== DEBUG INFO ===');
-            console.log('Fetched logs count:', res.data.length);
-
-            // Get current user ID from token
-            const token = localStorage.getItem('token');
-            let currentUserId = null;
-            if (token) {
-                try {
-                    // Split JWT token and decode payload
-                    const base64Url = token.split('.')[1];
-                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
-                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                    }).join(''));
-
-                    const payload = JSON.parse(jsonPayload);
-                    // JWT payload structure is { user: { id: 'user_id' } }
-                    currentUserId = payload.user?.id;
-                    console.log('Current user ID from token:', currentUserId);
-                    console.log('Full token payload structure:', Object.keys(payload));
-                    console.log('User object in payload:', payload.user);
-                } catch (e) {
-                    console.log('Could not decode token:', e.message);
-                    console.log('Token present:', !!token);
-                    console.log('Token length:', token?.length);
-                }
-            } else {
-                console.log('No token found in localStorage');
-            }
-
-            // Show log user IDs
-            if (res.data.length > 0) {
-                console.log('Log user IDs in response:');
-                res.data.slice(0, 5).forEach((log, index) => {
-                    console.log(`  ${index + 1}. Log ID: ${log._id} | User ID: ${log.userId} | Match: ${log.userId === currentUserId}`);
-                });
-            } else {
-                console.log('No logs found in response');
-            }
-
             setLogs(res.data);
         } catch (err) {
-            console.error('Error fetching logs:', err);
             setError(err.response?.data?.msg || err.message || 'Failed to fetch logs');
-
-            // Check if it's an auth error
             if (err.response?.status === 401) {
                 localStorage.removeItem('token');
                 window.location.href = '/login';
             }
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
+    }, []);
+
+    useEffect(() => {
+        fetchLogs();
+        const interval = setInterval(() => fetchLogs(), 15000);
+        return () => clearInterval(interval);
+    }, [fetchLogs]);
+
+    const filteredLogs = searchQuery
+        ? logs.filter(log => {
+            const q = searchQuery.toLowerCase();
+            return (log.automationName || '').toLowerCase().includes(q) ||
+                   (log.action || '').toLowerCase().includes(q) ||
+                   getRecipientUsername(log).toLowerCase().includes(q);
+        })
+        : logs;
+
+    const exportToCSV = () => {
+        const csvContent = [
+            ['Automation', 'Action', 'User', 'Status', 'Timestamp'],
+            ...logs.map(log => [
+                log.automationName, log.action, getRecipientUsername(log), log.status,
+                new Date(log.timestamp).toISOString(),
+            ])
+        ].map(row => row.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `activity-logs-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
     };
 
     return (
         <div className="animate-fade-in">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+            {/* Header */}
+            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-main tracking-tight">Activity Logs</h1>
-                    <p className="text-secondary mt-1">Track every action performed by your automations.</p>
+                    <h1 className="text-lg sm:text-xl lg:text-2xl font-extrabold text-main font-display tracking-tight mb-0.5">
+                        Activity Feed 📋
+                    </h1>
+                    <p className="text-secondary text-[11px] sm:text-xs">Track every action performed by your AI automations.</p>
                 </div>
-
                 <div className="flex gap-2">
-                    <button className="btn btn-secondary text-sm">
-                        <Download size={16} /> Export CSV
+                    <button onClick={() => fetchLogs(true)} className="btn btn-secondary text-sm" disabled={refreshing}>
+                        <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
+                        {refreshing ? 'Refreshing...' : 'Refresh'}
+                    </button>
+                    <button onClick={exportToCSV} className="btn btn-secondary text-sm">
+                        <Download size={14} /> Export
                     </button>
                 </div>
-            </div>
+            </motion.div>
 
-            <div className="card p-0 overflow-hidden border-main shadow-sm">
-                {/* Toolbar */}
-                <div className="p-4 border-b border-main flex flex-col sm:flex-row gap-4 justify-between bg-table-header items-center transition-colors">
-                    <div className="relative w-full sm:w-auto flex-1 max-w-md group">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary group-focus-within:text-blue-500 transition-colors" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Search logs..."
-                            className="input pl-10 py-2.5 text-sm w-full transition-all"
-                        />
-                    </div>
-                    <div className="flex gap-2 w-full sm:w-auto">
-                        <button className="btn btn-secondary text-sm py-2 px-4 flex-1 sm:flex-none justify-center">
-                            <Filter size={16} /> Filter
-                        </button>
-                        <button className="btn btn-secondary text-sm py-2 px-4 flex-1 sm:flex-none justify-center" onClick={fetchLogs}>
-                            Refresh
-                        </button>
-                    </div>
+            {/* Search */}
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-6">
+                <div className="relative max-w-md group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2" size={16} style={{ color: 'var(--color-text-tertiary)' }} />
+                    <input
+                        type="text" placeholder="Search by automation, action, or user..."
+                        className="input pl-11 py-2.5 text-sm"
+                        value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                 </div>
+            </motion.div>
 
-                {/* Error Message */}
-                {error && (
-                    <div className="p-4 bg-red-50 border-b border-red-100 animate-fade-in">
-                        <div className="text-red-700 text-sm font-medium flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                            {error}
-                        </div>
-                    </div>
-                )}
+            {/* Error */}
+            {error && (
+                <div className="mb-4 rounded-xl px-4 py-3 text-sm font-medium" style={{
+                    background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.15)', color: '#ef4444',
+                }}>
+                    {error}
+                </div>
+            )}
 
-                {/* Desktop Table View */}
-                <div className="hidden md:block overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-table-header border-b border-main">
-                            <tr>
-                                <th className="px-6 py-4 text-xs font-bold text-secondary uppercase tracking-widest">Automation</th>
-                                <th className="px-6 py-4 text-xs font-bold text-secondary uppercase tracking-widest">Action</th>
-                                <th className="px-6 py-4 text-xs font-bold text-secondary uppercase tracking-widest">Details</th>
-                                <th className="px-6 py-4 text-xs font-bold text-secondary uppercase tracking-widest">Time</th>
-                                <th className="px-6 py-4 text-xs font-bold text-secondary uppercase tracking-widest">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-main">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan="5" className="px-6 py-20 text-center">
-                                        <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
-                                        <p className="text-secondary font-medium">Fetching activity logs...</p>
-                                    </td>
+            {/* Logs */}
+            {loading ? (
+                <div className="rounded-2xl border p-16 text-center" style={{ background: 'var(--glass-bg)', borderColor: 'var(--color-border)' }}>
+                    <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4" style={{ color: '#3b82f6' }} />
+                    <p className="text-secondary font-medium">Loading activity logs...</p>
+                </div>
+            ) : filteredLogs.length > 0 ? (
+                <div className="rounded-2xl border overflow-hidden" style={{
+                    background: 'var(--glass-bg)', borderColor: 'var(--color-border)',
+                    backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                }}>
+                    {/* Desktop Table */}
+                    <div className="hidden md:block overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                                    <th className="px-5 py-3.5 text-[10px] font-bold text-secondary uppercase tracking-widest">Automation</th>
+                                    <th className="px-5 py-3.5 text-[10px] font-bold text-secondary uppercase tracking-widest">Details</th>
+                                    <th className="px-5 py-3.5 text-[10px] font-bold text-secondary uppercase tracking-widest">Time</th>
+                                    <th className="px-5 py-3.5 text-[10px] font-bold text-secondary uppercase tracking-widest">Status</th>
                                 </tr>
-                            ) : logs.length > 0 ? (
-                                logs.map((log, index) => (
-                                    <tr key={`${log._id}-${index}`} className="hover:bg-primary/5 transition-colors group">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className={`w-9 h-9 rounded-lg ${getIconBgColor(log.automationName).replace('100', '500/10')} flex items-center justify-center shrink-0`}>
-                                                    {getAutomationIcon(log.automationName)}
+                            </thead>
+                            <tbody>
+                                {filteredLogs.map((log, index) => {
+                                    const meta = getAutomationMeta(log.automationName);
+                                    return (
+                                        <tr key={`${log._id}-${index}`}
+                                            className="group transition-colors duration-200 cursor-pointer"
+                                            style={{ borderBottom: '1px solid var(--color-border)' }}
+                                            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-surface-hover)'; }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                        >
+                                            <td className="px-5 py-3.5">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm" style={{
+                                                        background: `${meta.color}10`, border: `1px solid ${meta.color}18`,
+                                                    }}>
+                                                        {meta.emoji}
+                                                    </div>
+                                                    <span className="text-sm font-bold text-main">{log.automationName}</span>
                                                 </div>
+                                            </td>
+                                            <td className="px-5 py-3.5 max-w-md">
+                                                {log.messageData ? (
+                                                    <div className="space-y-1.5">
+                                                        <div className="flex items-center gap-1.5 text-xs">
+                                                            <User size={11} className="text-secondary" />
+                                                            <span className="font-bold text-main text-[11px]">{getRecipientUsername(log)}</span>
+                                                        </div>
+                                                        <p className="text-[11px] text-secondary line-clamp-1">{getMessageContent(log)}</p>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-xs text-secondary">{log.action}</span>
+                                                )}
+                                            </td>
+                                            <td className="px-5 py-3.5 text-xs text-secondary whitespace-nowrap">
+                                                <div className="flex items-center gap-1.5">
+                                                    <Clock size={12} />
+                                                    {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
+                                                </div>
+                                            </td>
+                                            <td className="px-5 py-3.5">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${log.status === 'success' ? 'badge-success' : 'badge-neutral'}`}>
+                                                    {log.status === 'success' ? '✅ Success' : '❌ Failed'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden">
+                        <motion.div variants={stagger} initial="hidden" animate="visible" className="divide-y" style={{ borderColor: 'var(--color-border)' }}>
+                            {filteredLogs.map((log, index) => {
+                                const meta = getAutomationMeta(log.automationName);
+                                return (
+                                    <motion.div variants={riseUp} key={`mobile-${log._id}-${index}`} className="p-4 space-y-2.5">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="text-base">{meta.emoji}</span>
                                                 <span className="text-sm font-bold text-main">{log.automationName}</span>
                                             </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-secondary font-medium">{log.action}</td>
-                                        <td className="px-6 py-4 text-sm text-secondary max-w-md">
-                                            {log.messageData ? (
-                                                <div className="space-y-2">
-                                                    <div className="flex items-start gap-2">
-                                                        <User size={14} className="mt-0.5 text-secondary" />
-                                                        <span className="font-bold text-main text-xs">{getRecipientUsername(log)}</span>
-                                                    </div>
-
-                                                    <div className="flex items-start gap-2 bg-body/50 rounded-lg p-2.5 border border-main">
-                                                        <MessageSquare size={14} className="mt-0.5 text-secondary shrink-0" />
-                                                        <span className="text-secondary text-xs line-clamp-2 leading-relaxed">
-                                                            {getMessageContent(log)}
-                                                        </span>
-                                                    </div>
-
-                                                    {getBotResponse(log) !== 'Response logged in backend' && (
-                                                        <div className="flex items-start gap-2 ml-4">
-                                                            <BotIcon size={14} className="mt-0.5 text-blue-500" />
-                                                            <span className="text-secondary text-xs line-clamp-1 italic">
-                                                                {getBotResponse(log)}
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <span className="text-secondary italic text-xs">No additional details</span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-secondary whitespace-nowrap">
-                                            <div className="flex items-center gap-1.5">
-                                                <Clock size={14} />
-                                                {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${log.status === 'success' ? 'badge-success' : 'badge-neutral'}`}>
+                                                {log.status === 'success' ? 'Success' : 'Failed'}
+                                            </span>
+                                        </div>
+                                        {log.messageData && (
+                                            <div className="rounded-lg p-2.5 text-xs" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+                                                <p className="text-secondary line-clamp-2">{getMessageContent(log)}</p>
                                             </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center justify-between">
-                                                <span className={`inline-flex items-center px-2.5 py-1 ${log.status === 'success' ? 'badge-success' : 'badge-neutral'}`}>
-                                                    {log.status === 'success' ? 'Success' : 'Failed'}
-                                                </span>
-                                                <button className="text-secondary hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                                                    <ChevronRight size={20} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="5" className="px-6 py-20 text-center">
-                                        <div className="w-16 h-16 bg-surface rounded-2xl flex items-center justify-center text-secondary mx-auto mb-6 transform rotate-12 border border-main">
-                                            <Clock size={32} />
+                                        )}
+                                        <div className="flex items-center gap-1.5 text-[11px] text-secondary">
+                                            <Clock size={11} />
+                                            {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
                                         </div>
-                                        <h3 className="text-lg font-bold text-main mb-1">No activity yet</h3>
-                                        <p className="text-secondary">Your automation actions will appear here once they start running.</p>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                    </motion.div>
+                                );
+                            })}
+                        </motion.div>
+                    </div>
 
-                {/* Mobile Card View */}
-                <div className="md:hidden divide-y divide-main">
-                    {loading ? (
-                        <div className="px-4 py-20 text-center">
-                            <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
-                            <p className="text-secondary font-medium">Fetching activity logs...</p>
+                    {/* Footer */}
+                    <div className="flex items-center justify-between px-5 py-3" style={{ borderTop: '1px solid var(--color-border)', background: 'var(--color-surface)' }}>
+                        <span className="text-[11px] text-secondary font-medium">Showing {filteredLogs.length} of {logs.length} logs</span>
+                        <div className="flex items-center gap-1.5 text-[11px] text-secondary">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            Auto-refreshing
                         </div>
-                    ) : logs.length > 0 ? (
-                        logs.map((log, index) => (
-                            <div key={`mobile-${log._id}-${index}`} className="p-4 space-y-3 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
-                                <div className="flex items-center justify-between">
-                                    <div className="font-bold text-main">{log.automationName}</div>
-                                    <span className={`inline-flex items-center px-2 py-0.5 ${log.status === 'success' ? 'badge-success' : 'badge-neutral'}`}>
-                                        {log.status === 'success' ? 'Success' : 'Failed'}
-                                    </span>
-                                </div>
-
-                                <div className="text-sm text-secondary">
-                                    <span className="font-bold text-secondary text-xs uppercase tracking-wide mr-2">Action:</span>
-                                    {log.action}
-                                </div>
-
-                                {log.messageData && (
-                                    <div className="bg-body/50 rounded-lg p-3 text-sm space-y-2 border border-main">
-                                        <div className="flex justify-between text-xs text-secondary">
-                                            <span>User: {getRecipientUsername(log)}</span>
-                                        </div>
-                                        <div className="text-secondary border-l-2 border-primary/30 pl-2">
-                                            {getMessageContent(log)?.substring(0, 100)}
-                                            {getMessageContent(log)?.length > 100 ? '...' : ''}
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="flex items-center justify-between text-xs text-secondary pt-1">
-                                    <div className="flex items-center gap-1">
-                                        <Clock size={12} />
-                                        {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="px-6 py-20 text-center">
-                            <div className="w-16 h-16 bg-surface rounded-2xl flex items-center justify-center text-main mx-auto mb-6 transform rotate-12 border border-main">
-                                <Clock size={32} />
-                            </div>
-                            <h3 className="text-lg font-bold text-main mb-1">No activity yet</h3>
-                            <p className="text-secondary">Your automation actions will appear here once they start running.</p>
-                        </div>
-                    )}
-                </div>
-
-                {/* Pagination */}
-                <div className="p-4 border-t border-main flex items-center justify-between text-xs md:text-sm text-secondary bg-table-header transition-colors">
-                    <span>Showing {logs.length} logs</span>
-                    <div className="flex gap-2">
-                        <button className="px-3 py-1.5 border border-main rounded-lg hover:bg-surface hover:text-main transition-all disabled:opacity-50" disabled>Previous</button>
-                        <button className="px-3 py-1.5 border border-main rounded-lg hover:bg-surface hover:text-main transition-all" onClick={fetchLogs}>Refresh</button>
                     </div>
                 </div>
-            </div>
+            ) : (
+                <div className="rounded-2xl border p-16 text-center" style={{ background: 'var(--glass-bg)', borderColor: 'var(--color-border)' }}>
+                    <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center transform rotate-6" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+                        <Clock size={28} style={{ color: 'var(--color-text-tertiary)' }} />
+                    </div>
+                    <h3 className="text-xl font-bold text-main mb-2">No activity yet</h3>
+                    <p className="text-sm text-secondary">Your automation logs will appear here once they start running.</p>
+                </div>
+            )}
         </div>
     );
 };

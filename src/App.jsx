@@ -4,6 +4,14 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 // Layouts
 import DashboardLayout from './layouts/DashboardLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminProtectedRoute from './admin/components/AdminProtectedRoute';
+
+// Admin Layouts & Pages
+import AdminLayout from './admin/layouts/AdminLayout';
+import AdminLogin from './admin/pages/AdminLogin';
+import Overview from './admin/pages/Overview';
+import UserManagement from './admin/pages/UserManagement';
+import AdminManagers from './admin/pages/AdminManagers';
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -19,6 +27,8 @@ import Settings from './pages/Settings';
 import Analytics from './pages/Analytics';
 import MessageHistory from './pages/MessageHistory';
 import BotCustomization from './pages/BotCustomization';
+import HowItWorks from './pages/HowItWorks';
+import CustomerSupport from './pages/CustomerSupport';
 
 function App() {
   // Global mouse tracking for ultra-premium 3D spotlight effects
@@ -57,8 +67,19 @@ function App() {
           <Route path="analytics" element={<Analytics />} />
           <Route path="messages" element={<MessageHistory />} />
           <Route path="bot-settings" element={<BotCustomization />} />
+          <Route path="how-it-works" element={<HowItWorks />} />
+          <Route path="support" element={<CustomerSupport />} />
           <Route path="billing" element={<Billing />} />
           <Route path="settings" element={<Settings />} />
+        </Route>
+
+        {/* Admin Routes (God Mode) */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
+          <Route index element={<Overview />} />
+          <Route path="users" element={<UserManagement />} />
+          <Route path="managers" element={<AdminManagers />} />
+          <Route path="logs" element={<div className="p-8 text-gray-500 font-mono italic">System Logs (Module Incoming)</div>} />
         </Route>
       </Routes>
     </Router>

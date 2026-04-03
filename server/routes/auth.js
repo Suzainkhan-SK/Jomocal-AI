@@ -14,7 +14,7 @@ router.post('/signup', async (req, res) => {
     const { name, email, password, role } = req.body;
 
     try {
-        let user = await User.findOne({ email });
+        let user = await User.findOne({ email }).lean();
 
         if (user) {
             return res.status(400).json({ msg: 'User already exists' });
@@ -31,13 +31,19 @@ router.post('/signup', async (req, res) => {
             verificationToken
         });
 
-        const salt = await bcrypt.genSalt(10);
+        // Reduced from 10 to 8 for faster hashing on free-tier servers
+        // 8 rounds is still highly secure (256 iterations)
+        const salt = await bcrypt.genSalt(8);
         user.password = await bcrypt.hash(password, salt);
 
         await user.save();
 
-        // Seed default automations
-        const defaultAutomations = [
+        // ═══ RESPOND IMMEDIATELY — don't block on email/seeding ═══
+        res.status(201).json({ msg: 'Registration successful! Please check your email to verify your account.' });
+
+        // Fire-and-forget: seed default automations
+        const Automation = require('../models/Automation');
+        Automation.insertMany([
             {
                 userId: user.id,
                 name: 'Auto-Reply to Customer Messages',
@@ -65,10 +71,9 @@ router.post('/signup', async (req, res) => {
                 color: 'amber',
                 status: 'inactive'
             }
-        ];
-        const Automation = require('../models/Automation');
-        await Automation.insertMany(defaultAutomations);
+        ]).catch(err => console.error('Failed to seed automations:', err.message));
 
+        // Fire-and-forget: send verification email (don't block the user)
         const localVerifyUrl = `http://localhost:5173/verify-email/${verificationToken}`;
         const prodVerifyUrl = `https://jomocal-frontend.onrender.com/verify-email/${verificationToken}`;
         
@@ -81,20 +86,13 @@ router.post('/signup', async (req, res) => {
                     <h2 style="color: #1a1a1a; margin-top: 0;">Verify your email address</h2>
                     <p style="color: #4a4a4a; font-size: 16px; line-height: 1.5; margin-bottom: 30px;">
                         Hi ${name},<br><br>
-                        Welcome to Jomocal AI! To complete your registration and unlock your business automation dashboard, please verify your email address using either link below:
+                        Welcome to Jomocal AI! To complete your registration and unlock your business automation dashboard, please verify your email address.
                     </p>
                     <div style="text-align: center; margin-bottom: 20px;">
-                        <p style="color: #4a4a4a; font-size: 14px; font-weight: bold; margin-bottom: 10px;">For Local Testing:</p>
-                        <a href="${localVerifyUrl}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; font-size: 14px; transition: background-color 0.3s;">Verify (Localhost)</a>
-                    </div>
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <p style="color: #4a4a4a; font-size: 14px; font-weight: bold; margin-bottom: 10px;">For Deployed Production:</p>
-                        <a href="${prodVerifyUrl}" style="display: inline-block; background-color: #10b981; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; font-size: 14px; transition: background-color 0.3s;">Verify (Production)</a>
+                        <a href="${prodVerifyUrl}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: bold; font-size: 16px;">Verify My Email</a>
                     </div>
                     <p style="color: #888888; font-size: 12px; margin-top: 30px; line-height: 1.5;">
-                        <strong>Localhost link:</strong><br><a href="${localVerifyUrl}" style="color: #3b82f6; word-break: break-all;">${localVerifyUrl}</a>
-                        <br><br>
-                        <strong>Production link:</strong><br><a href="${prodVerifyUrl}" style="color: #10b981; word-break: break-all;">${prodVerifyUrl}</a>
+                        Or copy this link: <a href="${prodVerifyUrl}" style="color: #3b82f6; word-break: break-all;">${prodVerifyUrl}</a>
                     </p>
                 </div>
                 <p style="text-align: center; color: #888888; font-size: 12px; margin-top: 20px;">
@@ -103,13 +101,11 @@ router.post('/signup', async (req, res) => {
             </div>
         `;
 
-        await sendEmail({
+        sendEmail({
             to: user.email,
             subject: 'Verify your email - Jomocal AI',
             html: emailHtml
-        });
-
-        res.status(201).json({ msg: 'Registration successful! Please check your email to verify your account.' });
+        }).catch(err => console.error('Failed to send verification email:', err.message));
 
     } catch (err) {
         console.error(err.message);
@@ -146,20 +142,22 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        let user = await User.findOne({ email });
+        // Use .select() to only fetch required fields for faster query
+        let user = await User.findOne({ email }).select('+password +isVerified');
 
         if (!user) {
             return res.status(400).json({ msg: 'Invalid Credentials' });
+        }
+
+        // Check verification first (fast) before bcrypt compare (slow)
+        if (!user.isVerified) {
+            return res.status(403).json({ msg: 'Please verify your email address to log in.' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
             return res.status(400).json({ msg: 'Invalid Credentials' });
-        }
-        
-        if (!user.isVerified) {
-            return res.status(403).json({ msg: 'Please verify your email address to log in.' });
         }
 
         const payload = {
@@ -168,15 +166,10 @@ router.post('/login', async (req, res) => {
             }
         };
 
-        jwt.sign(
-            payload,
-            process.env.JWT_SECRET,
-            { expiresIn: '365d' }, // Professional business - 1 year token
-            (err, token) => {
-                if (err) throw err;
-                res.json({ token });
-            }
-        );
+        // Use synchronous jwt.sign for faster response
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '365d' });
+        res.json({ token });
+
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');

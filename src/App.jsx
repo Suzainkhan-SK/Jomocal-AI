@@ -12,6 +12,7 @@ import AdminLogin from './admin/pages/AdminLogin';
 import Overview from './admin/pages/Overview';
 import UserManagement from './admin/pages/UserManagement';
 import AdminManagers from './admin/pages/AdminManagers';
+import SystemLogs from './admin/pages/SystemLogs';
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -79,7 +80,7 @@ function App() {
           <Route index element={<Overview />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="managers" element={<AdminManagers />} />
-          <Route path="logs" element={<div className="p-8 text-gray-500 font-mono italic">System Logs (Module Incoming)</div>} />
+          <Route path="logs" element={<SystemLogs />} />
         </Route>
       </Routes>
     </Router>

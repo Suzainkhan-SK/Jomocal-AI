@@ -22,7 +22,7 @@ const activityLogSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['success', 'failed'],
+        enum: ['success', 'error', 'failed', 'pending'],
         required: true
     },
     details: String, // Error message or success details

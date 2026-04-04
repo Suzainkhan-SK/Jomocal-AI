@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Automation = require('../models/Automation');
+const ActivityLog = require('../models/ActivityLog');
 const auth = require('../middleware/auth');
 const { isAdmin, isOwner } = require('../middleware/adminAuth');
 
@@ -124,6 +125,30 @@ router.post('/manage-admins', isOwner, async (req, res) => {
         res.json({ msg: `User successfully ${action}d to ${user.role}.`, user });
     } catch (err) {
         console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   GET /api/admin/logs
+// @desc    Get all platform logs for Mission Control
+// @access  Admin
+router.get('/logs', isAdmin, async (req, res) => {
+    try {
+        const { status, limit = 100 } = req.query;
+        let query = {};
+        
+        if (status && status !== 'All') {
+            query.status = status.toLowerCase();
+        }
+
+        const logs = await ActivityLog.find(query)
+            .populate('userId', 'email name')
+            .sort({ timestamp: -1 })
+            .limit(parseInt(limit));
+
+        res.json(logs);
+    } catch (err) {
+        console.error("Fetch logs error:", err);
         res.status(500).send('Server Error');
     }
 });

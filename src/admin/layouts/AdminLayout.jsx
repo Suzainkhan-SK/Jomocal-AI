@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Shield, LogOut, Code, Activity, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Shield, LogOut, Code, Terminal, Activity, Settings } from 'lucide-react';
 import api from '../../utils/api';
 
 const AdminLayout = () => {
@@ -35,7 +35,7 @@ const AdminLayout = () => {
         { path: '/admin', label: 'Overview', icon: LayoutDashboard },
         { path: '/admin/users', label: 'User Directory', icon: Users },
         ...(adminUser.role === 'owner' ? [{ path: '/admin/managers', label: 'Access Control', icon: Shield }] : []),
-        { path: '/admin/logs', label: 'System Logs', icon: Activity },
+        { path: '/admin/logs', label: 'System Logs', icon: Terminal },
     ];
 
     return (

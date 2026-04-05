@@ -9,6 +9,15 @@ dotenv.config();
 
 const app = express();
 
+// Security Fix for Google OAuth Popups (Prevents window.closed errors)
+app.use((req, res, next) => {
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+    next();
+});
+
+// Health Check for Deployment Verification
+app.get('/api/health', (req, res) => res.json({ status: 'active', version: 'v1.1' }));
+
 // Middleware
 app.use(express.json());
 app.use(cors({

@@ -4,6 +4,9 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
+import { GoogleOAuthProvider } from '@react-oauth/google'
+
+const GOOGLE_CLIENT_ID = "506823647810-9rl2i5if6lnn75gaoenuffnqg1q24di6.apps.googleusercontent.com";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -40,9 +43,11 @@ class ErrorBoundary extends React.Component {
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
+      </GoogleOAuthProvider>
     </ErrorBoundary>
   </StrictMode>,
 )

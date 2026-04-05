@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@react-oauth/google": "^0.13.4",
     "@remotion/cli": "^4.0.436",
     "@remotion/player": "^4.0.436",
     "@splinetool/react-spline": "^4.1.0",

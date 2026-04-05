@@ -3,15 +3,22 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const axios = require('axios');
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 const sendEmail = require('../utils/sendEmail');
+
+const client = new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET
+);
 
 // @route   POST api/auth/signup
 // @desc    Register user
 // @access  Public
 router.post('/signup', async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, phoneNumber } = req.body;
 
     try {
         let user = await User.findOne({ email }).lean();
@@ -27,6 +34,7 @@ router.post('/signup', async (req, res) => {
             email,
             password,
             role,
+            phoneNumber,
             isVerified: false,
             verificationToken
         });
@@ -179,6 +187,101 @@ router.post('/login', async (req, res) => {
 // @route   GET api/auth/user
 // @desc    Get authenticated user data
 // @access  Private
+// @route   POST api/auth/google
+// @desc    Login or Signup with Google
+// @access  Public
+router.post('/google', async (req, res) => {
+    const { code } = req.body;
+
+    try {
+        // 1. Swap the code for tokens (This uses a special "postmessage" redirect_uri by the library)
+        const { tokens } = await client.getToken({
+            code: code,
+            redirect_uri: 'postmessage' 
+        });
+
+        // 2. Fetch user profile with the official client helper
+        client.setCredentials(tokens);
+        const userInfo = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${tokens.access_token}` }
+        });
+
+        const { sub, email, name, picture } = userInfo.data;
+
+        // 3. Data lookup and linkage
+        let user = await User.findOne({ email });
+
+        if (user) {
+            // Update googleId to link the account if not already linked
+            if (!user.googleId) {
+                user.googleId = sub;
+                await user.save();
+            }
+            
+            // If already exists, mark as verified (google accounts are verified)
+            if (!user.isVerified) {
+                user.isVerified = true;
+                await user.save();
+            }
+        } else {
+            // 2. Create new user from Google profile
+            user = new User({
+                name,
+                email,
+                googleId: sub,
+                isVerified: true, // Google accounts skip email verification
+                role: 'user' // Default role
+            });
+            await user.save();
+
+            // ═══ Seed default automations for NEW user ═══
+            const Automation = require('../models/Automation');
+            Automation.insertMany([
+                {
+                    userId: user.id,
+                    name: 'Auto-Reply to Customer Messages',
+                    description: 'Instantly reply to new messages on WhatsApp & Instagram with a welcome note.',
+                    type: 'auto_reply',
+                    icon: 'MessageSquare',
+                    color: 'blue',
+                    status: 'inactive'
+                },
+                {
+                    userId: user.id,
+                    name: 'Save Leads Automatically',
+                    description: 'Capture contact details from DMs and save them to a Google Sheet.',
+                    type: 'lead_save',
+                    icon: 'Users',
+                    color: 'green',
+                    status: 'inactive'
+                },
+                {
+                    userId: user.id,
+                    name: 'Lead Hunter',
+                    description: 'Find and drip-send personalized B2B leads with AI.',
+                    type: 'lead_hunter',
+                    icon: 'Zap',
+                    color: 'amber',
+                    status: 'inactive'
+                }
+            ]).catch(err => console.error('Failed to seed google user automations:', err.message));
+        }
+
+        const payload = {
+            user: {
+                id: user.id
+            }
+        };
+
+        const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '365d' });
+        res.json({ token: jwtToken });
+
+    } catch (err) {
+        console.error("Google verify error:", err);
+        res.status(401).json({ msg: 'Token verification failed' });
+    }
+});
+
 router.get('/user', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');

@@ -13,9 +13,18 @@ const userSchema = new mongoose.Schema({
         trim: true,
         lowercase: true
     },
+    phoneNumber: {
+        type: String,
+        trim: true
+    },
     password: {
         type: String,
-        required: true
+        required: function() { return !this.googleId; } // Only required if not logging in via Google
+    },
+    googleId: {
+        type: String,
+        sparse: true,
+        unique: true
     },
     role: {
         type: String,

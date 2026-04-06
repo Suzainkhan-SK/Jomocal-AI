@@ -145,7 +145,7 @@ class TelegramBridge {
                             this.processingMessages.add(messageKey);
 
                             // 6. Forward to n8n (cloud-first with env overrides).
-                            const defaultCloudBaseUrl = 'https://cmpuntg10.app.n8n.cloud';
+                            const defaultCloudBaseUrl = 'https://cmpunktg10.app.n8n.cloud';
                             const baseUrl = process.env.N8N_WEBHOOK_BASE_URL || defaultCloudBaseUrl;
                             const prodWebhook =
                                 process.env.N8N_TELEGRAM_WEBHOOK_URL ||
@@ -185,7 +185,7 @@ class TelegramBridge {
                                     const statusCode = err.response?.status;
                                     console.error(`❌ Bridge: Forwarding failed to ${n8nUrl}: Status ${statusCode || 'Unknown'} - ${err.message}`);
                                     if (statusCode === 404) {
-                                        console.error(`💡 n8n TIP: Workflow is likely NOT ACTIVE on cmpuntg10.`);
+                                        console.error(`💡 n8n TIP: Workflow is likely NOT ACTIVE on cmpunktg10.`);
                                     }
                                     if (true) {
                                         console.error(`❌ Bridge: Forwarding failed to ${n8nUrl}:`, err.message);

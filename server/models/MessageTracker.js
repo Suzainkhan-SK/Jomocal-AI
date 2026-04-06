@@ -28,7 +28,6 @@ const messageTrackerSchema = new mongoose.Schema({
 });
 
 // Add indexes for efficient querying
-messageTrackerSchema.index({ messageId: 1 });
 messageTrackerSchema.index({ userId: 1, platform: 1, processedAt: -1 });
 
 module.exports = mongoose.model('MessageTracker', messageTrackerSchema);

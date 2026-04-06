@@ -182,7 +182,12 @@ class TelegramBridge {
                                     success = true;
                                     break;
                                 } catch (err) {
-                                    if (!err.response || err.response.status !== 404) {
+                                    const statusCode = err.response?.status;
+                                    console.error(`❌ Bridge: Forwarding failed to ${n8nUrl}: Status ${statusCode || 'Unknown'} - ${err.message}`);
+                                    if (statusCode === 404) {
+                                        console.error(`💡 n8n TIP: Workflow is likely NOT ACTIVE on cmpuntg10.`);
+                                    }
+                                    if (true) {
                                         console.error(`❌ Bridge: Forwarding failed to ${n8nUrl}:`, err.message);
                                         errorMessage = err.message;
                                     }

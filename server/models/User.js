@@ -49,7 +49,6 @@ const userSchema = new mongoose.Schema({
 });
 
 // Explicit indexes for faster auth queries
-userSchema.index({ email: 1 });
 userSchema.index({ verificationToken: 1 }, { sparse: true });
 
 module.exports = mongoose.model('User', userSchema);

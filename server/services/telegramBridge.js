@@ -145,7 +145,7 @@ class TelegramBridge {
                             this.processingMessages.add(messageKey);
 
                             // 6. Forward to n8n (cloud-first with env overrides).
-                            const defaultCloudBaseUrl = 'https://cmpunktg5.app.n8n.cloud';
+                            const defaultCloudBaseUrl = 'https://cmpuntg10.app.n8n.cloud';
                             const baseUrl = process.env.N8N_WEBHOOK_BASE_URL || defaultCloudBaseUrl;
                             const prodWebhook =
                                 process.env.N8N_TELEGRAM_WEBHOOK_URL ||

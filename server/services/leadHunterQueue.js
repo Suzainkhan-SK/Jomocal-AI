@@ -3,11 +3,11 @@ const LeadHunterJob = require('../models/LeadHunterJob');
 const { getValidGoogleAccessToken } = require('./googleTokens');
 
 const DEFAULT_SENDER_WEBHOOK_URL =
-  'https://cmpunktg5.app.n8n.cloud/webhook/lead-hunter-sender';
+  'https://cmpuntg10.app.n8n.cloud/webhook/lead-hunter-sender';
 
 function buildSenderWebhookCandidates() {
   const configured = process.env.N8N_SENDER_WEBHOOK_URL;
-  const baseUrl = process.env.N8N_WEBHOOK_BASE_URL || 'https://cmpunktg5.app.n8n.cloud';
+  const baseUrl = process.env.N8N_WEBHOOK_BASE_URL || 'https://cmpuntg10.app.n8n.cloud';
   const base = baseUrl.replace(/\/+$/, '');
   return [
     configured,
